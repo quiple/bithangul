@@ -139,7 +139,7 @@
         />
       {/if}
     </Resizable.Pane>
-    <Resizable.Handle />
+    <Resizable.Handle class="bg-card border-x w-2" />
     <!-- Right Panel (Preview) -->
     <Resizable.Pane defaultSize={10} class="min-w-100">
       <Preview generatedData={generatedData} />
