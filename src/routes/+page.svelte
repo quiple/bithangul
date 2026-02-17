@@ -5,16 +5,16 @@
   import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte';
   import Preview from '$lib/components/Preview.svelte';
   import { Button } from '$lib/components/ui/button';
-  import { 
-    Download, 
-    Upload, 
-    Play, 
-    FileType, 
-    FileCode 
+  import {
+    Download,
+    Upload,
+    Play,
+    FileType,
+    FileCode
   } from '@lucide/svelte';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
   import type { FontProject, PixelComponent } from '$lib/types';
-  
+
   let worker: Worker;
   let generatedData = $state<ArrayBuffer | null>(null);
   let isGenerating = $state(false);
@@ -25,7 +25,7 @@
         generatedData = e.data.buffer;
         isGenerating = false;
     };
-    
+
     return () => {
         worker.terminate();
     };
@@ -74,7 +74,7 @@
   function handleExportBDF() {
     alert("BDF Export implementation requires specific BDF format generation logic. Not implemented.");
   }
-  
+
   function handleExportHEX() {
       alert("HEX Export implementation requires specific HEX format generation logic. Not implemented.");
   }
@@ -88,24 +88,24 @@
       <h1 class="font-bold text-lg">Hangul Pixel Font Gen</h1>
       <div class="h-6 w-px bg-border mx-2"></div>
       <Button variant="outline" size="sm" onclick={handleLoadProject}>
-        <Upload class="w-4 h-4 mr-2" /> Load
+        <Upload /> Load
       </Button>
       <Button variant="outline" size="sm" onclick={handleSaveProject}>
-        <Download class="w-4 h-4 mr-2" /> Save
+        <Download /> Save
       </Button>
     </div>
-    
+
     <div class="flex items-center space-x-2">
       <Button variant="secondary" size="sm" onclick={handleGenerate} disabled={isGenerating}>
-        <Play class="w-4 h-4 mr-2 {isGenerating ? 'animate-spin' : ''}" /> 
+        <Play class={isGenerating ? 'animate-spin' : ''} />
         {isGenerating ? 'Generating...' : 'Generate'}
       </Button>
       <div class="h-6 w-px bg-border mx-2"></div>
       <Button variant="ghost" size="sm" onclick={handleExportBDF}>
-        <FileType class="w-4 h-4 mr-2" /> BDF
+        <FileType /> BDF
       </Button>
       <Button variant="ghost" size="sm" onclick={handleExportHEX}>
-        <FileCode class="w-4 h-4 mr-2" /> HEX
+        <FileCode /> HEX
       </Button>
     </div>
   </header>
@@ -116,21 +116,21 @@
     <div class="w-[400px] border-r flex flex-col bg-sidebar relative shrink-0">
        {#if projectState.selectedComponentId && projectState.selectedComponent}
          <!-- Edit Mode -->
-         <ComponentEditor 
-            component={projectState.selectedComponent} 
+         <ComponentEditor
+            component={projectState.selectedComponent}
             onSave={(updated) => {
                 projectState.updateComponent(updated.id, updated);
                 // Go back to list
-                projectState.selectComponent(null); 
+                projectState.selectComponent(null);
             }}
             onCancel={() => {
-                projectState.selectComponent(null); 
+                projectState.selectComponent(null);
             }}
          />
        {:else}
          <!-- List Mode -->
-         <ComponentList 
-            components={projectState.project.components} 
+         <ComponentList
+            components={projectState.project.components}
             selectedId={projectState.selectedComponentId}
             onSelect={(id) => projectState.selectComponent(id)}
             onAdd={() => projectState.addComponent()}
