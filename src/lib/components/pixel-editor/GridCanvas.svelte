@@ -20,7 +20,7 @@
     isDrawing = true
     updatePixel(r, c, drawMode)
     // Use setPointerCapture to track drag even outside the element
-    ;(e.target as Element).setPointerCapture(e.pointerId)
+    // ;(e.target as Element).setPointerCapture(e.pointerId)
   }
 
   function handlePointerEnter(r: number, c: number, e: PointerEvent) {
