@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "imports": {
+    "#app.css": "./src/app.css"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
