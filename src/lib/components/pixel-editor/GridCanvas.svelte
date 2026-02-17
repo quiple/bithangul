@@ -10,7 +10,7 @@
   } = $props()
 
   let isDrawing = false
-  let drawMode = 1; // 1 = draw, 0 = erase
+  let drawMode = 1 // 1 = draw, 0 = erase
 
   function handlePointerDown(r: number, c: number, e: PointerEvent) {
     e.preventDefault() // Prevent scroll on touch

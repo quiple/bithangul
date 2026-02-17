@@ -5,7 +5,7 @@
 
   export let generatedData: ArrayBuffer | null = null
 
-  const ITEM_HEIGHT = 41; // Using 41 to account for 1px border if needed, or stick to 40?
+  const ITEM_HEIGHT = 41 // Using 41 to account for 1px border if needed, or stick to 40?
   // PreviewItem has border-b inside h-10? Usually border-b is inside.
   // Standard Tailwind reset makes border transparent but keep width.
   // border-b-width is 1px.
@@ -23,7 +23,7 @@
 
   // Virtualization logic
   $: startIndex = Math.max(0, Math.floor(scrollTop / REAL_ITEM_HEIGHT))
-  $: visibleCount = Math.ceil(containerHeight / REAL_ITEM_HEIGHT) + 4; // Buffer increased
+  $: visibleCount = Math.ceil(containerHeight / REAL_ITEM_HEIGHT) + 4 // Buffer increased
   $: endIndex = Math.min(TOTAL_ITEMS, startIndex + visibleCount)
 
   $: visibleItems = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i)

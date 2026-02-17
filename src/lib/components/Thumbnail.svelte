@@ -19,7 +19,7 @@
     const ch = h / 16;
 
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "black"; // Always black pixels
+    ctx.fillStyle = "black" // Always black pixels
 
     for (let r = 0; r < 16; r++) {
       for (let c = 0; c < 16; c++) {

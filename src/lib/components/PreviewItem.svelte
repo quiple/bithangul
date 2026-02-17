@@ -30,7 +30,7 @@
 
     // Clear
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.fillStyle = 'black'; // Or variable color
+    ctx.fillStyle = 'black' // Or variable color
 
     // Draw 16x16
     // Canvas size is 32x32 (scale 2)
