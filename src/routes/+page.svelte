@@ -85,9 +85,9 @@
 
 <div class="h-screen w-screen flex flex-col bg-background text-foreground overflow-hidden">
   <!-- Toolbar -->
-  <header class="h-14 border-b px-4 flex items-center justify-between shrink-0 bg-card">
+  <header class="h-14 border-b px-4 gap-2 flex items-center justify-between shrink-0 bg-card">
     <div class="flex items-center gap-4">
-      <h1 class="font-bold text-lg">Hangul Pixel Font Gen</h1>
+      <h1 class="font-bold text-lg truncate">BitHangul</h1>
       <ButtonGroup.Root>
         <Button variant="outline" size="sm" onclick={handleLoadProject}>
           <Upload /> Load
@@ -107,10 +107,10 @@
           </Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
-          <Button variant="outline" size="sm" onclick={handleExportBDF}>
+          <Button variant="outline" size="sm" onclick={handleExportBDF} disabled={Boolean(!generatedData)}>
             <FileType /> Export to BDF
           </Button>
-          <Button variant="outline" size="sm" onclick={handleExportHEX}>
+          <Button variant="outline" size="sm" onclick={handleExportHEX} disabled={Boolean(!generatedData)}>
             <FileCode /> Export to HEX
           </Button>
         </ButtonGroup.Root>
