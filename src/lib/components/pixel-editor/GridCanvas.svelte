@@ -42,6 +42,7 @@
   }
 
   function updatePixel(r: number, c: number, val: number) {
+    // console.log('updatePixel', r, c, val, bitmap[r][c]);
     if (bitmap[r][c] !== val) {
       const newBitmap = bitmap.map((row) => [...row]);
       newBitmap[r][c] = val;
@@ -53,7 +54,7 @@
 <svelte:window onpointerup={handlePointerUp} />
 
 <div
-  class="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-[1px] bg-border border border-border w-full max-w-[400px] aspect-square select-none touch-none"
+  class="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-[1px] bg-gray-300 border border-gray-400 w-full max-w-[400px] aspect-square select-none touch-none"
   oncontextmenu={(e) => e.preventDefault()}
   role="grid"
   tabindex="-1"
@@ -62,8 +63,8 @@
     {#each row as cell, c}
       <button
         class={cn(
-          "w-full h-full cursor-pointer transition-colors duration-75 block",
-          cell ? "bg-primary" : "bg-background hover:bg-muted",
+          "w-full h-full block",
+          cell === 1 ? "bg-black" : "bg-white hover:bg-gray-100",
         )}
         onpointerdown={(e) => handlePointerDown(r, c, e)}
         onpointerenter={(e) => handlePointerEnter(r, c, e)}
