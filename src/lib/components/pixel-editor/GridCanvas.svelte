@@ -63,7 +63,7 @@
     {#each row as cell, c}
       <button
         class={cn(
-          "w-full h-full transition-colors block",
+          "w-full h-full transition-colors duration-100 block",
           cell ? "bg-primary" : "bg-background hover:bg-muted",
         )}
         onpointerdown={(e) => handlePointerDown(r, c, e)}
