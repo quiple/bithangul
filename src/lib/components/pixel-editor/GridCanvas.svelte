@@ -54,7 +54,7 @@
 <svelte:window onpointerup={handlePointerUp} />
 
 <div
-  class="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-[1px] bg-gray-300 border border-gray-400 w-full max-w-[400px] aspect-square select-none touch-none"
+  class="grid grid-cols-16 gap-px bg-gray-300 border border-gray-400 w-full max-w-100 aspect-square select-none touch-none"
   oncontextmenu={(e) => e.preventDefault()}
   role="grid"
   tabindex="-1"
