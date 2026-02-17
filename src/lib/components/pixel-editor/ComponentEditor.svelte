@@ -12,7 +12,17 @@
 
   let { component, onSave, onCancel }: Props = $props();
 
-  let localComponent = $state<PixelComponent>(JSON.parse(JSON.stringify(component)));
+  let localComponent = $state<PixelComponent>(
+    JSON.parse(JSON.stringify(component)),
+  );
+
+  $effect(() => {
+    // When component prop changes (e.g. selection change), update local state
+    // Check if ID changed to avoid resetting on local edits if parent passes same object reference
+    if (component.id !== localComponent.id) {
+      localComponent = JSON.parse(JSON.stringify(component));
+    }
+  });
 
   function handleSave() {
     // Return a plain object, removing proxy
@@ -30,18 +40,20 @@
   </div>
 
   <div class="flex-1 flex flex-col p-4 overflow-hidden gap-4 min-h-0">
-    <div class="flex justify-center items-center flex-1 bg-muted/20 rounded-md border min-h-0">
-        <GridCanvas 
-            bitmap={localComponent.bitmap} 
-            onUpdate={(bm) => localComponent.bitmap = bm} 
-        />
+    <div
+      class="flex justify-center items-center flex-1 bg-muted/20 rounded-md border min-h-0"
+    >
+      <GridCanvas
+        bitmap={localComponent.bitmap}
+        onUpdate={(bm) => (localComponent.bitmap = bm)}
+      />
     </div>
-    
+
     <div class="h-[300px] shrink-0 border-t pt-4">
-        <TargetSelector 
-            targets={localComponent.targets} 
-            onUpdate={(t) => localComponent.targets = t} 
-        />
+      <TargetSelector
+        targets={localComponent.targets}
+        onUpdate={(t) => (localComponent.targets = t)}
+      />
     </div>
   </div>
 </div>

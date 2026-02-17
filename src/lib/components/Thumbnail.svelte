@@ -1,28 +1,26 @@
 <script lang="ts">
-  import { onMount, afterUpdate } from 'svelte';
+  import { onMount } from "svelte";
 
-  export let bitmap: number[][]; // 16x16
-  export let size = 32;
+  let { bitmap, size = 32 }: { bitmap?: number[][]; size?: number } = $props();
 
   let canvas: HTMLCanvasElement;
 
-  $: if (canvas && bitmap) draw();
+  $effect(() => {
+    if (bitmap) draw();
+  });
 
   function draw() {
-    const ctx = canvas.getContext('2d');
+    if (!canvas || !bitmap) return;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const w = canvas.width;
     const h = canvas.height;
     const cw = w / 16;
     const ch = h / 16;
-    
+
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'black'; // text-foreground color in light mode?
-    // Use getComputedStyle for color?
-    // Let's stick to black for simplicity in thumbnail or 'currentColor'.
-    // Actually, canvas doesn't support currentColor easily.
-    // Use black.
-    
+    ctx.fillStyle = "black"; // Always black pixels
+
     for (let r = 0; r < 16; r++) {
       for (let c = 0; c < 16; c++) {
         if (bitmap[r][c]) {
@@ -35,9 +33,9 @@
   onMount(draw);
 </script>
 
-<canvas 
-  bind:this={canvas} 
-  width={size} 
-  height={size} 
-  class="block bg-white dark:bg-black border border-muted"
+<canvas
+  bind:this={canvas}
+  width={size}
+  height={size}
+  class="block bg-white border border-muted"
 ></canvas>
