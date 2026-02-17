@@ -32,8 +32,8 @@
 </script>
 
 <div class="flex flex-col p-2">
-  <div class="flex justify-between items-center mb-2 pl-2">
-    <h2 class="font-bold">Edit Component</h2>
+  <div class="flex justify-between items-center mb-2 pl-2 gap-2">
+    <h2 class="font-bold truncate">Edit Component</h2>
     <ButtonGroup.Root>
       <ButtonGroup.Root>
         <Button size="sm" variant="ghost" onclick={onCancel}>Cancel</Button>
