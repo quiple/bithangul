@@ -54,7 +54,7 @@
 <svelte:window onpointerup={handlePointerUp} />
 
 <div
-  class="grid grid-cols-16 gap-px bg-gray-300 border border-gray-400 w-full max-w-100 aspect-square select-none touch-none"
+  class="grid grid-cols-16 gap-px bg-border border w-full max-w-100 aspect-square select-none touch-none"
   oncontextmenu={(e) => e.preventDefault()}
   role="grid"
   tabindex="-1"
@@ -63,8 +63,8 @@
     {#each row as cell, c}
       <button
         class={cn(
-          "w-full h-full block",
-          cell === 1 ? "bg-black" : "bg-white hover:bg-gray-100",
+          "w-full h-full transition-colors block",
+          cell ? "bg-primary" : "bg-background hover:bg-muted",
         )}
         onpointerdown={(e) => handlePointerDown(r, c, e)}
         onpointerenter={(e) => handlePointerEnter(r, c, e)}
