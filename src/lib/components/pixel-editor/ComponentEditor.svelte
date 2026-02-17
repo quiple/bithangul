@@ -3,6 +3,7 @@
   import GridCanvas from "./GridCanvas.svelte"
   import TargetSelector from "./TargetSelector.svelte"
   import type { PixelComponent } from "$lib/types"
+  import * as ButtonGroup from "$lib/components/ui/button-group/index.js";
 
   interface Props {
     component: PixelComponent
@@ -30,26 +31,28 @@
   }
 </script>
 
-<div class="flex flex-col h-full bg-background text-foreground">
-  <div class="flex justify-between items-center p-4 border-b shrink-0">
-    <h2 class="text-lg font-bold">Edit Component</h2>
-    <div class="space-x-2">
-      <Button variant="ghost" onclick={onCancel}>Cancel</Button>
-      <Button onclick={handleSave}>Save</Button>
-    </div>
+<div class="flex flex-col p-2">
+  <div class="flex justify-between items-center mb-2 pl-2">
+    <h2 class="font-bold">Edit Component</h2>
+    <ButtonGroup.Root>
+      <ButtonGroup.Root>
+        <Button size="sm" variant="ghost" onclick={onCancel}>Cancel</Button>
+      </ButtonGroup.Root>
+      <ButtonGroup.Root>
+        <Button size="sm" onclick={handleSave}>Save</Button>
+      </ButtonGroup.Root>
+    </ButtonGroup.Root>
   </div>
 
-  <div class="flex-1 flex flex-col p-4 overflow-hidden gap-4 min-h-0">
-    <div
-      class="flex justify-center items-center flex-1 bg-muted/20 rounded-md border min-h-0"
-    >
+  <div class="flex flex-col">
+    <div class="flex justify-center">
       <GridCanvas
         bitmap={localComponent.bitmap}
         onUpdate={(bm) => (localComponent.bitmap = bm)}
       />
     </div>
 
-    <div class="h-[300px] shrink-0 border-t pt-4">
+    <div class="border-t pt-4">
       <TargetSelector
         targets={localComponent.targets}
         onUpdate={(t) => (localComponent.targets = t)}
