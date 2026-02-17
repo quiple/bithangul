@@ -5,29 +5,29 @@
   export let data: ArrayBuffer | null;
 
   $: char = String.fromCharCode(0xAC00 + index);
-  
+
   let canvas: HTMLCanvasElement;
 
   function draw() {
     if (!canvas || !data) {
         // Clear canvas if no data
         if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx?.clearRect(0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext('2d')
+            ctx?.clearRect(0, 0, canvas.width, canvas.height)
         }
-        return;
+        return
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Each char is 32 bytes (16 x uint16)
     // Offset = index * 32
     const offset = index * 32;
     if (offset + 32 > data.byteLength) return;
 
     const view = new DataView(data);
-    
+
     // Clear
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'black'; // Or variable color
@@ -35,11 +35,11 @@
     // Draw 16x16
     // Canvas size is 32x32 (scale 2)
     const scale = 2;
-    
+
     for (let r = 0; r < 16; r++) {
        // Read Big Endian uint16
        const rowVal = view.getUint16(offset + r * 2, false);
-       
+
        for (let c = 0; c < 16; c++) {
            // Check bit at c (MSB is index 0)
            // 0x8000 is bit 0 set.
