@@ -37,5 +37,5 @@
   bind:this={canvas}
   width={size}
   height={size}
-  class="block bg-white border border-muted"
+  class="block bg-background border"
 ></canvas>
