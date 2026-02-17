@@ -41,12 +41,12 @@
                <span class={comp.targets.jongsung.length > 0 ? "text-primary font-bold" : ""}>Jong:{comp.targets.jongsung.length}</span>
              </div>
            </div>
-           
+
            <div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-               <Button 
-                variant="destructive" 
-                size="icon" 
-                class="h-6 w-6" 
+               <Button
+                variant="destructive"
+                size="icon"
+                class="h-6 w-6"
                 onclick={(e) => { e.stopPropagation(); onDelete(comp.id); }}
                >
                  <Trash class="w-3 h-3" />
@@ -54,7 +54,7 @@
            </div>
         </button>
       {/each}
-      
+
       {#if components.length === 0}
         <div class="p-8 text-center text-sm text-muted-foreground">
           No components. Click "Add" to start.
