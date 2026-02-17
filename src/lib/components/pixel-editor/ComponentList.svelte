@@ -13,8 +13,8 @@
 </script>
 
 <div class="flex flex-col">
-  <div class="flex justify-between items-center pl-4 p-2 shrink-0">
-    <h2 class="font-bold">Components</h2>
+  <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2">
+    <h2 class="font-bold truncate">Components</h2>
     <Button size="sm" variant="outline" onclick={onAdd}>
       <Plus /> Add
     </Button>
