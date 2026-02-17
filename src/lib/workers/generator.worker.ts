@@ -1,5 +1,6 @@
-import {decomposeHangul} from '../hangul'
 import type {FontProject, PixelComponent} from '../types'
+
+import {decomposeHangul} from '../hangul'
 
 interface GenerationResult {
   // 11,172 chars * 32 bytes (16 rows * 2 bytes)
