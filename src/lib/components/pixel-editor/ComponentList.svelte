@@ -6,7 +6,6 @@
   import {Trash, Plus} from '@lucide/svelte'
 
   export let components: PixelComponent[]
-  export let selectedId: string | null
   export let onSelect: (id: string) => void
   export let onAdd: () => void
   export let onDelete: (id: string) => void
