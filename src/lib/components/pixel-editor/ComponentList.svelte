@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button";
-  import { ScrollArea } from "$lib/components/ui/scroll-area";
-  import type { PixelComponent } from "$lib/types";
-  import Thumbnail from "$lib/components/Thumbnail.svelte";
-  import { cn } from "$lib/utils";
-  import { Trash, Plus } from "@lucide/svelte";
+  import {Button} from '$lib/components/ui/button'
+  import {ScrollArea} from '$lib/components/ui/scroll-area'
+  import type {PixelComponent} from '$lib/types'
+  import Thumbnail from '$lib/components/Thumbnail.svelte'
+  import {cn} from '$lib/utils'
+  import {Trash, Plus} from '@lucide/svelte'
 
-  export let components: PixelComponent[];
-  export let selectedId: string | null;
-  export let onSelect: (id: string) => void;
-  export let onAdd: () => void;
-  export let onDelete: (id: string) => void;
+  export let components: PixelComponent[]
+  export let selectedId: string | null
+  export let onSelect: (id: string) => void
+  export let onAdd: () => void
+  export let onDelete: (id: string) => void
 </script>
 
 <div class="h-full flex flex-col bg-sidebar border-r">
