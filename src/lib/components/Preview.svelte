@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
-  import PreviewItem from './PreviewItem.svelte';
-  import { Settings } from '@lucide/svelte';
+  import { onMount, tick } from 'svelte'
+  import PreviewItem from './PreviewItem.svelte'
+  import { Settings } from '@lucide/svelte'
 
-  export let generatedData: ArrayBuffer | null = null;
+  export let generatedData: ArrayBuffer | null = null
 
   const ITEM_HEIGHT = 41; // Using 41 to account for 1px border if needed, or stick to 40?
   // PreviewItem has border-b inside h-10? Usually border-b is inside.
@@ -14,23 +14,23 @@
   // With 40px item, border-b creates visual separation.
   // Let's use 40.
 
-  const REAL_ITEM_HEIGHT = 40;
-  const TOTAL_ITEMS = 11172;
+  const REAL_ITEM_HEIGHT = 40
+  const TOTAL_ITEMS = 11172
 
-  let scrollTop = 0;
-  let container: HTMLDivElement;
-  let containerHeight = 800;
+  let scrollTop = 0
+  let container: HTMLDivElement
+  let containerHeight = 800
 
   // Virtualization logic
-  $: startIndex = Math.max(0, Math.floor(scrollTop / REAL_ITEM_HEIGHT));
+  $: startIndex = Math.max(0, Math.floor(scrollTop / REAL_ITEM_HEIGHT))
   $: visibleCount = Math.ceil(containerHeight / REAL_ITEM_HEIGHT) + 4; // Buffer increased
-  $: endIndex = Math.min(TOTAL_ITEMS, startIndex + visibleCount);
+  $: endIndex = Math.min(TOTAL_ITEMS, startIndex + visibleCount)
 
-  $: visibleItems = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i);
+  $: visibleItems = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i)
 
   function handleScroll(e: UIEvent) {
     if (e.target instanceof HTMLElement) {
-      scrollTop = e.target.scrollTop;
+      scrollTop = e.target.scrollTop
     }
   }
 </script>
@@ -65,7 +65,7 @@
 
 <style>
 :global(.animate-spin-slow) {
-    animation: spin 3s linear infinite;
+    animation: spin 3s linear infinite
 }
 @keyframes spin {
     from { transform: rotate(0deg); }

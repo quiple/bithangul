@@ -1,55 +1,55 @@
 <script lang="ts">
-  import { Checkbox } from "$lib/components/ui/checkbox";
-  import { Label } from "$lib/components/ui/label";
-  import { Button } from "$lib/components/ui/button";
+  import { Checkbox } from "$lib/components/ui/checkbox"
+  import { Label } from "$lib/components/ui/label"
+  import { Button } from "$lib/components/ui/button"
   import {
     Tabs,
     TabsList,
     TabsTrigger,
     TabsContent,
-  } from "$lib/components/ui/tabs";
-  import { ScrollArea } from "$lib/components/ui/scroll-area";
-  import { CHOSUNG, JUNGSUNG, JONGSUNG } from "$lib/hangul";
-  import { cn } from "$lib/utils";
+  } from "$lib/components/ui/tabs"
+  import { ScrollArea } from "$lib/components/ui/scroll-area"
+  import { CHOSUNG, JUNGSUNG, JONGSUNG } from "$lib/hangul"
+  import { cn } from "$lib/utils"
 
   let {
     targets,
     onUpdate,
   }: {
-    targets: { chosung: number[]; jungsung: number[]; jongsung: number[] };
-    onUpdate: (newTargets: typeof targets) => void;
-  } = $props();
+    targets: { chosung: number[]; jungsung: number[]; jongsung: number[] }
+    onUpdate: (newTargets: typeof targets) => void
+  } = $props()
 
-  let activeTab = $state("chosung");
+  let activeTab = $state("chosung")
 
   function toggleIndex(
     type: "chosung" | "jungsung" | "jongsung",
     index: number,
   ) {
-    const list = targets[type];
-    const newTargets = { ...targets };
+    const list = targets[type]
+    const newTargets = { ...targets }
     if (list.includes(index)) {
-      newTargets[type] = list.filter((i) => i !== index);
+      newTargets[type] = list.filter((i) => i !== index)
     } else {
-      newTargets[type] = [...list, index].sort((a, b) => a - b);
+      newTargets[type] = [...list, index].sort((a, b) => a - b)
     }
-    onUpdate(newTargets);
+    onUpdate(newTargets)
   }
 
   function selectAll(type: "chosung" | "jungsung" | "jongsung") {
-    const newTargets = { ...targets };
-    if (type === "chosung") newTargets.chosung = CHOSUNG.map((_, i) => i);
+    const newTargets = { ...targets }
+    if (type === "chosung") newTargets.chosung = CHOSUNG.map((_, i) => i)
     else if (type === "jungsung")
-      newTargets.jungsung = JUNGSUNG.map((_, i) => i);
+      newTargets.jungsung = JUNGSUNG.map((_, i) => i)
     else if (type === "jongsung")
-      newTargets.jongsung = JONGSUNG.map((_, i) => i);
-    onUpdate(newTargets);
+      newTargets.jongsung = JONGSUNG.map((_, i) => i)
+    onUpdate(newTargets)
   }
 
   function clearAll(type: "chosung" | "jungsung" | "jongsung") {
-    const newTargets = { ...targets };
-    newTargets[type] = [];
-    onUpdate(newTargets);
+    const newTargets = { ...targets }
+    newTargets[type] = []
+    onUpdate(newTargets)
   }
 </script>
 

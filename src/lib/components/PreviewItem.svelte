@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount } from 'svelte'
 
-  export let index: number;
-  export let data: ArrayBuffer | null;
+  export let index: number
+  export let data: ArrayBuffer | null
 
-  $: char = String.fromCharCode(0xAC00 + index);
+  $: char = String.fromCharCode(0xAC00 + index)
 
-  let canvas: HTMLCanvasElement;
+  let canvas: HTMLCanvasElement
 
   function draw() {
     if (!canvas || !data) {
@@ -18,27 +18,27 @@
         return
     }
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
     // Each char is 32 bytes (16 x uint16)
     // Offset = index * 32
-    const offset = index * 32;
-    if (offset + 32 > data.byteLength) return;
+    const offset = index * 32
+    if (offset + 32 > data.byteLength) return
 
-    const view = new DataView(data);
+    const view = new DataView(data)
 
     // Clear
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.fillStyle = 'black'; // Or variable color
 
     // Draw 16x16
     // Canvas size is 32x32 (scale 2)
-    const scale = 2;
+    const scale = 2
 
     for (let r = 0; r < 16; r++) {
        // Read Big Endian uint16
-       const rowVal = view.getUint16(offset + r * 2, false);
+       const rowVal = view.getUint16(offset + r * 2, false)
 
        for (let c = 0; c < 16; c++) {
            // Check bit at c (MSB is index 0)
@@ -46,13 +46,13 @@
            // (rowVal << c) & 0x8000 ?
            // Or (rowVal >> (15 - c)) & 1?
            if ((rowVal >> (15 - c)) & 1) {
-               ctx.fillRect(c * scale, r * scale, scale, scale);
+               ctx.fillRect(c * scale, r * scale, scale, scale)
            }
        }
     }
   }
 
-  $: if (canvas && data && index >= 0) draw();
+  $: if (canvas && data && index >= 0) draw()
 </script>
 
 <div class="flex items-center space-x-4 h-10 px-4 border-b">

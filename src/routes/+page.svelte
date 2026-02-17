@@ -16,7 +16,7 @@
   import GeneratorWorker from '$lib/workers/generator.worker?worker'
   import type { FontProject, PixelComponent } from '$lib/types'
 
-  let worker: Worker;
+  let worker: Worker
   let generatedData = $state<ArrayBuffer | null>(null)
   let isGenerating = $state(false)
 

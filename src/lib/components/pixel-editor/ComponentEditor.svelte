@@ -1,32 +1,32 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button";
-  import GridCanvas from "./GridCanvas.svelte";
-  import TargetSelector from "./TargetSelector.svelte";
-  import type { PixelComponent } from "$lib/types";
+  import { Button } from "$lib/components/ui/button"
+  import GridCanvas from "./GridCanvas.svelte"
+  import TargetSelector from "./TargetSelector.svelte"
+  import type { PixelComponent } from "$lib/types"
 
   interface Props {
-    component: PixelComponent;
-    onSave: (c: PixelComponent) => void;
-    onCancel: () => void;
+    component: PixelComponent
+    onSave: (c: PixelComponent) => void
+    onCancel: () => void
   }
 
-  let { component, onSave, onCancel }: Props = $props();
+  let { component, onSave, onCancel }: Props = $props()
 
   let localComponent = $state<PixelComponent>(
     JSON.parse(JSON.stringify(component)),
-  );
+  )
 
   $effect(() => {
     // When component prop changes (e.g. selection change), update local state
     // Check if ID changed to avoid resetting on local edits if parent passes same object reference
     if (component.id !== localComponent.id) {
-      localComponent = JSON.parse(JSON.stringify(component));
+      localComponent = JSON.parse(JSON.stringify(component))
     }
-  });
+  })
 
   function handleSave() {
     // Return a plain object, removing proxy
-    onSave($state.snapshot(localComponent));
+    onSave($state.snapshot(localComponent))
   }
 </script>
 

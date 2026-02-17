@@ -1,52 +1,52 @@
 <script lang="ts">
-  import { cn } from "$lib/utils";
+  import { cn } from "$lib/utils"
 
   let {
     bitmap,
     onUpdate,
   }: {
-    bitmap: number[][];
-    onUpdate: (newBitmap: number[][]) => void;
-  } = $props();
+    bitmap: number[][]
+    onUpdate: (newBitmap: number[][]) => void
+  } = $props()
 
-  let isDrawing = false;
+  let isDrawing = false
   let drawMode = 1; // 1 = draw, 0 = erase
 
   function handlePointerDown(r: number, c: number, e: PointerEvent) {
     e.preventDefault(); // Prevent scroll on touch
     // Determine draw mode based on current pixel
-    const currentVal = bitmap[r][c];
-    drawMode = currentVal === 1 ? 0 : 1;
-    isDrawing = true;
-    updatePixel(r, c, drawMode);
+    const currentVal = bitmap[r][c]
+    drawMode = currentVal === 1 ? 0 : 1
+    isDrawing = true
+    updatePixel(r, c, drawMode)
 
     // Use setPointerCapture to track drag even outside the element
-    (e.target as Element).setPointerCapture(e.pointerId);
+    (e.target as Element).setPointerCapture(e.pointerId)
   }
 
   function handlePointerEnter(r: number, c: number, e: PointerEvent) {
     if (isDrawing) {
-      updatePixel(r, c, drawMode);
+      updatePixel(r, c, drawMode)
     }
   }
 
   function handlePointerUp(e: PointerEvent) {
-    isDrawing = false;
+    isDrawing = false
     // Release capture if needed, though usually automatic on up
     if (
       e.target instanceof Element &&
       e.target.hasPointerCapture(e.pointerId)
     ) {
-      e.target.releasePointerCapture(e.pointerId);
+      e.target.releasePointerCapture(e.pointerId)
     }
   }
 
   function updatePixel(r: number, c: number, val: number) {
-    // console.log('updatePixel', r, c, val, bitmap[r][c]);
+    // console.log('updatePixel', r, c, val, bitmap[r][c])
     if (bitmap[r][c] !== val) {
-      const newBitmap = bitmap.map((row) => [...row]);
-      newBitmap[r][c] = val;
-      onUpdate(newBitmap);
+      const newBitmap = bitmap.map((row) => [...row])
+      newBitmap[r][c] = val
+      onUpdate(newBitmap)
     }
   }
 </script>
