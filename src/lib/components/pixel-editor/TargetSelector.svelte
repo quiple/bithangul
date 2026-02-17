@@ -10,7 +10,7 @@
   } from "$lib/components/ui/tabs"
   import { ScrollArea } from "$lib/components/ui/scroll-area"
   import { CHOSUNG, JUNGSUNG, JONGSUNG } from "$lib/hangul"
-  import { cn } from "$lib/utils"
+  import * as ButtonGroup from "$lib/components/ui/button-group/index.js"
 
   let {
     targets,
@@ -54,34 +54,42 @@
 </script>
 
 <div class="h-full flex flex-col space-y-4">
-  <div class="flex items-center justify-between">
-    <h3 class="text-sm font-medium">Apply To</h3>
-    <div class="space-x-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onclick={() => selectAll(activeTab as any)}>All</Button
-      >
-      <Button
-        variant="outline"
-        size="sm"
-        onclick={() => clearAll(activeTab as any)}>None</Button
-      >
-    </div>
+  <div class="flex justify-between items-center mb-2 pl-2 gap-2">
+    <h3 class="font-medium truncate">Apply To</h3>
+    <ButtonGroup.Root>
+      <ButtonGroup.Root>
+        <Button
+          variant="outline"
+          size="sm"
+          onclick={() => selectAll(activeTab as any)}
+        >
+          All
+        </Button>
+      </ButtonGroup.Root>
+      <ButtonGroup.Root>
+        <Button
+          variant="outline"
+          size="sm"
+          onclick={() => clearAll(activeTab as any)}
+        >
+          None
+        </Button>
+      </ButtonGroup.Root>
+    </ButtonGroup.Root>
   </div>
 
   <!-- Using bind:value with Tabs might need legacy syntax or verify Shadcn Tabs behavior -->
   <Tabs bind:value={activeTab} class="flex-1 flex flex-col min-h-0">
     <TabsList class="grid w-full grid-cols-3">
-      <TabsTrigger value="chosung"
-        >Choseong ({targets.chosung.length})</TabsTrigger
-      >
-      <TabsTrigger value="jungsung"
-        >Jungseong ({targets.jungsung.length})</TabsTrigger
-      >
-      <TabsTrigger value="jongsung"
-        >Jongseong ({targets.jongsung.length})</TabsTrigger
-      >
+      <TabsTrigger value="chosung">
+        Choseong ({targets.chosung.length})
+      </TabsTrigger>
+      <TabsTrigger value="jungsung">
+        Jungseong ({targets.jungsung.length})
+      </TabsTrigger>
+      <TabsTrigger value="jongsung">
+        Jongseong ({targets.jongsung.length})
+      </TabsTrigger>
     </TabsList>
 
     <div class="flex-1 overflow-hidden mt-2 border rounded-md relative">

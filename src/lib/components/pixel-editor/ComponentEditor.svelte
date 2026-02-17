@@ -3,7 +3,7 @@
   import GridCanvas from "./GridCanvas.svelte"
   import TargetSelector from "./TargetSelector.svelte"
   import type { PixelComponent } from "$lib/types"
-  import * as ButtonGroup from "$lib/components/ui/button-group/index.js";
+  import * as ButtonGroup from "$lib/components/ui/button-group/index.js"
 
   interface Props {
     component: PixelComponent
@@ -29,7 +29,7 @@
 </script>
 
 <div class="flex flex-col p-2">
-  <div class="flex justify-between items-center mb-2 pl-2 gap-2">
+  <div class="flex justify-between items-center mb-4 pl-2 gap-2">
     <h2 class="font-bold truncate">Edit Component</h2>
     <ButtonGroup.Root>
       <ButtonGroup.Root>
@@ -42,18 +42,16 @@
   </div>
 
   <div class="flex flex-col">
-    <div class="flex justify-center">
+    <div class="flex justify-center mb-4">
       <GridCanvas
         bitmap={localComponent.bitmap}
         onUpdate={(bm) => (localComponent.bitmap = bm)}
       />
     </div>
 
-    <div class="border-t pt-4">
-      <TargetSelector
-        targets={localComponent.targets}
-        onUpdate={(t) => (localComponent.targets = t)}
-      />
-    </div>
+    <TargetSelector
+      targets={localComponent.targets}
+      onUpdate={(t) => (localComponent.targets = t)}
+    />
   </div>
 </div>

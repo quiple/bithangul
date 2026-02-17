@@ -36,7 +36,7 @@
 </script>
 
 <div
-  class="h-full overflow-y-auto relative bg-background"
+  class={['h-full relative bg-background', generatedData ? 'overflow-y-auto' : 'overflow-hidden']}
   on:scroll={handleScroll}
   bind:this={container}
   bind:clientHeight={containerHeight}

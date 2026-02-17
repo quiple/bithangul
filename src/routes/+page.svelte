@@ -127,7 +127,6 @@
           component={projectState.selectedComponent}
           onSave={(updated) => {
             projectState.updateComponent(updated.id, updated)
-            // Go back to list
             projectState.selectComponent(null)
           }}
           onCancel={() => {
