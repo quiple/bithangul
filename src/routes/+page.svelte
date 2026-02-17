@@ -113,7 +113,7 @@
   <!-- Main Content -->
   <div class="flex-1 flex overflow-hidden min-h-0">
     <!-- Left Panel -->
-    <div class="w-[400px] border-r flex flex-col bg-sidebar relative shrink-0">
+    <div class="w-100 border-r flex flex-col bg-sidebar relative shrink-0">
        {#if projectState.selectedComponentId && projectState.selectedComponent}
          <!-- Edit Mode -->
          <ComponentEditor
