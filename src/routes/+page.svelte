@@ -15,7 +15,6 @@
     FileCode
   } from '@lucide/svelte'
   import GeneratorWorker from '$lib/workers/generator.worker?worker'
-  import type { FontProject, PixelComponent } from '$lib/types'
 
   let worker: Worker
   let generatedData = $state<ArrayBuffer | null>(null)
