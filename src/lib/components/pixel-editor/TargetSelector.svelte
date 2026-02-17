@@ -74,13 +74,13 @@
   <Tabs bind:value={activeTab} class="flex-1 flex flex-col min-h-0">
     <TabsList class="grid w-full grid-cols-3">
       <TabsTrigger value="chosung"
-        >Chosung ({targets.chosung.length})</TabsTrigger
+        >Choseong ({targets.chosung.length})</TabsTrigger
       >
       <TabsTrigger value="jungsung"
-        >Jungsung ({targets.jungsung.length})</TabsTrigger
+        >Jungseong ({targets.jungsung.length})</TabsTrigger
       >
       <TabsTrigger value="jongsung"
-        >Jongsung ({targets.jongsung.length})</TabsTrigger
+        >Jongseong ({targets.jongsung.length})</TabsTrigger
       >
     </TabsList>
 
