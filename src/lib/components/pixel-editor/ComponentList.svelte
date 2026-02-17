@@ -16,8 +16,8 @@
 <div class="h-full flex flex-col bg-sidebar border-r">
   <div class="p-4 border-b flex justify-between items-center bg-background shrink-0">
     <h2 class="font-bold text-sm">Components</h2>
-    <Button size="sm" variant="outline" onclick={onAdd} class="h-8 px-2">
-      <Plus class="w-4 h-4 mr-1" /> Add
+    <Button size="sm" variant="outline" onclick={onAdd}>
+      <Plus /> Add
     </Button>
   </div>
   <ScrollArea class="flex-1 min-h-0">
