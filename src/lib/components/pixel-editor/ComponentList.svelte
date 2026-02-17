@@ -34,10 +34,10 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="text-xs font-mono truncate text-muted-foreground">{comp.id.slice(0,8)}</div>
-          <div class="text-[10px] text-muted-foreground flex gap-1 mt-1">
-            <span class={comp.targets.chosung.length > 0 ? "text-primary font-bold" : ""}>Cho:{comp.targets.chosung.length}</span>
-            <span class={comp.targets.jungsung.length > 0 ? "text-primary font-bold" : ""}>Jung:{comp.targets.jungsung.length}</span>
-            <span class={comp.targets.jongsung.length > 0 ? "text-primary font-bold" : ""}>Jong:{comp.targets.jongsung.length}</span>
+          <div class="text-xs truncate text-muted-foreground mt-1">
+            <span class={comp.targets.chosung.length > 0 ? "text-primary font-bold" : ""}>Cho: {comp.targets.chosung.length}</span>,
+            <span class={comp.targets.jungsung.length > 0 ? "text-primary font-bold" : ""}>Jung: {comp.targets.jungsung.length}</span>,
+            <span class={comp.targets.jongsung.length > 0 ? "text-primary font-bold" : ""}>Jong: {comp.targets.jongsung.length}</span>
           </div>
         </div>
 
