@@ -39,10 +39,10 @@
             <Button
               variant="destructive"
               size="icon"
-              class="h-6 w-6"
+              class="size-5 rounded"
               onclick={(e) => {e.stopPropagation(); onDelete(comp.id)}}
             >
-              <Trash class="w-3 h-3" />
+              <Trash class="size-3.5" />
             </Button>
           </div>
         </Button>
