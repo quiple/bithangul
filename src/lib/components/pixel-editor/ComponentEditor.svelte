@@ -14,7 +14,7 @@
   let { component, onSave, onCancel }: Props = $props()
 
   let localComponent = $state<PixelComponent>(
-    JSON.parse(JSON.stringify(component)),
+    structuredClone($state.snapshot(component))
   )
 
   $effect(() => {
