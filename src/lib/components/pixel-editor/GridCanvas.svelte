@@ -18,8 +18,7 @@
     const currentVal = bitmap[r][c]
     drawMode = currentVal === 1 ? 0 : 1
     isDrawing = true
-    updatePixel(r, c, drawMode)
-
+    updatePixel(r, c, drawMode);
     // Use setPointerCapture to track drag even outside the element
     (e.target as Element).setPointerCapture(e.pointerId)
   }
