@@ -3,7 +3,6 @@
   import {ScrollArea} from '$lib/components/ui/scroll-area'
   import type {PixelComponent} from '$lib/types'
   import Thumbnail from '$lib/components/Thumbnail.svelte'
-  import {cn} from '$lib/utils'
   import {Trash, Plus} from '@lucide/svelte'
 
   export let components: PixelComponent[]
@@ -14,15 +13,15 @@
 </script>
 
 <div class="flex flex-col">
-  <div class="flex justify-between items-center mb-2 pl-4 p-2 shrink-0">
+  <div class="flex justify-between items-center pl-4 p-2 shrink-0">
     <h2 class="font-bold">Components</h2>
     <Button size="sm" variant="outline" onclick={onAdd}>
       <Plus /> Add
     </Button>
   </div>
 
-  <ScrollArea class="h-full p-2">
-    <div class="flex flex-col gap-1.5">
+  <ScrollArea class="h-[calc(100vh-48px-56px)]">
+    <div class="flex flex-col gap-1.5 px-2 pb-2">
       {#each components as comp (comp.id)}
         <Button variant="outline" class="p-2 gap-3 h-auto text-left bg-background group relative" onclick={() => onSelect(comp.id)}>
           <Thumbnail bitmap={comp.bitmap} size={32} />
@@ -35,7 +34,7 @@
             </div>
           </div>
 
-          <div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div class="absolute right-1 top-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
               variant="destructive"
               size="icon"
