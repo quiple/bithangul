@@ -1,4 +1,5 @@
 <script lang="ts">
+  import * as Resizable from "$lib/components/ui/resizable/index.js";
   import { onMount, tick } from 'svelte';
   import { projectState } from '$lib/state.svelte';
   import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte';
@@ -111,9 +112,9 @@
   </header>
 
   <!-- Main Content -->
-  <div class="flex-1 flex overflow-hidden min-h-0">
+  <Resizable.PaneGroup direction="horizontal" class="flex-1 flex overflow-hidden min-h-0">
     <!-- Left Panel -->
-    <div class="w-100 border-r flex flex-col bg-sidebar relative shrink-0">
+    <Resizable.Pane defaultSize={4} class="border-r flex flex-col bg-sidebar relative shrink-0">
        {#if projectState.selectedComponentId && projectState.selectedComponent}
          <!-- Edit Mode -->
          <ComponentEditor
@@ -137,11 +138,11 @@
             onDelete={(id) => projectState.deleteComponent(id)}
          />
        {/if}
-    </div>
-
+    </Resizable.Pane>
+    <Resizable.Handle />
     <!-- Right Panel (Preview) -->
-    <div class="flex-1 bg-muted/10 min-w-0 relative">
+    <Resizable.Pane defaultSize={10} class="flex-1 bg-muted/10 min-w-0 relative">
        <Preview generatedData={generatedData} />
-    </div>
-  </div>
+    </Resizable.Pane>
+  </Resizable.PaneGroup>
 </div>
