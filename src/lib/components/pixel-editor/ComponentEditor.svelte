@@ -18,15 +18,12 @@
   )
 
   $effect(() => {
-    // When component prop changes (e.g. selection change), update local state
-    // Check if ID changed to avoid resetting on local edits if parent passes same object reference
     if (component.id !== localComponent.id) {
       localComponent = structuredClone($state.snapshot(component))
     }
   })
 
   function handleSave() {
-    // Return a plain object, removing proxy
     onSave($state.snapshot(localComponent))
   }
 </script>
