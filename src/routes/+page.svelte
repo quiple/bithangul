@@ -6,6 +6,7 @@
   import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte'
   import Preview from '$lib/components/Preview.svelte'
   import { Button } from '$lib/components/ui/button'
+  import * as ButtonGroup from "$lib/components/ui/button-group/index.js"
   import {
     Download,
     Upload,
@@ -85,29 +86,35 @@
 <div class="h-screen w-screen flex flex-col bg-background text-foreground overflow-hidden">
   <!-- Toolbar -->
   <header class="h-14 border-b px-4 flex items-center justify-between shrink-0 bg-card">
-    <div class="flex items-center space-x-4">
+    <div class="flex items-center gap-4">
       <h1 class="font-bold text-lg">Hangul Pixel Font Gen</h1>
-      <div class="h-6 w-px bg-border mx-2"></div>
-      <Button variant="outline" size="sm" onclick={handleLoadProject}>
-        <Upload /> Load
-      </Button>
-      <Button variant="outline" size="sm" onclick={handleSaveProject}>
-        <Download /> Save
-      </Button>
+      <ButtonGroup.Root>
+        <Button variant="outline" size="sm" onclick={handleLoadProject}>
+          <Upload /> Load
+        </Button>
+        <Button variant="outline" size="sm" onclick={handleSaveProject}>
+          <Download /> Save
+        </Button>
+      </ButtonGroup.Root>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <Button variant="secondary" size="sm" onclick={handleGenerate} disabled={isGenerating}>
-        <Play class={isGenerating ? 'animate-spin' : ''} />
-        {isGenerating ? 'Generating...' : 'Generate'}
-      </Button>
-      <div class="h-6 w-px bg-border mx-2"></div>
-      <Button variant="ghost" size="sm" onclick={handleExportBDF}>
-        <FileType /> BDF
-      </Button>
-      <Button variant="ghost" size="sm" onclick={handleExportHEX}>
-        <FileCode /> HEX
-      </Button>
+    <div class="flex items-center">
+      <ButtonGroup.Root>
+        <ButtonGroup.Root>
+          <Button size="sm" onclick={handleGenerate} disabled={isGenerating}>
+            <Play class={isGenerating ? 'animate-spin' : ''} />
+            {isGenerating ? 'Generating...' : 'Generate'}
+          </Button>
+        </ButtonGroup.Root>
+        <ButtonGroup.Root>
+          <Button variant="outline" size="sm" onclick={handleExportBDF}>
+            <FileType /> Export to BDF
+          </Button>
+          <Button variant="outline" size="sm" onclick={handleExportHEX}>
+            <FileCode /> Export to HEX
+          </Button>
+        </ButtonGroup.Root>
+      </ButtonGroup.Root>
     </div>
   </header>
 
