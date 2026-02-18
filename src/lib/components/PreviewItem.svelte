@@ -1,64 +1,49 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onMount } from 'svelte';
 
-  export let index: number
-  export let data: ArrayBuffer | null
+  export let index: number;
+  export let data: ArrayBuffer | null;
 
-  $: char = String.fromCharCode(0xAC00 + index)
+  $: char = String.fromCharCode(0xAC00 + index);
 
-  let canvas: HTMLCanvasElement
+  let canvas: HTMLCanvasElement;
 
   function draw() {
-    if (!canvas || !data) {
-        // Clear canvas if no data
-        if (canvas) {
-            const ctx = canvas.getContext('2d')
-            ctx?.clearRect(0, 0, canvas.width, canvas.height)
-        }
-        return
-    }
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    ctx.clearRect(0, 0, 32, 32);
 
-    // Each char is 32 bytes (16 x uint16)
-    // Offset = index * 32
-    const offset = index * 32
-    if (offset + 32 > data.byteLength) return
+    if (!data) return;
 
-    const view = new DataView(data)
+    const offset = index * 32;
+    if (offset + 32 > data.byteLength) return;
 
-    // Clear
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.fillStyle = 'black' // Or variable color
-
-    // Draw 16x16
-    // Canvas size is 32x32 (scale 2)
-    const scale = 2
+    const view = new DataView(data);
+    ctx.fillStyle = '#000';
 
     for (let r = 0; r < 16; r++) {
-       // Read Big Endian uint16
-       const rowVal = view.getUint16(offset + r * 2, false)
-
-       for (let c = 0; c < 16; c++) {
-           // Check bit at c (MSB is index 0)
-           // 0x8000 is bit 0 set.
-           // (rowVal << c) & 0x8000 ?
-           // Or (rowVal >> (15 - c)) & 1?
-           if ((rowVal >> (15 - c)) & 1) {
-               ctx.fillRect(c * scale, r * scale, scale, scale)
-           }
-       }
+      const rowVal = view.getUint16(offset + r * 2, false);
+      for (let c = 0; c < 16; c++) {
+        if ((rowVal >> (15 - c)) & 1) {
+          ctx.fillRect(c * 2, r * 2, 2, 2);
+        }
+      }
     }
   }
 
-  $: if (canvas && data && index >= 0) draw()
+  $: if (canvas && index >= 0) draw();
+  onMount(draw);
 </script>
 
-<div class="flex items-center space-x-4 h-10 px-4 border-b">
-  <div class="w-16 font-mono text-sm text-muted-foreground">U+{(0xAC00 + index).toString(16).toUpperCase()}</div>
-  <div class="w-8 font-bold text-lg text-center border-r pr-4">{char}</div>
-  <div class="flex-1">
-     <canvas bind:this={canvas} width={32} height={32} class="border bg-white"></canvas>
+<div
+  class="group relative flex flex-col items-center justify-center w-full h-full cursor-default"
+  title="{char} (U+{(0xAC00 + index).toString(16).toUpperCase()})"
+>
+  <canvas bind:this={canvas} width={32} height={32} class="block"></canvas>
+  <!-- Tooltip char label on hover -->
+  <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none z-20 whitespace-nowrap">
+    {char}
   </div>
 </div>
