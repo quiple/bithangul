@@ -23,7 +23,7 @@
 
   let isDrawing = false;
   let drawMode = 1; // 1 = draw, 0 = erase
-  let containerEl: HTMLDivElement;
+  let containerEl: HTMLDivElement = $state(undefined!);
 
   // 포인터 좌표 → 그리드 셀 (r, c) 변환
   function getCellFromPointer(e: PointerEvent): { r: number; c: number } | null {
