@@ -39,7 +39,7 @@
               class="size-5 rounded"
               onclick={(e) => {e.stopPropagation(); onDelete(comp.id)}}
             >
-              <Trash class="size-3.5 stroke-red-500" />
+              <Trash class="size-3.5" />
             </Button>
           </div>
         </Button>
