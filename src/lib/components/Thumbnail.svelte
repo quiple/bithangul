@@ -39,4 +39,4 @@
   });
 </script>
 
-<canvas bind:this={canvas} width={size} height={size} class="block bg-background border {className}"></canvas>
+<canvas bind:this={canvas} width={size} height={size} class="block bg-background {className}"></canvas>
