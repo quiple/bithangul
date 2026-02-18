@@ -33,7 +33,8 @@
     }
   }
 
-  $: if (canvas && index >= 0) draw();
+  // data와 index 모두 의존성에 포함 → 생성 완료 시 즉시 재렌더링
+  $: canvas && index >= 0 && data !== undefined && draw();
   onMount(draw);
 </script>
 

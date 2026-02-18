@@ -18,6 +18,9 @@
   let containerHeight = 600;
   let container: HTMLDivElement;
 
+  let dataVersion = 0;
+  $: if (generatedData !== null) dataVersion++;  // 생성 완료마다 버전 증가
+
   // 가상 스크롤: 보이는 행만 렌더링
   $: startRow = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 2);
   $: visibleRowCount = Math.ceil(containerHeight / ROW_HEIGHT) + 4;
@@ -46,7 +49,7 @@
   >
     <!-- 전체 높이를 잡아주는 spacer -->
     <div style="height: {TOTAL_ROWS * ROW_HEIGHT}px; position: relative;">
-      {#each visibleRows as rowIdx (rowIdx)}
+      {#each visibleRows as rowIdx (`${rowIdx}-${dataVersion}`)}
         {@const firstIdx = rowIdx * COLS}
         <div
           style="position: absolute; top: {rowIdx * ROW_HEIGHT}px; left: 0; right: 0; height: {ROW_HEIGHT}px;"
