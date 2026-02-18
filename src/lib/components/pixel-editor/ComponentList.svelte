@@ -41,7 +41,7 @@
                   <!-- 편집 버튼 + 삭제 버튼을 나란히 배치 -->
                   <div class="relative group/item">
                     <Button
-                      class="inline-flex items-center justify-center rounded border text-sm font-medium transition-colors p-0 overflow-hidden
+                      class="inline-flex items-center justify-center rounded border transition-colors p-0 overflow-hidden
                         {selectedId === comp.id
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-background hover:border-primary/60 hover:bg-muted'}"
@@ -89,7 +89,7 @@
                 {#each variations as comp (comp.id)}
                   <div class="relative group/item">
                     <Button
-                      class="inline-flex items-center justify-center rounded border text-sm font-medium transition-colors p-0 overflow-hidden
+                      class="inline-flex items-center justify-center rounded border transition-colors p-0 overflow-hidden
                         {selectedId === comp.id
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border bg-background hover:border-primary/60 hover:bg-muted'}"
@@ -137,7 +137,7 @@
                   {#each variations as comp (comp.id)}
                     <div class="relative group/item">
                       <Button
-                        class="inline-flex items-center justify-center rounded border text-sm font-medium transition-colors p-0 overflow-hidden
+                        class="inline-flex items-center justify-center rounded border transition-colors p-0 overflow-hidden
                           {selectedId === comp.id
                           ? 'border-primary bg-primary text-primary-foreground'
                           : 'border-border bg-background hover:border-primary/60 hover:bg-muted'}"
