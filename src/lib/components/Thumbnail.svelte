@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  let { bitmap, size = 32 }: { bitmap?: number[][]; size?: number } = $props();
+  let { bitmap, size = 32, class: className = '' }: { bitmap?: number[][]; size?: number; class?: string } = $props();
 
   let canvas: HTMLCanvasElement = $state(undefined!);
 
@@ -39,4 +39,4 @@
   });
 </script>
 
-<canvas bind:this={canvas} width={size} height={size} class="block bg-background border"></canvas>
+<canvas bind:this={canvas} width={size} height={size} class="block bg-background border {className}"></canvas>

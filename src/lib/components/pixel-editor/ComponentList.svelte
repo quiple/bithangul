@@ -29,15 +29,13 @@
       {#each variations as comp (comp.id)}
         <div class="relative group/item">
           <Button
-            class="inline-flex items-center justify-center rounded border transition-colors p-0 overflow-hidden
-              {selectedId === comp.id
-              ? 'border-primary bg-primary text-primary-foreground'
-              : 'border-border bg-background hover:opacity-60'}"
+            variant="outline"
+            class="rounded p-0 overflow-hidden group"
             style="width: 2rem; height: 2rem;"
             onclick={() => onSelect(comp.id)}
             title="컴포넌트 편집"
           >
-            <Thumbnail bitmap={comp.bitmap} size={32} />
+            <Thumbnail bitmap={comp.bitmap} size={32} class="group-hover/item:opacity-60" />
           </Button>
           <Button
             variant="destructive"
