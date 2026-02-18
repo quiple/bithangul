@@ -19,7 +19,7 @@ class ProjectState {
       targets: {
         chosung: [],
         jungsung: [],
-        jongsung: [],
+        jongsung: [0],
       },
     }
     this.project.components.push(newComponent)
