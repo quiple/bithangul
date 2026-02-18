@@ -49,13 +49,12 @@
         </div>
       {/each}
       <Button
-        variant="outline"
-        class="rounded"
+        class="rounded bg-ring"
         style="width: 34px; height: 34px;"
         onclick={() => onAdd(type, i)}
         title="컴포넌트 추가"
       >
-        <Plus class="size-3.5" />
+        <Plus class="size-4" />
       </Button>
     </div>
   </div>
