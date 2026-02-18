@@ -7,6 +7,7 @@
   import Preview from '$lib/components/Preview.svelte'
   import { Button } from '$lib/components/ui/button'
   import * as ButtonGroup from "$lib/components/ui/button-group/index.js"
+  import { Spinner } from "$lib/components/ui/spinner/index.js";
   import {
     Download,
     Upload,
@@ -101,7 +102,9 @@
       <ButtonGroup.Root>
         <ButtonGroup.Root>
           <Button size="sm" onclick={handleGenerate} disabled={isGenerating}>
-            <Play class={isGenerating ? 'animate-spin' : ''} />
+            {#if isGenerating} <Spinner />
+            {:else} <Play />
+            {/if}
             {isGenerating ? '생성 중…' : '한글 음절 생성'}
           </Button>
         </ButtonGroup.Root>
