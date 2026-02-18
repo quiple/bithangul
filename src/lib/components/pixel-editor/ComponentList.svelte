@@ -30,12 +30,12 @@
         <div class="relative group/item">
           <Button
             variant="outline"
-            class="rounded p-0 overflow-hidden group"
+            class="rounded p-0 overflow-hidden"
             style="width: 2rem; height: 2rem;"
             onclick={() => onSelect(comp.id)}
             title="컴포넌트 편집"
           >
-            <Thumbnail bitmap={comp.bitmap} size={32} class="group-hover/item:opacity-60" />
+            <Thumbnail bitmap={comp.bitmap} size={32} class="transition group-hover/item:brightness-95" />
           </Button>
           <Button
             variant="destructive"
