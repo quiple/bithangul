@@ -27,7 +27,7 @@
     <span class="w-7 text-center text-base font-medium shrink-0 select-none">{char}</span>
     <div class="flex flex-wrap gap-1 flex-1 min-w-0">
       {#each variations as comp (comp.id)}
-        <div class="relative group/item">
+        <div class="relative group h-8">
           <Button
             variant="outline"
             class="rounded p-0 overflow-hidden"
@@ -35,12 +35,12 @@
             onclick={() => onSelect(comp.id)}
             title="컴포넌트 편집"
           >
-            <Thumbnail bitmap={comp.bitmap} size={32} class="transition group-hover/item:brightness-95" />
+            <Thumbnail bitmap={comp.bitmap} size={32} class="transition group-hover:brightness-95" />
           </Button>
           <Button
             variant="destructive"
             size="icon-sm"
-            class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
+            class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow"
             onclick={() => onDelete(comp.id)}
             title="컴포넌트 삭제"
           >
@@ -78,33 +78,27 @@
       <!-- 초성 섹션 -->
       <section>
         {@render sectionHeader('초성')}
-        <div class="space-y-0.5">
-          {#each CHOSUNG as char, i}
-            {@render jamoRow('chosung', char, i)}
-          {/each}
-        </div>
+        {#each CHOSUNG as char, i}
+          {@render jamoRow('chosung', char, i)}
+        {/each}
       </section>
 
       <!-- 중성 섹션 -->
       <section>
         {@render sectionHeader('중성')}
-        <div class="space-y-0.5">
-          {#each JUNGSUNG as char, i}
-            {@render jamoRow('jungsung', char, i)}
-          {/each}
-        </div>
+        {#each JUNGSUNG as char, i}
+          {@render jamoRow('jungsung', char, i)}
+        {/each}
       </section>
 
       <!-- 종성 섹션 (인덱스 0 = 받침 없음 제외) -->
       <section>
         {@render sectionHeader('종성')}
-        <div class="space-y-0.5">
-          {#each JONGSUNG as char, i}
-            {#if i !== 0}
-              {@render jamoRow('jongsung', char, i)}
-            {/if}
-          {/each}
-        </div>
+        {#each JONGSUNG as char, i}
+          {#if i !== 0}
+            {@render jamoRow('jongsung', char, i)}
+          {/if}
+        {/each}
       </section>
     </div>
   </div>
