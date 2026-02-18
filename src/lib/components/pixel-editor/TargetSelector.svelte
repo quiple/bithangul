@@ -29,11 +29,27 @@
   ) {
     const list = targets[type]
     const newTargets = { ...targets }
+    let newList: number[] = []
+
     if (list.includes(index)) {
-      newTargets[type] = list.filter((i) => i !== index)
+      newList = list.filter((i) => i !== index)
     } else {
-      newTargets[type] = [...list, index].sort((a, b) => a - b)
+      newList = [...list, index]
     }
+
+    if (type === "jongsung") {
+      // 종성일 경우 0을 제외한 나머지 항목들을 확인
+      const nonZero = newList.filter((i) => i !== 0)
+      if (nonZero.length === 0) {
+        // 아무것도 선택되지 않으면 0 (없음) 자동 선택
+        newList = [0]
+      } else {
+        // 다른 항목이 선택되면 0 (없음) 제거
+        newList = nonZero
+      }
+    }
+
+    newTargets[type] = newList.sort((a, b) => a - b)
     onUpdate(newTargets)
   }
 
@@ -43,13 +59,17 @@
     else if (type === "jungsung")
       newTargets.jungsung = JUNGSUNG.map((_, i) => i)
     else if (type === "jongsung")
-      newTargets.jongsung = JONGSUNG.map((_, i) => i)
+      newTargets.jongsung = JONGSUNG.map((_, i) => i).filter((i) => i !== 0)
     onUpdate(newTargets)
   }
 
   function clearAll(type: "chosung" | "jungsung" | "jongsung") {
     const newTargets = { ...targets }
-    newTargets[type] = []
+    if (type === "jongsung") {
+      newTargets[type] = [0]
+    } else {
+      newTargets[type] = []
+    }
     onUpdate(newTargets)
   }
 </script>
@@ -108,11 +128,19 @@
         {/each}
       {:else if activeTab === "jongsung"}
         {#each JONGSUNG as char, i}
-          <Toggle variant="outline" class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" id={`jong-${i}`} pressed={targets.jongsung.includes(i)} onPressedChange={() => toggleIndex("jongsung", i)}>
-            {#if char === ''}<span class="text-sm">(없음)</span>
-            {:else}{char}
-            {/if}
-          </Toggle>
+          {#if i !== 0}
+            <Toggle
+              variant="outline"
+              class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              id={`jong-${i}`}
+              pressed={targets.jongsung.includes(i)}
+              onPressedChange={() => toggleIndex("jongsung", i)}
+            >
+              {#if char === ""}<span class="text-sm">(없음)</span>
+              {:else}{char}
+              {/if}
+            </Toggle>
+          {/if}
         {/each}
       {/if}
     </div>
