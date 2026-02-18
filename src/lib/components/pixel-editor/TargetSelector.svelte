@@ -100,9 +100,16 @@
 
   function selectAll(type: 'chosung' | 'jungsung' | 'jongsung') {
     const newTargets = { ...targets };
-    if (type === 'chosung') newTargets.chosung = CHOSUNG.map((_, i) => i);
-    else if (type === 'jungsung') newTargets.jungsung = JUNGSUNG.map((_, i) => i);
-    else if (type === 'jongsung') newTargets.jongsung = JONGSUNG.map((_, i) => i).filter((i) => i !== 0);
+    // 고정 자모 탭이면 typeIndex 하나만 유지 (다른 항목은 모두 비활성화 상태이므로)
+    if (type === componentType) {
+      newTargets[type] = [typeIndex];
+    } else if (type === 'chosung') {
+      newTargets.chosung = CHOSUNG.map((_, i) => i);
+    } else if (type === 'jungsung') {
+      newTargets.jungsung = JUNGSUNG.map((_, i) => i);
+    } else if (type === 'jongsung') {
+      newTargets.jongsung = JONGSUNG.map((_, i) => i).filter((i) => i !== 0);
+    }
     onUpdate(newTargets);
   }
 
