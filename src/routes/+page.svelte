@@ -133,25 +133,28 @@
           </Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
-          <Button
-            variant="outline"
-            size="sm"
-            onclick={handleExportBDF}
-            disabled={!generatedData || isExportingBDF || isExportingHEX}
-          >
-            {#if isExportingBDF}<Spinner />{:else}<FileType />{/if}
-            BDF로 내보내기
-          </Button>
+          <Tooltip.Provider delayDuration={0}>
+            <Tooltip.Root>
+              <Tooltip.Trigger class={buttonVariants({ variant: "outline", size: "sm" })} onclick={handleExportBDF}
+              disabled={!generatedData || isExportingBDF || isExportingHEX}>
+                {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
+                {isExportingBDF ? '내보내는 중…' : 'BDF로 내보내기'}
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <p>폰트를 비트맵 배포 형식(BDF)으로 내보냅니다.</p>
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
 
-          <Tooltip.Provider>
+          <Tooltip.Provider delayDuration={0}>
             <Tooltip.Root>
               <Tooltip.Trigger class={buttonVariants({ variant: "outline", size: "sm" })} onclick={handleExportHEX}
               disabled={!generatedData || isExportingBDF || isExportingHEX}>
                 {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
-                {isGenerating ? '내보내는 중…' : 'HEX로 내보내기'}
+                {isExportingHEX ? '내보내는 중…' : 'HEX로 내보내기'}
               </Tooltip.Trigger>
-              <Tooltip.Content>
-                <p>Add to library</p>
+              <Tooltip.Content align="end">
+                <p>폰트를 GNU Unifont HEX 형식으로 내보냅니다.</p>
               </Tooltip.Content>
             </Tooltip.Root>
           </Tooltip.Provider>
