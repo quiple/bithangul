@@ -45,8 +45,8 @@
         </Button>
       {/each}
       {#if components.length === 0}
-        <div class="p-8 text-center text-sm text-muted-foreground">
-          No components. Click "Add" to start.
+        <div class="h-[calc(100vh-.5rem-96px-56px)] flex justify-center items-center text-center text-sm text-muted-foreground col-span-1 @sm:col-span-2 @lg:col-span-3 @xl:col-span-4 @3xl:col-span-5">
+          컴포넌트가 없습니다. ‘추가’ 버튼을 눌러 시작하세요.
         </div>
       {/if}
     </div>
