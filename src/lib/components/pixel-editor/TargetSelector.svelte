@@ -26,28 +26,40 @@
   let activeTab = $state('chosung');
 
   /**
-   * 특정 (chosung, jungsung, jongsung) 조합이 sibling 컴포넌트에서 이미 사용되고 있는지 확인.
-   * 현재 탭에 따라 해당 인덱스를 변경했을 때 충돌 여부를 판단.
+   * 특정 항목이 고정(fixed)인지 확인.
+   * - 이 컴포넌트의 자모 타입 탭에서 typeIndex 항목은 항상 고정 선택
+   */
+  function isFixed(tabType: 'chosung' | 'jungsung' | 'jongsung', index: number): boolean {
+    return tabType === componentType && index === typeIndex;
+  }
+
+  /**
+   * 특정 항목이 비활성화되어야 하는지 확인.
+   * 두 가지 경우에 비활성화:
+   * 1. 이 컴포넌트의 자모 타입 탭에서 typeIndex가 아닌 모든 항목 (다른 초성/중성/종성 선택 불가)
+   * 2. sibling 컴포넌트와 충돌하는 조합
    */
   function isDisabled(tabType: 'chosung' | 'jungsung' | 'jongsung', index: number): boolean {
+    // 고정 항목은 별도 처리 (disabled로 표시하되 selected 상태 유지)
+    if (isFixed(tabType, index)) return false;
+
+    // 같은 자모 타입 탭에서는 typeIndex 외 모든 항목 비활성화
+    // (예: 초성 ㄱ 컴포넌트라면 초성 탭에서 ㄱ 외 다른 초성 선택 불가)
+    if (tabType === componentType && index !== typeIndex) return true;
+
     // 이미 현재 컴포넌트에서 선택된 항목은 비활성화하지 않음 (토글 해제 가능해야 함)
     if (targets[tabType].includes(index)) return false;
 
-    // 현재 탭 타입의 인덱스를 index로 가정했을 때,
-    // 현재 선택된 다른 두 타입의 인덱스들과 조합하여 sibling과 충돌하는지 확인
+    // sibling 컴포넌트와 충돌하는 조합 확인
     for (const sibling of siblingComponents) {
-      // sibling의 각 타입 선택 목록
       const sibCho = sibling.targets.chosung;
       const sibJung = sibling.targets.jungsung;
       const sibJong = sibling.targets.jongsung;
 
-      // 현재 컴포넌트에서 tabType을 index로 바꿨을 때의 선택 목록
       const myCho = tabType === 'chosung' ? [index] : targets.chosung;
       const myJung = tabType === 'jungsung' ? [index] : targets.jungsung;
       const myJong = tabType === 'jongsung' ? [index] : targets.jongsung;
 
-      // 두 컴포넌트의 선택 범위가 겹치는지 확인
-      // 초성: myCho와 sibCho가 교집합이 있는지
       const choCross = myCho.length === 0 || sibCho.length === 0 ? false : myCho.some((c) => sibCho.includes(c));
       const jungCross = myJung.length === 0 || sibJung.length === 0 ? false : myJung.some((j) => sibJung.includes(j));
       const jongCross = myJong.length === 0 || sibJong.length === 0 ? false : myJong.some((j) => sibJong.includes(j));
@@ -110,11 +122,6 @@
       }
     }
     onUpdate(newTargets);
-  }
-
-  // 자모 고정 여부: 해당 탭이 이 컴포넌트의 자모 타입이면 typeIndex는 항상 선택 고정
-  function isFixed(type: 'chosung' | 'jungsung' | 'jongsung', index: number): boolean {
-    return type === componentType && index === typeIndex;
   }
 </script>
 
