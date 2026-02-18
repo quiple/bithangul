@@ -34,7 +34,7 @@
         <div class="space-y-0.5">
           {#each CHOSUNG as char, i}
             {@const variations = getVariations('chosung', i)}
-            <div class="flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-muted/50">
+            <div class="flex gap-1 rounded-md px-1 py-0.5 hover:bg-muted/50">
               <span class="w-7 text-center text-base font-medium shrink-0 select-none">{char}</span>
               <div class="flex flex-wrap gap-1 flex-1 min-w-0">
                 {#each variations as comp (comp.id)}
@@ -81,7 +81,7 @@
         <div class="space-y-0.5">
           {#each JUNGSUNG as char, i}
             {@const variations = getVariations('jungsung', i)}
-            <div class="flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-muted/50">
+            <div class="flex gap-1 rounded-md px-1 py-0.5 hover:bg-muted/50">
               <span class="w-7 text-center text-base font-medium shrink-0 select-none">{char}</span>
               <div class="flex flex-wrap gap-1 flex-1 min-w-0">
                 {#each variations as comp (comp.id)}
@@ -127,7 +127,7 @@
           {#each JONGSUNG as char, i}
             {#if i !== 0}
               {@const variations = getVariations('jongsung', i)}
-              <div class="flex items-center gap-1 rounded-md px-1 py-0.5 hover:bg-muted/50">
+              <div class="flex gap-1 rounded-md px-1 py-0.5 hover:bg-muted/50">
                 <span class="w-7 text-center text-base font-medium shrink-0 select-none">{char}</span>
                 <div class="flex flex-wrap gap-1 flex-1 min-w-0">
                   {#each variations as comp (comp.id)}
