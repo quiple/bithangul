@@ -1,31 +1,35 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button"
-  import GridCanvas from "./GridCanvas.svelte"
-  import TargetSelector from "./TargetSelector.svelte"
-  import type { PixelComponent } from "$lib/types"
-  import * as ButtonGroup from "$lib/components/ui/button-group/index.js"
-  import {ChevronLeft} from '@lucide/svelte'
+  import { Button } from '$lib/components/ui/button';
+  import GridCanvas from './GridCanvas.svelte';
+  import TargetSelector from './TargetSelector.svelte';
+  import type { PixelComponent } from '$lib/types';
+  import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
+  import { ChevronLeft } from '@lucide/svelte';
+  import { untrack } from 'svelte';
 
   interface Props {
-    component: PixelComponent
-    onSave: (c: PixelComponent) => void
-    onCancel: () => void
+    component: PixelComponent;
+    /** 같은 자모 타입+인덱스를 공유하는 다른 바리에이션 컴포넌트들 (현재 컴포넌트 제외) */
+    siblingComponents: PixelComponent[];
+    onSave: (c: PixelComponent) => void;
+    onCancel: () => void;
   }
 
-  let { component, onSave, onCancel }: Props = $props()
+  let { component, siblingComponents, onSave, onCancel }: Props = $props();
 
-  let localComponent = $state<PixelComponent>(
-    structuredClone($state.snapshot(component))
-  )
+  // untrack으로 감싸서 초기값만 읽고 반응성 추적 방지 (Svelte 5 lint 해결)
+  let localComponent = $state<PixelComponent>(untrack(() => structuredClone($state.snapshot(component))));
 
   $effect(() => {
-    if (component.id !== localComponent.id) {
-      localComponent = structuredClone($state.snapshot(component))
+    // component prop이 바뀌면 로컬 상태 동기화
+    const snap = $state.snapshot(component);
+    if (snap.id !== localComponent.id) {
+      localComponent = structuredClone(snap);
     }
-  })
+  });
 
   function handleSave() {
-    onSave($state.snapshot(localComponent))
+    onSave($state.snapshot(localComponent));
   }
 </script>
 
@@ -47,14 +51,14 @@
 
   <div class="flex flex-col">
     <div class="flex justify-center mb-4">
-      <GridCanvas
-        bitmap={localComponent.bitmap}
-        onUpdate={(bm) => (localComponent.bitmap = bm)}
-      />
+      <GridCanvas bitmap={localComponent.bitmap} onUpdate={(bm) => (localComponent.bitmap = bm)} />
     </div>
 
     <TargetSelector
       targets={localComponent.targets}
+      componentType={localComponent.type}
+      typeIndex={localComponent.typeIndex}
+      {siblingComponents}
       onUpdate={(t) => (localComponent.targets = t)}
     />
   </div>

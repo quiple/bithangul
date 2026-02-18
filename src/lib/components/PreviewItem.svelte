@@ -4,7 +4,7 @@
   export let index: number;
   export let data: ArrayBuffer | null;
 
-  $: char = String.fromCharCode(0xAC00 + index);
+  $: char = String.fromCharCode(0xac00 + index);
 
   let canvas: HTMLCanvasElement;
 
@@ -40,7 +40,8 @@
 
 <div
   class="max-w-full"
-  title="{char} (U+{(0xAC00 + index).toString(16).toUpperCase()})"
+  title="{char} (U+{(0xac00 + index).toString(16).toUpperCase()})"
 >
-  <canvas bind:this={canvas} width={32} height={32} class="block max-w-full"></canvas>
+  <canvas bind:this={canvas} width={32} height={32} class="block max-w-full"
+  ></canvas>
 </div>
