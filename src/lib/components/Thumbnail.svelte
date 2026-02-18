@@ -4,32 +4,29 @@
   let { bitmap, size = 32 }: { bitmap?: number[][]; size?: number } = $props();
 
   let canvas: HTMLCanvasElement = $state(undefined!);
-  // bitmap의 직렬화된 값을 추적해서 실제로 변경됐을 때만 다시 그림
-  let lastBitmapKey = '';
+
+  // 비트맵 내용 기반 키: 실제로 픽셀이 바뀔 때만 문자열 생성
+  let bitmapKey = $derived(bitmap ? bitmap.map((r) => r.join('')).join('|') : '');
 
   $effect(() => {
-    if (!bitmap) return;
-    // 얕은 비교 대신 내용 기반 키로 불필요한 재렌더 방지
-    const key = bitmap.map((r) => r.join('')).join('|');
-    if (key === lastBitmapKey) return;
-    lastBitmapKey = key;
-    draw(bitmap);
+    // bitmapKey를 구독 → 키가 바뀔 때만 실행
+    void bitmapKey;
+    if (bitmap && canvas) draw(bitmap);
   });
 
   function draw(bmp: number[][]) {
-    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const w = canvas.width;
     const h = canvas.height;
-    const cw = w / 16;
-    const ch = h / 16;
+    const cw = w / bmp[0].length;
+    const ch = h / bmp.length;
 
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = 'black';
 
-    for (let r = 0; r < 16; r++) {
-      for (let c = 0; c < 16; c++) {
+    for (let r = 0; r < bmp.length; r++) {
+      for (let c = 0; c < bmp[0].length; c++) {
         if (bmp[r][c]) {
           ctx.fillRect(c * cw, r * ch, cw, ch);
         }
