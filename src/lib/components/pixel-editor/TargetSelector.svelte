@@ -11,6 +11,7 @@
   import { ScrollArea } from "$lib/components/ui/scroll-area"
   import { CHOSUNG, JUNGSUNG, JONGSUNG } from "$lib/hangul"
   import * as ButtonGroup from "$lib/components/ui/button-group/index.js"
+  import { Toggle } from "$lib/components/ui/toggle/index.js"
 
   let {
     targets,
@@ -53,9 +54,9 @@
   }
 </script>
 
-<div class="h-full flex flex-col space-y-4">
+<div class="@container h-full flex flex-col space-y-4">
   <div class="flex justify-between items-center mb-2 pl-2 gap-2">
-    <h3 class="font-medium truncate">Apply To</h3>
+    <h3 class="font-medium truncate">적용 범위</h3>
     <ButtonGroup.Root>
       <ButtonGroup.Root>
         <Button
@@ -63,7 +64,7 @@
           size="sm"
           onclick={() => selectAll(activeTab as any)}
         >
-          All
+          전체 선택
         </Button>
       </ButtonGroup.Root>
       <ButtonGroup.Root>
@@ -72,7 +73,7 @@
           size="sm"
           onclick={() => clearAll(activeTab as any)}
         >
-          None
+          선택 해제
         </Button>
       </ButtonGroup.Root>
     </ButtonGroup.Root>
@@ -82,61 +83,36 @@
   <Tabs bind:value={activeTab} class="flex-1 flex flex-col min-h-0">
     <TabsList class="grid w-full grid-cols-3">
       <TabsTrigger value="chosung">
-        Choseong ({targets.chosung.length})
+        초성 ({targets.chosung.length})
       </TabsTrigger>
       <TabsTrigger value="jungsung">
-        Jungseong ({targets.jungsung.length})
+        중성 ({targets.jungsung.length})
       </TabsTrigger>
       <TabsTrigger value="jongsung">
-        Jongseong ({targets.jongsung.length})
+        종성 ({targets.jongsung.length})
       </TabsTrigger>
     </TabsList>
 
-    <div class="flex-1 overflow-hidden mt-2 border rounded-md relative">
-      <ScrollArea class="h-full w-full absolute inset-0">
-        <div class="p-4 grid grid-cols-3 gap-2">
-          {#if activeTab === "chosung"}
-            {#each CHOSUNG as char, i}
-              <div class="flex items-center space-x-2">
-                <Checkbox
-                  id={`cho-${i}`}
-                  checked={targets.chosung.includes(i)}
-                  onCheckedChange={() => toggleIndex("chosung", i)}
-                />
-                <Label for={`cho-${i}`} class="cursor-pointer font-mono"
-                  >{char}</Label
-                >
-              </div>
-            {/each}
-          {:else if activeTab === "jungsung"}
-            {#each JUNGSUNG as char, i}
-              <div class="flex items-center space-x-2">
-                <Checkbox
-                  id={`jung-${i}`}
-                  checked={targets.jungsung.includes(i)}
-                  onCheckedChange={() => toggleIndex("jungsung", i)}
-                />
-                <Label for={`jung-${i}`} class="cursor-pointer font-mono"
-                  >{char}</Label
-                >
-              </div>
-            {/each}
-          {:else if activeTab === "jongsung"}
-            {#each JONGSUNG as char, i}
-              <div class="flex items-center space-x-2">
-                <Checkbox
-                  id={`jong-${i}`}
-                  checked={targets.jongsung.includes(i)}
-                  onCheckedChange={() => toggleIndex("jongsung", i)}
-                />
-                <Label for={`jong-${i}`} class="cursor-pointer font-mono"
-                  >{char || "(None)"}</Label
-                >
-              </div>
-            {/each}
-          {/if}
-        </div>
-      </ScrollArea>
+    <div class="grid grid-cols-4 @sm:grid-cols-6 @md:grid-cols-8 gap-2">
+      {#if activeTab === "chosung"}
+        {#each CHOSUNG as char, i}
+          <Toggle variant="outline" class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" id={`cho-${i}`} pressed={targets.chosung.includes(i)} onPressedChange={() => toggleIndex("chosung", i)}>
+            {char}
+          </Toggle>
+        {/each}
+      {:else if activeTab === "jungsung"}
+        {#each JUNGSUNG as char, i}
+          <Toggle variant="outline" class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" id={`jung-${i}`} pressed={targets.jungsung.includes(i)} onPressedChange={() => toggleIndex("jungsung", i)}>
+            {char}
+          </Toggle>
+        {/each}
+      {:else if activeTab === "jongsung"}
+        {#each JONGSUNG as char, i}
+          <Toggle variant="outline" class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" id={`jong-${i}`} pressed={targets.jongsung.includes(i)} onPressedChange={() => toggleIndex("jongsung", i)}>
+            {char}
+          </Toggle>
+        {/each}
+      {/if}
     </div>
   </Tabs>
 </div>

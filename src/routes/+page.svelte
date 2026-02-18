@@ -89,10 +89,10 @@
       <h1 class="font-bold text-lg truncate">BitHangul</h1>
       <ButtonGroup.Root>
         <Button variant="outline" size="sm" onclick={handleLoadProject}>
-          <Upload /> Load
+          <Upload /> 로드
         </Button>
         <Button variant="outline" size="sm" onclick={handleSaveProject}>
-          <Download /> Save
+          <Download /> 저장
         </Button>
       </ButtonGroup.Root>
     </div>
@@ -102,15 +102,15 @@
         <ButtonGroup.Root>
           <Button size="sm" onclick={handleGenerate} disabled={isGenerating}>
             <Play class={isGenerating ? 'animate-spin' : ''} />
-            {isGenerating ? 'Generating...' : 'Generate'}
+            {isGenerating ? '생성 중…' : '생성'}
           </Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
           <Button variant="outline" size="sm" onclick={handleExportBDF} disabled={Boolean(!generatedData)}>
-            <FileType /> Export to BDF
+            <FileType /> BDF로 내보내기
           </Button>
           <Button variant="outline" size="sm" onclick={handleExportHEX} disabled={Boolean(!generatedData)}>
-            <FileCode /> Export to HEX
+            <FileCode /> HEX로 내보내기
           </Button>
         </ButtonGroup.Root>
       </ButtonGroup.Root>

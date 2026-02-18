@@ -30,13 +30,13 @@
 
 <div class="flex flex-col p-2">
   <div class="flex justify-between items-center mb-4 pl-2 gap-2">
-    <h2 class="font-bold truncate">Edit Component</h2>
+    <h2 class="font-bold truncate">컴포넌트 편집</h2>
     <ButtonGroup.Root>
       <ButtonGroup.Root>
-        <Button size="sm" variant="ghost" onclick={onCancel}>Cancel</Button>
+        <Button size="sm" variant="ghost" onclick={onCancel}>취소</Button>
       </ButtonGroup.Root>
       <ButtonGroup.Root>
-        <Button size="sm" onclick={handleSave}>Save</Button>
+        <Button size="sm" onclick={handleSave}>저장</Button>
       </ButtonGroup.Root>
     </ButtonGroup.Root>
   </div>

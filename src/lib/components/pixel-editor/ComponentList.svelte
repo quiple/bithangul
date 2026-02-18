@@ -14,23 +14,21 @@
 
 <div class="flex flex-col @container">
   <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2">
-    <h2 class="font-bold truncate">Components</h2>
+    <h2 class="font-bold truncate">컴포넌트</h2>
     <Button size="sm" variant="outline" onclick={onAdd}>
-      <Plus /> Add
+      <Plus /> 추가
     </Button>
   </div>
 
   <ScrollArea class="h-[calc(100vh-48px-56px)]">
-    <div class="grid grid-col-1 @sm:grid-col-2 @md:grid-col-3 gap-1.5 px-2 pb-2">
+    <div class="grid grid-cols-1 @sm:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4 @3xl:grid-cols-5 gap-1.5 px-2 pb-2">
       {#each components as comp (comp.id)}
         <Button variant="outline" class="p-2 gap-3 h-auto text-left bg-background group relative" onclick={() => onSelect(comp.id)}>
           <Thumbnail bitmap={comp.bitmap} size={32} />
           <div class="flex-1 min-w-0">
             <div class="text-xs font-medium font-mono truncate">{comp.id.slice(0, 8)}</div>
             <div class="text-xs truncate text-muted-foreground mt-1">
-              <span class={comp.targets.chosung.length > 0 ? "text-primary font-bold" : ""}>Cho: {comp.targets.chosung.length}</span>,
-              <span class={comp.targets.jungsung.length > 0 ? "text-primary font-bold" : ""}>Jung: {comp.targets.jungsung.length}</span>,
-              <span class={comp.targets.jongsung.length > 0 ? "text-primary font-bold" : ""}>Jong: {comp.targets.jongsung.length}</span>
+              초: {comp.targets.chosung.length}, 중: {comp.targets.jungsung.length}, 종: {comp.targets.jongsung.length}
             </div>
           </div>
 
