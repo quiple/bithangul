@@ -104,11 +104,11 @@
     if (type === componentType) {
       newTargets[type] = [typeIndex];
     } else if (type === 'chosung') {
-      newTargets.chosung = CHOSUNG.map((_, i) => i);
+      newTargets.chosung = CHOSUNG.map((_, i) => i).filter((i) => !isDisabled('chosung', i));
     } else if (type === 'jungsung') {
-      newTargets.jungsung = JUNGSUNG.map((_, i) => i);
+      newTargets.jungsung = JUNGSUNG.map((_, i) => i).filter((i) => !isDisabled('jungsung', i));
     } else if (type === 'jongsung') {
-      newTargets.jongsung = JONGSUNG.map((_, i) => i).filter((i) => i !== 0);
+      newTargets.jongsung = JONGSUNG.map((_, i) => i).filter((i) => i !== 0 && !isDisabled('jongsung', i));
     }
     onUpdate(newTargets);
   }
