@@ -9,42 +9,44 @@
     onUpdate: (newBitmap: number[][]) => void;
   } = $props();
 
+  // 내부 작업용 bitmap: 드래그 중에는 이 상태만 변이하고 onUpdate는 호출하지 않음
+  // → 부모의 prop 교체가 일어나지 않아 리렌더/블링킹 없음
+  let localBitmap = $state<number[][]>(bitmap.map((row) => [...row]));
+
+  // 부모의 bitmap prop이 외부에서 바뀔 때만 동기화 (편집기 전환 등)
+  $effect(() => {
+    // bitmap이 새 배열 참조로 바뀌면 로컬 상태 갱신
+    localBitmap = bitmap.map((row) => [...row]);
+  });
+
   let isDrawing = false;
   let drawMode = 1; // 1 = draw, 0 = erase
 
   function handlePointerDown(r: number, c: number, e: PointerEvent) {
-    e.preventDefault(); // Prevent scroll on touch
-    // Determine draw mode based on current pixel
-    const currentVal = bitmap[r][c];
-    drawMode = currentVal === 1 ? 0 : 1;
+    e.preventDefault();
+    drawMode = localBitmap[r][c] === 1 ? 0 : 1;
     isDrawing = true;
-    updatePixel(r, c, drawMode);
-    // Use setPointerCapture to track drag even outside the element
-    // ;(e.target as Element).setPointerCapture(e.pointerId)
+    paintPixel(r, c);
   }
 
-  function handlePointerEnter(r: number, c: number, e: PointerEvent) {
+  function handlePointerEnter(r: number, c: number) {
     if (isDrawing) {
-      updatePixel(r, c, drawMode);
+      paintPixel(r, c);
     }
   }
 
-  function handlePointerUp(e: PointerEvent) {
-    isDrawing = false;
-    // Release capture if needed, though usually automatic on up
-    if (
-      e.target instanceof Element &&
-      e.target.hasPointerCapture(e.pointerId)
-    ) {
-      e.target.releasePointerCapture(e.pointerId);
+  function handlePointerUp() {
+    if (isDrawing) {
+      isDrawing = false;
+      // 드래그가 끝난 시점에 한 번만 부모에 알림
+      onUpdate(localBitmap.map((row) => [...row]));
     }
   }
 
-  function updatePixel(r: number, c: number, val: number) {
-    if (bitmap[r][c] !== val) {
-      const newBitmap = bitmap.map((row) => [...row]);
-      newBitmap[r][c] = val;
-      onUpdate(newBitmap);
+  function paintPixel(r: number, c: number) {
+    if (localBitmap[r][c] !== drawMode) {
+      // 배열 교체 없이 직접 변이 → Svelte가 세밀하게 해당 셀만 업데이트
+      localBitmap[r][c] = drawMode;
     }
   }
 </script>
@@ -57,15 +59,12 @@
   role="grid"
   tabindex="-1"
 >
-  {#each bitmap as row, r}
+  {#each localBitmap as row, r}
     {#each row as cell, c}
       <button
-        class={cn(
-          'size-full cursor-crosshair transition-colors duration-100 block',
-          cell ? 'bg-primary' : 'bg-background hover:bg-muted',
-        )}
+        class={cn('size-full cursor-crosshair block', cell ? 'bg-primary' : 'bg-background hover:bg-muted')}
         onpointerdown={(e) => handlePointerDown(r, c, e)}
-        onpointerenter={(e) => handlePointerEnter(r, c, e)}
+        onpointerenter={() => handlePointerEnter(r, c)}
         aria-label={`Pixel ${r},${c}`}
         type="button"
       ></button>
