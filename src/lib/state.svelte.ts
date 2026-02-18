@@ -1,4 +1,4 @@
-import type {FontProject, PixelComponent} from '$lib/types'
+import type { FontProject, PixelComponent } from '$lib/types'
 
 class ProjectState {
   project = $state<FontProject>({
@@ -9,9 +9,10 @@ class ProjectState {
   selectedComponentId = $state<string | null>(null)
 
   constructor() {
-    // Initialize with one component if empty?
+    // 컴포넌트가 없으면 하나 추가하되, 목록 화면이 먼저 보이도록 선택 해제
     if (this.project.components.length === 0) {
       this.addComponent()
+      this.selectedComponentId = null
     }
   }
 
@@ -55,7 +56,8 @@ class ProjectState {
 
   loadProject(data: FontProject) {
     this.project = data
-    this.selectedComponentId = data.components[0]?.id ?? null
+    // 로드 후 목록 화면이 먼저 보이도록 선택 해제
+    this.selectedComponentId = null
   }
 }
 
