@@ -10,6 +10,21 @@
   export let onSelect: (id: string) => void
   export let onAdd: () => void
   export let onDelete: (id: string) => void
+
+  // 초성 → 중성 → 종성 첫 번째 인덱스 기준 정렬 (비어있으면 Infinity → 맨 뒤)
+  $: sortedComponents = [...components].sort((a, b) => {
+    const aCho  = a.targets.chosung[0]  ?? Infinity
+    const bCho  = b.targets.chosung[0]  ?? Infinity
+    if (aCho !== bCho) return aCho - bCho
+
+    const aJung = a.targets.jungsung[0] ?? Infinity
+    const bJung = b.targets.jungsung[0] ?? Infinity
+    if (aJung !== bJung) return aJung - bJung
+
+    const aJong = a.targets.jongsung[0] ?? Infinity
+    const bJong = b.targets.jongsung[0] ?? Infinity
+    return aJong - bJong
+  })
 </script>
 
 <div class="flex flex-col @container">
@@ -22,7 +37,7 @@
 
   <ScrollArea class="h-[calc(100vh-48px-56px)]">
     <div class="grid grid-cols-1 @sm:grid-cols-2 @lg:grid-cols-3 @xl:grid-cols-4 @3xl:grid-cols-5 gap-1.5 px-2 pb-2">
-      {#each components as comp (comp.id)}
+      {#each sortedComponents as comp (comp.id)}
         <Button variant="outline" class="p-2 gap-3 h-auto text-left bg-background group relative" onclick={() => onSelect(comp.id)}>
           <Thumbnail bitmap={comp.bitmap} size={32} />
           <div class="flex-1 min-w-0">
@@ -44,7 +59,7 @@
           </div>
         </Button>
       {/each}
-      {#if components.length === 0}
+      {#if sortedComponents.length === 0}
         <div class="h-[calc(100vh-.5rem-96px-56px)] flex justify-center items-center text-center text-sm text-muted-foreground col-span-1 @sm:col-span-2 @lg:col-span-3 @xl:col-span-4 @3xl:col-span-5">
           컴포넌트가 없습니다. ‘추가’ 버튼을 눌러 시작하세요.
         </div>
