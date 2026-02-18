@@ -41,7 +41,6 @@
   }
 
   function updatePixel(r: number, c: number, val: number) {
-    // console.log('updatePixel', r, c, val, bitmap[r][c])
     if (bitmap[r][c] !== val) {
       const newBitmap = bitmap.map((row) => [...row])
       newBitmap[r][c] = val
