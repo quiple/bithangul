@@ -39,8 +39,8 @@
 </script>
 
 <div
-  class="group relative flex flex-col items-center justify-center size-full cursor-default p-0"
+  class="max-w-full"
   title="{char} (U+{(0xAC00 + index).toString(16).toUpperCase()})"
 >
-  <canvas bind:this={canvas} width={32} height={32} class="block"></canvas>
+  <canvas bind:this={canvas} width={32} height={32} class="block max-w-full"></canvas>
 </div>
