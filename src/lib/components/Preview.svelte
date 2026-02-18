@@ -10,9 +10,9 @@
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS); // 399
 
   // 셀 크기: 32px 캔버스 + 1px 테두리 = 33px
-  const CELL_SIZE = 33;
+  const CELL_SIZE = 33
   // 행 높이: 셀 높이 + 행 레이블 영역
-  const ROW_HEIGHT = 36; // 33px cell + 3px gap
+  const ROW_HEIGHT = CELL_SIZE
 
   let scrollTop = 0;
   let containerHeight = 600;
@@ -36,11 +36,11 @@
   }
 </script>
 
-<div class="h-full flex flex-col bg-background border-l">
+<div class="h-full flex flex-col bg-background">
   <!-- 헤더: 종성 번호 (0~27) -->
   <div class="shrink-0 flex border-b bg-muted/50 sticky top-0 z-10">
     <!-- 행 레이블 공간 -->
-    <div class="w-10 shrink-0 border-r"></div>
+    <div class="w-6 shrink-0 border-r"></div>
     {#each { length: COLS } as _, j}
       <div class="flex-1 text-center text-[9px] text-muted-foreground py-1 border-r last:border-r-0 font-mono">
         {j}
@@ -64,7 +64,7 @@
           class="flex items-center"
         >
           <!-- 행 레이블: 초성+중성 대표 글자 -->
-          <div class="w-10 shrink-0 flex items-center justify-center h-full border-r bg-muted/30 text-xs font-bold text-muted-foreground">
+          <div class="w-6 shrink-0 flex items-center justify-center h-full border-r bg-muted/30 text-xs font-bold text-muted-foreground">
             {rowLabel(rowIdx)}
           </div>
 
@@ -73,7 +73,7 @@
             {@const itemIdx = firstIdx + colIdx}
             {#if itemIdx < TOTAL_ITEMS}
               <div
-                class="flex-1 h-full flex items-center justify-center border-r last:border-r-0 border-b bg-white hover:bg-blue-50 hover:border-blue-300 transition-colors relative overflow-visible"
+                class="flex-1 h-full flex items-center justify-center border-r last:border-r-0 border-b bg-white transition-colors relative overflow-visible"
               >
                 <PreviewItem index={itemIdx} data={generatedData} />
               </div>
