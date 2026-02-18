@@ -82,7 +82,15 @@
 >
   {#each localBitmap as row, r}
     {#each row as cell, c}
-      <div class="size-full {cell ? 'bg-primary' : 'bg-background'}" role="gridcell" aria-label="Pixel {r},{c}"></div>
+      {@const thickR = (r + 1) % 8 === 0 && r + 1 < ROWS}
+      {@const thickC = (c + 1) % 8 === 0 && c + 1 < COLS}
+      <div
+        class="size-full {cell ? 'bg-primary' : 'bg-background'} {thickC ? 'border-r-2 border-r-border' : ''} {thickR
+          ? 'border-b-2 border-b-border'
+          : ''}"
+        role="gridcell"
+        aria-label="Pixel {r},{c}"
+      ></div>
     {/each}
   {/each}
 </div>
