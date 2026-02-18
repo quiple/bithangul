@@ -38,12 +38,8 @@
 </script>
 
 <div
-  class="group relative flex flex-col items-center justify-center w-full h-full cursor-default"
+  class="group relative flex flex-col items-center justify-center size-full cursor-default p-0"
   title="{char} (U+{(0xAC00 + index).toString(16).toUpperCase()})"
 >
   <canvas bind:this={canvas} width={32} height={32} class="block"></canvas>
-  <!-- Tooltip char label on hover -->
-  <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none z-20 whitespace-nowrap">
-    {char}
-  </div>
 </div>
