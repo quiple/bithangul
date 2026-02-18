@@ -24,13 +24,13 @@
 {#snippet jamoRow(type: ComponentType, char: string, i: number)}
   {@const variations = getVariations(type, i)}
   <div class="flex gap-1 rounded-md p-1 hover:bg-muted">
-    <span class="w-7 text-center text-base font-medium shrink-0 select-none leading-[2rem]">{char}</span>
-    <div class="flex flex-wrap gap-1 flex-1 min-w-0">
+    <span class="w-7 text-center text-base font-semibold shrink-0 select-none leading-8">{char}</span>
+    <div class="flex flex-wrap gap-x-1 gap-y-1.5 flex-1 min-w-0">
       {#each variations as comp (comp.id)}
         <div class="relative group h-8">
           <Button
             variant="outline"
-            class="rounded p-0 overflow-hidden"
+            class="rounded p-0 box-content overflow-hidden"
             style="width: 2rem; height: 2rem;"
             onclick={() => onSelect(comp.id)}
             title="컴포넌트 편집"
@@ -51,7 +51,7 @@
       <Button
         variant="outline"
         class="rounded"
-        style="width: 2rem; height: 2rem;"
+        style="width: 34px; height: 34px;"
         onclick={() => onAdd(type, i)}
         title="컴포넌트 추가"
       >
