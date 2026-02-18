@@ -5,12 +5,13 @@
   import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte';
   import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte';
   import Preview from '$lib/components/Preview.svelte';
-  import { Button } from '$lib/components/ui/button';
+  import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
   import { Spinner } from '$lib/components/ui/spinner/index.js';
   import { Download, Upload, Play, FileType, FileCode } from '@lucide/svelte';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
   import { exportBDF, exportHEX, downloadText } from '$lib/export';
+  import * as Tooltip from "$lib/components/ui/tooltip/index.js";
 
   let worker: Worker;
   let generatedData = $state<ArrayBuffer | null>(null);
@@ -141,15 +142,19 @@
             {#if isExportingBDF}<Spinner />{:else}<FileType />{/if}
             BDF로 내보내기
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onclick={handleExportHEX}
-            disabled={!generatedData || isExportingBDF || isExportingHEX}
-          >
-            {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
-            HEX로 내보내기
-          </Button>
+
+          <Tooltip.Provider>
+            <Tooltip.Root>
+              <Tooltip.Trigger class={buttonVariants({ variant: "outline", size: "sm" })} onclick={handleExportHEX}
+              disabled={!generatedData || isExportingBDF || isExportingHEX}>
+                {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
+                {isGenerating ? '내보내는 중…' : 'HEX로 내보내기'}
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <p>Add to library</p>
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
         </ButtonGroup.Root>
       </ButtonGroup.Root>
     </div>
