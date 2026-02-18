@@ -155,7 +155,7 @@
                     class="inline-flex items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                     style="width: 2rem; height: 2rem;"
                     onclick={() => onAdd('jongsung', i)}
-                    title="바리에이션 추가"
+                    title="컴포넌트 추가"
                   >
                     <Plus class="size-3.5" />
                   </button>
