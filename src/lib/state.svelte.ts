@@ -8,13 +8,7 @@ class ProjectState {
 
   selectedComponentId = $state<string | null>(null)
 
-  constructor() {
-    // 컴포넌트가 없으면 하나 추가하되, 목록 화면이 먼저 보이도록 선택 해제
-    if (this.project.components.length === 0) {
-      this.addComponent()
-      this.selectedComponentId = null
-    }
-  }
+  constructor() { }
 
   addComponent() {
     const newComponent: PixelComponent = {
