@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { ScrollArea } from '$lib/components/ui/scroll-area';
   import type { PixelComponent, ComponentType } from '$lib/types';
   import Thumbnail from '$lib/components/Thumbnail.svelte';
   import { Trash, Plus } from '@lucide/svelte';
@@ -76,7 +75,7 @@
     <h2 class="font-bold truncate">컴포넌트</h2>
   </div>
 
-  <ScrollArea class="h-[calc(100vh-48px-56px)]">
+  <div class="overflow-y-auto overscroll-contain flex-1 min-h-0">
     <div class="px-2 py-2 space-y-4">
       <!-- 초성 섹션 -->
       <section>
@@ -110,5 +109,5 @@
         </div>
       </section>
     </div>
-  </ScrollArea>
+  </div>
 </div>
