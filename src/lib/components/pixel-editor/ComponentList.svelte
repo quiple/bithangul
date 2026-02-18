@@ -12,7 +12,7 @@
   export let onDelete: (id: string) => void
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col @container">
   <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2">
     <h2 class="font-bold truncate">Components</h2>
     <Button size="sm" variant="outline" onclick={onAdd}>
@@ -21,7 +21,7 @@
   </div>
 
   <ScrollArea class="h-[calc(100vh-48px-56px)]">
-    <div class="@container grid grid-col-2 gap-1.5 px-2 pb-2">
+    <div class="grid grid-col-1 @sm:grid-col-2 @md:grid-col-3 gap-1.5 px-2 pb-2">
       {#each components as comp (comp.id)}
         <Button variant="outline" class="p-2 gap-3 h-auto text-left bg-background group relative" onclick={() => onSelect(comp.id)}>
           <Thumbnail bitmap={comp.bitmap} size={32} />
