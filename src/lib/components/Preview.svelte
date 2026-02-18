@@ -37,17 +37,6 @@
 </script>
 
 <div class="h-full flex flex-col bg-background">
-  <!-- 헤더: 종성 번호 (0~27) -->
-  <div class="shrink-0 flex border-b bg-muted/50 sticky top-0 z-10">
-    <!-- 행 레이블 공간 -->
-    <div class="w-6 shrink-0 border-r"></div>
-    {#each { length: COLS } as _, j}
-      <div class="flex-1 text-center text-[9px] text-muted-foreground py-1 border-r last:border-r-0 font-mono">
-        {j}
-      </div>
-    {/each}
-  </div>
-
   <!-- 스크롤 영역 -->
   <div
     class="flex-1 overflow-y-auto overflow-x-auto relative"
