@@ -42,7 +42,7 @@
 <div class="h-full flex flex-col bg-background">
   <!-- 스크롤 영역 -->
   <div
-    class="flex-1 overflow-y-auto overflow-x-auto relative"
+    class="flex-1 overflow-y-auto overflow-x-hidden relative"
     bind:this={container}
     bind:clientHeight={containerHeight}
     on:scroll={onScroll}
@@ -65,12 +65,12 @@
             {@const itemIdx = firstIdx + colIdx}
             {#if itemIdx < TOTAL_ITEMS}
               <div
-                class="flex-1 h-full flex items-center justify-center border-r last:border-r-0 border-b bg-white transition-colors relative overflow-visible"
+                class="flex-1 min-w-0 h-full flex items-center justify-center border-r last:border-r-0 border-b bg-white transition-colors relative overflow-hidden"
               >
                 <PreviewItem index={itemIdx} data={generatedData} />
               </div>
             {:else}
-              <div class="flex-1 h-full border-r last:border-r-0 bg-muted/20"></div>
+              <div class="flex-1 min-w-0 h-full border-r last:border-r-0 bg-muted/20"></div>
             {/if}
           {/each}
         </div>
