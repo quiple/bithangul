@@ -133,7 +133,7 @@
           </Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
-          <Tooltip.Provider delayDuration={0}>
+          <Tooltip.Provider>
             <Tooltip.Root>
               <Tooltip.Trigger class={buttonVariants({ variant: "outline", size: "sm" })} onclick={handleExportBDF}
               disabled={!generatedData || isExportingBDF || isExportingHEX}>
@@ -146,7 +146,7 @@
             </Tooltip.Root>
           </Tooltip.Provider>
 
-          <Tooltip.Provider delayDuration={0}>
+          <Tooltip.Provider>
             <Tooltip.Root>
               <Tooltip.Trigger class={buttonVariants({ variant: "outline", size: "sm" })} onclick={handleExportHEX}
               disabled={!generatedData || isExportingBDF || isExportingHEX}>
