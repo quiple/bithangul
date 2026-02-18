@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { cn } from '$lib/utils';
 
   let {
@@ -11,7 +12,7 @@
 
   // 내부 작업용 bitmap: 드래그 중에는 이 상태만 변이하고 onUpdate는 호출하지 않음
   // → 부모의 prop 교체가 일어나지 않아 리렌더/블링킹 없음
-  let localBitmap = $state<number[][]>(bitmap.map((row) => [...row]));
+  let localBitmap = $state<number[][]>(untrack(() => bitmap.map((row) => [...row])));
 
   // 부모의 bitmap prop이 외부에서 바뀔 때만 동기화 (편집기 전환 등)
   $effect(() => {
