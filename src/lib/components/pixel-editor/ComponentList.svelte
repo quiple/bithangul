@@ -43,7 +43,7 @@
           <div class="flex-1 min-w-0">
             <div class="text-xs font-medium font-mono truncate">{comp.id.slice(0, 8)}</div>
             <div class="text-xs truncate text-muted-foreground mt-1">
-              초: {comp.targets.chosung.length}, 중: {comp.targets.jungsung.length}, 종: {comp.targets.jongsung.length}
+              초: {comp.targets.chosung.length}, 중: {comp.targets.jungsung.length}, 종: {comp.targets.jongsung.filter((i) => i !== 0).length}
             </div>
           </div>
 
