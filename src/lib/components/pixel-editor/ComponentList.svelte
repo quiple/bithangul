@@ -44,10 +44,10 @@
                       class="inline-flex items-center justify-center rounded border transition-colors p-0 overflow-hidden
                         {selectedId === comp.id
                         ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-background hover:border-primary/60 hover:bg-muted'}"
+                        : 'border-border bg-background hover:opacity-60'}"
                       style="width: 2rem; height: 2rem;"
                       onclick={() => onSelect(comp.id)}
-                      title="편집"
+                      title="컴포넌트 편집"
                     >
                       <Thumbnail bitmap={comp.bitmap} size={32} />
                     </Button>
@@ -57,7 +57,7 @@
                       size="icon-sm"
                       class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
                       onclick={() => onDelete(comp.id)}
-                      title="삭제"
+                      title="컴포넌트 삭제"
                     >
                       <Trash class="size-2.5" />
                     </Button>
@@ -93,10 +93,10 @@
                       class="inline-flex items-center justify-center rounded border transition-colors p-0 overflow-hidden
                         {selectedId === comp.id
                         ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-background hover:border-primary/60 hover:bg-muted'}"
+                        : 'border-border bg-background hover:opacity-60'}"
                       style="width: 2rem; height: 2rem;"
                       onclick={() => onSelect(comp.id)}
-                      title="편집"
+                      title="컴포넌트 편집"
                     >
                       <Thumbnail bitmap={comp.bitmap} size={32} />
                     </Button>
@@ -105,7 +105,7 @@
                       size="icon-sm"
                       class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
                       onclick={() => onDelete(comp.id)}
-                      title="삭제"
+                      title="컴포넌트 삭제"
                     >
                       <Trash class="size-2.5" />
                     </Button>
@@ -142,10 +142,10 @@
                         class="inline-flex items-center justify-center rounded border transition-colors p-0 overflow-hidden
                           {selectedId === comp.id
                           ? 'border-primary bg-primary text-primary-foreground'
-                          : 'border-border bg-background hover:border-primary/60 hover:bg-muted'}"
+                          : 'border-border bg-background hover:opacity-60'}"
                         style="width: 2rem; height: 2rem;"
                         onclick={() => onSelect(comp.id)}
-                        title="편집"
+                        title="컴포넌트 편집"
                       >
                         <Thumbnail bitmap={comp.bitmap} size={32} />
                       </Button>
@@ -154,7 +154,7 @@
                         size="icon-sm"
                         class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
                         onclick={() => onDelete(comp.id)}
-                        title="삭제"
+                        title="컴포넌트 삭제"
                       >
                         <Trash class="size-2.5" />
                       </Button>
