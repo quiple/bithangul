@@ -23,8 +23,8 @@
 <!-- 자모 행 하나를 렌더링하는 snippet -->
 {#snippet jamoRow(type: ComponentType, char: string, i: number)}
   {@const variations = getVariations(type, i)}
-  <div class="flex gap-1 rounded-md px-1 py-0.5 hover:bg-muted/50">
-    <span class="w-7 text-center text-base font-medium shrink-0 select-none">{char}</span>
+  <div class="flex gap-1 rounded-md p-1 hover:bg-muted">
+    <span class="w-7 text-center text-base font-medium shrink-0 select-none leading-[2rem]">{char}</span>
     <div class="flex flex-wrap gap-1 flex-1 min-w-0">
       {#each variations as comp (comp.id)}
         <div class="relative group h-8">
