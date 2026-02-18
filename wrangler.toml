@@ -2,6 +2,8 @@ name = "bithangul"
 compatibility_date = "2026-02-18"
 compatibility_flags = ["nodejs_compat"]
 main = ".svelte-kit/cloudflare/_worker.js"
+workers_dev = false
+preview_urls = false
 
 [assets]
 directory = ".svelte-kit/cloudflare"
