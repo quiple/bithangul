@@ -4,6 +4,7 @@
   import TargetSelector from "./TargetSelector.svelte"
   import type { PixelComponent } from "$lib/types"
   import * as ButtonGroup from "$lib/components/ui/button-group/index.js"
+  import {ChevronLeft} from '@lucide/svelte'
 
   interface Props {
     component: PixelComponent
@@ -29,8 +30,11 @@
 </script>
 
 <div class="flex flex-col p-2">
-  <div class="flex justify-between items-center mb-4 pl-2 gap-2">
-    <h2 class="font-bold truncate">컴포넌트 편집</h2>
+  <div class="flex justify-between items-center mb-4 gap-2">
+    <div class="flex items-center">
+      <Button variant="ghost" size="icon-sm" onclick={onCancel}><ChevronLeft class="size-6" /></Button>
+      <h2 class="font-bold truncate">컴포넌트 편집</h2>
+    </div>
     <ButtonGroup.Root>
       <ButtonGroup.Root>
         <Button size="sm" variant="ghost" onclick={onCancel}>취소</Button>
