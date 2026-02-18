@@ -109,7 +109,9 @@
       {:else if activeTab === "jongsung"}
         {#each JONGSUNG as char, i}
           <Toggle variant="outline" class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" id={`jong-${i}`} pressed={targets.jongsung.includes(i)} onPressedChange={() => toggleIndex("jongsung", i)}>
-            {char}
+            {#if char === ''}<span class="text-sm">(없음)</span>
+            {:else}{char}
+            {/if}
           </Toggle>
         {/each}
       {/if}
