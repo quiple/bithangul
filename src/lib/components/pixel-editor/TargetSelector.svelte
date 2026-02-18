@@ -109,7 +109,7 @@
         중성 ({targets.jungsung.length})
       </TabsTrigger>
       <TabsTrigger value="jongsung">
-        종성 ({targets.jongsung.length})
+        종성 ({targets.jongsung.filter((i) => i !== 0).length})
       </TabsTrigger>
     </TabsList>
 
