@@ -21,7 +21,7 @@
   </div>
 
   <ScrollArea class="h-[calc(100vh-48px-56px)]">
-    <div class="flex flex-col gap-1.5 px-2 pb-2">
+    <div class="@container grid grid-col-2 gap-1.5 px-2 pb-2">
       {#each components as comp (comp.id)}
         <Button variant="outline" class="p-2 gap-3 h-auto text-left bg-background group relative" onclick={() => onSelect(comp.id)}>
           <Thumbnail bitmap={comp.bitmap} size={32} />
@@ -36,12 +36,12 @@
 
           <div class="absolute right-1 top-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
-              variant="destructive"
+              variant="outline"
               size="icon"
               class="size-5 rounded"
               onclick={(e) => {e.stopPropagation(); onDelete(comp.id)}}
             >
-              <Trash class="size-3.5" />
+              <Trash class="size-3.5 stroke-red-500" />
             </Button>
           </div>
         </Button>
