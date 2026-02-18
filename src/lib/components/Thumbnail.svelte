@@ -3,7 +3,7 @@
 
   let { bitmap, size = 32 }: { bitmap?: number[][]; size?: number } = $props();
 
-  let canvas: HTMLCanvasElement;
+  let canvas: HTMLCanvasElement = $state(undefined!);
   // bitmap의 직렬화된 값을 추적해서 실제로 변경됐을 때만 다시 그림
   let lastBitmapKey = '';
 
