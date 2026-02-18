@@ -158,9 +158,7 @@
           {@const disabled = isDisabled('chosung', i)}
           <Toggle
             variant="outline"
-            class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground
-              {fixed ? 'ring-2 ring-primary ring-offset-1 cursor-not-allowed' : ''}
-              {!fixed && disabled ? 'opacity-25 cursor-not-allowed' : ''}"
+            class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             id={`cho-${i}`}
             pressed={targets.chosung.includes(i)}
             disabled={fixed || disabled}
@@ -175,9 +173,7 @@
           {@const disabled = isDisabled('jungsung', i)}
           <Toggle
             variant="outline"
-            class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground
-              {fixed ? 'ring-2 ring-primary ring-offset-1 cursor-not-allowed' : ''}
-              {!fixed && disabled ? 'opacity-25 cursor-not-allowed' : ''}"
+            class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             id={`jung-${i}`}
             pressed={targets.jungsung.includes(i)}
             disabled={fixed || disabled}
@@ -193,9 +189,7 @@
             {@const disabled = isDisabled('jongsung', i)}
             <Toggle
               variant="outline"
-              class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground
-                {fixed ? 'ring-2 ring-primary ring-offset-1 cursor-not-allowed' : ''}
-                {!fixed && disabled ? 'opacity-25 cursor-not-allowed' : ''}"
+              class="text-xl transition bg-background data-[state=on]:font-semibold data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
               id={`jong-${i}`}
               pressed={targets.jongsung.includes(i)}
               disabled={fixed || disabled}
