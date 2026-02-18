@@ -1,4 +1,4 @@
-import type { FontProject, PixelComponent } from '$lib/types'
+import type {FontProject, PixelComponent} from '$lib/types'
 
 class ProjectState {
   project = $state<FontProject>({
@@ -8,7 +8,7 @@ class ProjectState {
 
   selectedComponentId = $state<string | null>(null)
 
-  constructor() { }
+  constructor() {}
 
   addComponent() {
     const newComponent: PixelComponent = {
