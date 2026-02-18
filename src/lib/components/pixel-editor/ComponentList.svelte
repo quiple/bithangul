@@ -64,7 +64,8 @@
                   </div>
                 {/each}
                 <Button
-                  class="inline-flex items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  variant="outline"
+                  class="rounded"
                   style="width: 2rem; height: 2rem;"
                   onclick={() => onAdd('chosung', i)}
                   title="컴포넌트 추가"
@@ -111,7 +112,8 @@
                   </div>
                 {/each}
                 <Button
-                  class="inline-flex items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  variant="outline"
+                  class="rounded"
                   style="width: 2rem; height: 2rem;"
                   onclick={() => onAdd('jungsung', i)}
                   title="컴포넌트 추가"
@@ -159,7 +161,8 @@
                     </div>
                   {/each}
                   <Button
-                    class="inline-flex items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    variant="outline"
+                    class="rounded"
                     style="width: 2rem; height: 2rem;"
                     onclick={() => onAdd('jongsung', i)}
                     title="컴포넌트 추가"
