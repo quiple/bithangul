@@ -123,7 +123,7 @@
   <!-- Main Content -->
   <Resizable.PaneGroup direction="horizontal" class="flex-1 flex overflow-hidden">
     <!-- Left Panel -->
-    <Resizable.Pane defaultSize={4} class="flex flex-col bg-sidebar">
+    <Resizable.Pane defaultSize={35} minSize={20} maxSize={60} class="flex flex-col bg-sidebar">
       {#if projectState.selectedComponentId && projectState.selectedComponent}
         <!-- Edit Mode -->
         <ComponentEditor
@@ -149,7 +149,7 @@
     </Resizable.Pane>
     <Resizable.Handle class="bg-card border-x w-2" />
     <!-- Right Panel (Preview) -->
-    <Resizable.Pane defaultSize={8}>
+    <Resizable.Pane defaultSize={65} minSize={40} class="overflow-hidden">
       <Preview generatedData={generatedData} />
     </Resizable.Pane>
   </Resizable.PaneGroup>
