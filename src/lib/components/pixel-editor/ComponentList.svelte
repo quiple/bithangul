@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Button } from '$lib/components/ui/button';
   import { ScrollArea } from '$lib/components/ui/scroll-area';
   import type { PixelComponent, ComponentType } from '$lib/types';
   import Thumbnail from '$lib/components/Thumbnail.svelte';
@@ -39,7 +40,7 @@
                 {#each variations as comp (comp.id)}
                   <!-- 편집 버튼 + 삭제 버튼을 나란히 배치 -->
                   <div class="relative group/item">
-                    <button
+                    <Button
                       class="inline-flex items-center justify-center rounded border text-sm font-medium transition-colors p-0 overflow-hidden
                         {selectedId === comp.id
                         ? 'border-primary bg-primary text-primary-foreground'
@@ -49,25 +50,27 @@
                       title="편집"
                     >
                       <Thumbnail bitmap={comp.bitmap} size={32} />
-                    </button>
+                    </Button>
                     <!-- 삭제 버튼: 버튼 오른쪽 상단에 작게 표시 -->
-                    <button
-                      class="absolute -top-1.5 -right-1.5 size-4 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
+                    <Button
+                      variant="destructive"
+                      size="icon-sm"
+                      class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
                       onclick={() => onDelete(comp.id)}
                       title="삭제"
                     >
                       <Trash class="size-2.5" />
-                    </button>
+                    </Button>
                   </div>
                 {/each}
-                <button
+                <Button
                   class="inline-flex items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                   style="width: 2rem; height: 2rem;"
                   onclick={() => onAdd('chosung', i)}
-                  title="바리에이션 추가"
+                  title="컴포넌트 추가"
                 >
                   <Plus class="size-3.5" />
-                </button>
+                </Button>
               </div>
             </div>
           {/each}
@@ -85,7 +88,7 @@
               <div class="flex flex-wrap gap-1 flex-1 min-w-0">
                 {#each variations as comp (comp.id)}
                   <div class="relative group/item">
-                    <button
+                    <Button
                       class="inline-flex items-center justify-center rounded border text-sm font-medium transition-colors p-0 overflow-hidden
                         {selectedId === comp.id
                         ? 'border-primary bg-primary text-primary-foreground'
@@ -95,24 +98,26 @@
                       title="편집"
                     >
                       <Thumbnail bitmap={comp.bitmap} size={32} />
-                    </button>
-                    <button
-                      class="absolute -top-1.5 -right-1.5 size-4 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon-sm"
+                      class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
                       onclick={() => onDelete(comp.id)}
                       title="삭제"
                     >
                       <Trash class="size-2.5" />
-                    </button>
+                    </Button>
                   </div>
                 {/each}
-                <button
+                <Button
                   class="inline-flex items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                   style="width: 2rem; height: 2rem;"
                   onclick={() => onAdd('jungsung', i)}
-                  title="바리에이션 추가"
+                  title="컴포넌트 추가"
                 >
                   <Plus class="size-3.5" />
-                </button>
+                </Button>
               </div>
             </div>
           {/each}
@@ -131,7 +136,7 @@
                 <div class="flex flex-wrap gap-1 flex-1 min-w-0">
                   {#each variations as comp (comp.id)}
                     <div class="relative group/item">
-                      <button
+                      <Button
                         class="inline-flex items-center justify-center rounded border text-sm font-medium transition-colors p-0 overflow-hidden
                           {selectedId === comp.id
                           ? 'border-primary bg-primary text-primary-foreground'
@@ -141,24 +146,26 @@
                         title="편집"
                       >
                         <Thumbnail bitmap={comp.bitmap} size={32} />
-                      </button>
-                      <button
-                        class="absolute -top-1.5 -right-1.5 size-4 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon-sm"
+                        class="absolute -top-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-10 shadow"
                         onclick={() => onDelete(comp.id)}
                         title="삭제"
                       >
                         <Trash class="size-2.5" />
-                      </button>
+                      </Button>
                     </div>
                   {/each}
-                  <button
+                  <Button
                     class="inline-flex items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                     style="width: 2rem; height: 2rem;"
                     onclick={() => onAdd('jongsung', i)}
                     title="컴포넌트 추가"
                   >
                     <Plus class="size-3.5" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             {/if}
