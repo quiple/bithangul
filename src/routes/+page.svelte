@@ -102,7 +102,7 @@
         <ButtonGroup.Root>
           <Button size="sm" onclick={handleGenerate} disabled={isGenerating}>
             <Play class={isGenerating ? 'animate-spin' : ''} />
-            {isGenerating ? '생성 중…' : '생성'}
+            {isGenerating ? '생성 중…' : '한글 음절 생성'}
           </Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
