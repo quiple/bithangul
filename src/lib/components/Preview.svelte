@@ -1,41 +1,41 @@
 <script lang="ts">
-  import PreviewItem from './PreviewItem.svelte';
+  import PreviewItem from './PreviewItem.svelte'
 
-  export let generatedData: ArrayBuffer | null = null;
+  export let generatedData: ArrayBuffer | null = null
 
   // 11,172자를 28열(종성 수)로 나누면 399행
   // 각 행 = 같은 초성+중성 조합의 28가지 종성 변형
-  const COLS = 28;
-  const TOTAL_ITEMS = 11172;
-  const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS); // 399
+  const COLS = 28
+  const TOTAL_ITEMS = 11172
+  const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS) // 399
 
   // 셀 크기: 32px 캔버스 + 1px 테두리 = 33px
   const CELL_SIZE = 33
   // 행 높이: 셀 높이 + 행 레이블 영역
   const ROW_HEIGHT = CELL_SIZE
 
-  let scrollTop = 0;
-  let containerHeight = 600;
-  let container: HTMLDivElement;
+  let scrollTop = 0
+  let containerHeight = 600
+  let container: HTMLDivElement
 
-  let dataVersion = 0;
-  $: if (generatedData !== null) dataVersion++;  // 생성 완료마다 버전 증가
+  let dataVersion = 0
+  $: if (generatedData !== null) dataVersion++ // 생성 완료마다 버전 증가
 
   // 가상 스크롤: 보이는 행만 렌더링
-  $: startRow = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 2);
-  $: visibleRowCount = Math.ceil(containerHeight / ROW_HEIGHT) + 4;
-  $: endRow = Math.min(TOTAL_ROWS, startRow + visibleRowCount);
-  $: visibleRows = Array.from({ length: endRow - startRow }, (_, i) => startRow + i);
+  $: startRow = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 2)
+  $: visibleRowCount = Math.ceil(containerHeight / ROW_HEIGHT) + 4
+  $: endRow = Math.min(TOTAL_ROWS, startRow + visibleRowCount)
+  $: visibleRows = Array.from({ length: endRow - startRow }, (_, i) => startRow + i)
 
   function onScroll(e: UIEvent) {
-    scrollTop = (e.target as HTMLElement).scrollTop;
+    scrollTop = (e.target as HTMLElement).scrollTop
   }
 
   // 행 인덱스 → 해당 행의 첫 글자 (초성+중성 조합 대표)
   function rowLabel(rowIdx: number): string {
-    const firstItemIdx = rowIdx * COLS;
-    if (firstItemIdx >= TOTAL_ITEMS) return '';
-    return String.fromCharCode(0xAC00 + firstItemIdx);
+    const firstItemIdx = rowIdx * COLS
+    if (firstItemIdx >= TOTAL_ITEMS) return ''
+    return String.fromCharCode(0xAC00 + firstItemIdx)
   }
 </script>
 
