@@ -1,74 +1,88 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte'
-  import PreviewItem from './PreviewItem.svelte'
-  import { Settings } from '@lucide/svelte'
+  import PreviewItem from './PreviewItem.svelte';
 
-  export let generatedData: ArrayBuffer | null = null
+  export let generatedData: ArrayBuffer | null = null;
 
-  const ITEM_HEIGHT = 41 // Using 41 to account for 1px border if needed, or stick to 40?
-  // PreviewItem has border-b inside h-10? Usually border-b is inside.
-  // Standard Tailwind reset makes border transparent but keep width.
-  // border-b-width is 1px.
-  // If box-sizing: border-box, h-10 is total height.
-  // But border collapse?
-  // With 40px item, border-b creates visual separation.
-  // Let's use 40.
+  // 11,172자를 28열(종성 수)로 나누면 399행
+  // 각 행 = 같은 초성+중성 조합의 28가지 종성 변형
+  const COLS = 28;
+  const TOTAL_ITEMS = 11172;
+  const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS); // 399
 
-  const REAL_ITEM_HEIGHT = 40
-  const TOTAL_ITEMS = 11172
+  // 셀 크기: 32px 캔버스 + 1px 테두리 = 33px
+  const CELL_SIZE = 33;
+  // 행 높이: 셀 높이 + 행 레이블 영역
+  const ROW_HEIGHT = 36; // 33px cell + 3px gap
 
-  let scrollTop = 0
-  let container: HTMLDivElement
-  let containerHeight = 800
+  let scrollTop = 0;
+  let containerHeight = 600;
+  let container: HTMLDivElement;
 
-  // Virtualization logic
-  $: startIndex = Math.max(0, Math.floor(scrollTop / REAL_ITEM_HEIGHT))
-  $: visibleCount = Math.ceil(containerHeight / REAL_ITEM_HEIGHT) + 4 // Buffer increased
-  $: endIndex = Math.min(TOTAL_ITEMS, startIndex + visibleCount)
+  // 가상 스크롤: 보이는 행만 렌더링
+  $: startRow = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 2);
+  $: visibleRowCount = Math.ceil(containerHeight / ROW_HEIGHT) + 4;
+  $: endRow = Math.min(TOTAL_ROWS, startRow + visibleRowCount);
+  $: visibleRows = Array.from({ length: endRow - startRow }, (_, i) => startRow + i);
 
-  $: visibleItems = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i)
+  function onScroll(e: UIEvent) {
+    scrollTop = (e.target as HTMLElement).scrollTop;
+  }
 
-  function handleScroll(e: UIEvent) {
-    if (e.target instanceof HTMLElement) {
-      scrollTop = e.target.scrollTop
-    }
+  // 행 인덱스 → 해당 행의 첫 글자 (초성+중성 조합 대표)
+  function rowLabel(rowIdx: number): string {
+    const firstItemIdx = rowIdx * COLS;
+    if (firstItemIdx >= TOTAL_ITEMS) return '';
+    return String.fromCharCode(0xAC00 + firstItemIdx);
   }
 </script>
 
-<div
-  class={['h-full relative bg-background', generatedData ? 'overflow-y-auto' : 'overflow-hidden']}
-  on:scroll={handleScroll}
-  bind:this={container}
-  bind:clientHeight={containerHeight}
->
-  <div style="height: {TOTAL_ITEMS * REAL_ITEM_HEIGHT}px; width: 100%; position: relative;">
-    {#each visibleItems as idx (idx)}
-      <div
-        style="position: absolute; top: {idx * REAL_ITEM_HEIGHT}px; left: 0; right: 0; height: {REAL_ITEM_HEIGHT}px;"
-        class="w-full"
-      >
-        <PreviewItem index={idx} data={generatedData} />
+<div class="h-full flex flex-col bg-background border-l">
+  <!-- 헤더: 종성 번호 (0~27) -->
+  <div class="shrink-0 flex border-b bg-muted/50 sticky top-0 z-10">
+    <!-- 행 레이블 공간 -->
+    <div class="w-10 shrink-0 border-r"></div>
+    {#each { length: COLS } as _, j}
+      <div class="flex-1 text-center text-[9px] text-muted-foreground py-1 border-r last:border-r-0 font-mono">
+        {j}
       </div>
     {/each}
   </div>
 
-  {#if !generatedData}
-    <div class="fixed inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm pointer-events-none z-10" style="position: absolute;">
-       <div class="text-center p-6 bg-card rounded shadow border">
-         <Settings class="w-12 h-12 mx-auto mb-4 text-muted-foreground animate-spin-slow" />
-         <p class="text-lg font-medium">Preview not ready</p>
-         <p class="text-sm text-muted-foreground">Click "Generate" to see fonts.</p>
-       </div>
-    </div>
-  {/if}
-</div>
+  <!-- 스크롤 영역 -->
+  <div
+    class="flex-1 overflow-y-auto overflow-x-auto relative"
+    bind:this={container}
+    bind:clientHeight={containerHeight}
+    on:scroll={onScroll}
+  >
+    <!-- 전체 높이를 잡아주는 spacer -->
+    <div style="height: {TOTAL_ROWS * ROW_HEIGHT}px; position: relative;">
+      {#each visibleRows as rowIdx (rowIdx)}
+        {@const firstIdx = rowIdx * COLS}
+        <div
+          style="position: absolute; top: {rowIdx * ROW_HEIGHT}px; left: 0; right: 0; height: {ROW_HEIGHT}px;"
+          class="flex items-center"
+        >
+          <!-- 행 레이블: 초성+중성 대표 글자 -->
+          <div class="w-10 shrink-0 flex items-center justify-center h-full border-r bg-muted/30 text-xs font-bold text-muted-foreground">
+            {rowLabel(rowIdx)}
+          </div>
 
-<style>
-  :global(.animate-spin-slow) {
-    animation: spin 3s linear infinite
-  }
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-</style>
+          <!-- 28개 셀 -->
+          {#each { length: COLS } as _, colIdx}
+            {@const itemIdx = firstIdx + colIdx}
+            {#if itemIdx < TOTAL_ITEMS}
+              <div
+                class="flex-1 h-full flex items-center justify-center border-r last:border-r-0 border-b bg-white hover:bg-blue-50 hover:border-blue-300 transition-colors relative overflow-visible"
+              >
+                <PreviewItem index={itemIdx} data={generatedData} />
+              </div>
+            {:else}
+              <div class="flex-1 h-full border-r last:border-r-0 bg-muted/20"></div>
+            {/if}
+          {/each}
+        </div>
+      {/each}
+    </div>
+  </div>
+</div>
