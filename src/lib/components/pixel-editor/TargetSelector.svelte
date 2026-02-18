@@ -151,7 +151,7 @@
       </TabsTrigger>
     </TabsList>
 
-    <div class="grid grid-cols-4 @sm:grid-cols-6 @md:grid-cols-8 gap-2 mt-2">
+    <div class="grid grid-cols-4 @sm:grid-cols-6 @md:grid-cols-8 gap-2">
       {#if activeTab === 'chosung'}
         {#each CHOSUNG as char, i}
           {@const fixed = isFixed('chosung', i)}
