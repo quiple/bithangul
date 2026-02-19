@@ -36,6 +36,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://bithangul.quiple.dev" />
   <link rel="canonical" href="https://bithangul.quiple.dev" />
+  <meta property="og:locale" content="ko_KR" />
   <link rel="icon" href={favicon} />
 </svelte:head>
 
