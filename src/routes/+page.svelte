@@ -196,11 +196,11 @@
         <!-- List Mode -->
         <ComponentList
           components={projectState.project.components}
-          selectedId={projectState.selectedComponentId}
           onSelect={(id) => projectState.selectComponent(id)}
           onAdd={(type, typeIndex) => projectState.addComponent(type, typeIndex)}
           onDelete={(id) => projectState.deleteComponent(id)}
           onDuplicate={(id) => projectState.duplicateComponent(id)}
+          onCopyRowToAll={(type, typeIndex) => projectState.copyRowToAll(type, typeIndex)}
         />
       {/if}
     </Resizable.Pane>

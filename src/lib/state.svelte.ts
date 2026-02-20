@@ -1,5 +1,7 @@
 import type {FontProject, PixelComponent, ComponentType} from '$lib/types'
 
+import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT} from '$lib/hangul'
+
 class ProjectState {
   project = $state<FontProject>({
     name: 'My Font',
@@ -69,6 +71,40 @@ class ProjectState {
     }
     const index = this.project.components.indexOf(source)
     this.project.components.splice(index + 1, 0, newComponent)
+  }
+
+  copyRowToAll(type: ComponentType, sourceTypeIndex: number) {
+    const sourceComps = this.project.components.filter((c) => c.type === type && c.typeIndex === sourceTypeIndex)
+    if (sourceComps.length === 0) return
+
+    const count = type === 'chosung' ? CHOSUNG_COUNT : type === 'jungsung' ? JUNGSUNG_COUNT : JONGSUNG_COUNT
+    const startIndex = type === 'jongsung' ? 1 : 0
+
+    for (let ti = startIndex; ti < count; ti++) {
+      if (ti === sourceTypeIndex) continue
+
+      // 대상 행의 기존 컴포넌트 제거
+      this.project.components = this.project.components.filter((c) => !(c.type === type && c.typeIndex === ti))
+
+      // 소스 행의 컴포넌트를 복제하여 대상 행에 추가
+      for (const src of sourceComps) {
+        const newTargets = {
+          chosung: [...src.targets.chosung],
+          jungsung: [...src.targets.jungsung],
+          jongsung: [...src.targets.jongsung],
+        }
+        // targets에서 소스 typeIndex를 대상 typeIndex로 교체
+        newTargets[type] = newTargets[type].map((idx) => (idx === sourceTypeIndex ? ti : idx))
+
+        this.project.components.push({
+          id: crypto.randomUUID(),
+          bitmap: src.bitmap.map((row) => [...row]),
+          type,
+          typeIndex: ti,
+          targets: newTargets,
+        })
+      }
+    }
   }
 
   deleteComponent(id: string) {
