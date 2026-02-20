@@ -38,6 +38,7 @@ class ProjectState {
       targets,
     }
     this.project.components.push(newComponent)
+    this.selectedComponentId = newComponent.id
   }
 
   selectComponent(id: string | null) {
