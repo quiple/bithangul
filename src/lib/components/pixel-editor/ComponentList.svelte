@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import type { PixelComponent, ComponentType } from '$lib/types';
   import Thumbnail from '$lib/components/Thumbnail.svelte';
-  import { Trash, Plus } from '@lucide/svelte';
+  import { Trash, Plus, Copy } from '@lucide/svelte';
   import { CHOSUNG, JUNGSUNG, JONGSUNG } from '$lib/hangul';
 
   interface Props {
@@ -11,9 +11,10 @@
     onSelect: (id: string) => void;
     onAdd: (type: ComponentType, typeIndex: number) => void;
     onDelete: (id: string) => void;
+    onDuplicate: (id: string) => void;
   }
 
-  let { components, selectedId, onSelect, onAdd, onDelete }: Props = $props();
+  let { components, selectedId, onSelect, onAdd, onDelete, onDuplicate }: Props = $props();
 
   function getVariations(type: ComponentType, typeIndex: number): PixelComponent[] {
     return components.filter((c) => c.type === type && c.typeIndex === typeIndex);
@@ -45,6 +46,15 @@
             title="컴포넌트 삭제"
           >
             <Trash class="size-2.5" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon-sm"
+            class="absolute -bottom-1.5 -right-1.5 size-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow"
+            onclick={() => onDuplicate(comp.id)}
+            title="컴포넌트 복사"
+          >
+            <Copy class="size-2.5" />
           </Button>
         </div>
       {/each}
