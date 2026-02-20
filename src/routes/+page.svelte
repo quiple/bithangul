@@ -137,7 +137,7 @@
       <ButtonGroup.Root>
         <ButtonGroup.Root>
           <Button variant="outline" size="sm" onclick={handleLoadProject}>
-            <Upload /> 로드...
+            <Upload /> 불러오기...
           </Button>
           <Button variant="outline" size="sm" onclick={handleSaveProject}>
             <Download /> 저장
@@ -145,7 +145,7 @@
         </ButtonGroup.Root>
         <ButtonGroup.Root>
           <Button variant="outline" size="sm" onclick={() => (exampleDialogOpen = true)}>
-            <BookOpen /> 예제 불러오기
+            <BookOpen /> 예제 불러오기...
           </Button>
         </ButtonGroup.Root>
       </ButtonGroup.Root>
