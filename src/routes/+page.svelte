@@ -19,6 +19,9 @@
   let isExportingBDF = $state(false);
   let isExportingHEX = $state(false);
 
+  /** 새로 추가되어 아직 저장되지 않은 컴포넌트 ID */
+  let newlyCreatedId = $state<string | null>(null);
+
   onMount(() => {
     worker = new GeneratorWorker();
     worker.onmessage = (e) => {
@@ -186,9 +189,14 @@
           siblingComponents={siblings}
           onSave={(updated) => {
             projectState.updateComponent(updated.id, updated);
+            newlyCreatedId = null;
             projectState.selectComponent(null);
           }}
           onCancel={() => {
+            if (newlyCreatedId && newlyCreatedId === projectState.selectedComponentId) {
+              projectState.deleteComponent(newlyCreatedId);
+            }
+            newlyCreatedId = null;
             projectState.selectComponent(null);
           }}
         />
@@ -196,8 +204,15 @@
         <!-- List Mode -->
         <ComponentList
           components={projectState.project.components}
-          onSelect={(id) => projectState.selectComponent(id)}
-          onAdd={(type, typeIndex) => projectState.addComponent(type, typeIndex)}
+          onSelect={(id) => {
+            newlyCreatedId = null;
+            projectState.selectComponent(id);
+          }}
+          onAdd={(type, typeIndex) => {
+            const id = projectState.addComponent(type, typeIndex);
+            newlyCreatedId = id;
+            projectState.selectComponent(id);
+          }}
           onDelete={(id) => projectState.deleteComponent(id)}
           onDuplicate={(id) => projectState.duplicateComponent(id)}
           onCopyRowToAll={(type, typeIndex) => projectState.copyRowToAll(type, typeIndex)}
