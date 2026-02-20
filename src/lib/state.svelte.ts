@@ -36,7 +36,6 @@ class ProjectState {
       targets,
     }
     this.project.components.push(newComponent)
-    this.selectedComponentId = newComponent.id
   }
 
   selectComponent(id: string | null) {
@@ -70,7 +69,6 @@ class ProjectState {
     }
     const index = this.project.components.indexOf(source)
     this.project.components.splice(index + 1, 0, newComponent)
-    this.selectedComponentId = newComponent.id
   }
 
   deleteComponent(id: string) {
