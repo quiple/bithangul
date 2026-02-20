@@ -54,6 +54,25 @@ class ProjectState {
     }
   }
 
+  duplicateComponent(id: string) {
+    const source = this.project.components.find((c) => c.id === id)
+    if (!source) return
+    const newComponent: PixelComponent = {
+      id: crypto.randomUUID(),
+      bitmap: source.bitmap.map((row) => [...row]),
+      type: source.type,
+      typeIndex: source.typeIndex,
+      targets: {
+        chosung: [...source.targets.chosung],
+        jungsung: [...source.targets.jungsung],
+        jongsung: [...source.targets.jongsung],
+      },
+    }
+    const index = this.project.components.indexOf(source)
+    this.project.components.splice(index + 1, 0, newComponent)
+    this.selectedComponentId = newComponent.id
+  }
+
   deleteComponent(id: string) {
     this.project.components = this.project.components.filter((c) => c.id !== id)
     if (this.selectedComponentId === id) {
