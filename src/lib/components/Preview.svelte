@@ -138,7 +138,7 @@
         >
           <!-- 행 레이블: 초성+중성 대표 글자 -->
           <div
-            class="shrink-0 flex items-center justify-center border-r bg-muted/30 text-xs font-bold text-muted-foreground"
+            class="shrink-0 flex items-center justify-center bg-muted/30 text-xs font-bold text-muted-foreground"
             style="width: {LABEL_W}px;"
           >
             {rowLabel(rowIdx)}
@@ -149,7 +149,7 @@
             use:rowCanvasAction={{ rowIdx, data: generatedData }}
             width={CANVAS_W}
             height={CANVAS_H}
-            style="width: {cssCanvasWidth}px; height: {cssRowHeight}px; image-rendering: pixelated; --border-color: var(--border, #e5e5e5);"
+            style="width: {cssCanvasWidth}px; height: {cssRowHeight}px; --border-color: var(--border, #e5e5e5);"
             class="block"
           ></canvas>
         </div>
