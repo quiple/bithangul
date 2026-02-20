@@ -12,7 +12,7 @@ class ProjectState {
 
   constructor() {}
 
-  addComponent(type: ComponentType, typeIndex: number) {
+  addComponent(type: ComponentType, typeIndex: number): string {
     // 기본 targets 설정: 해당 자모 타입은 typeIndex로 고정
     const targets: PixelComponent['targets'] = {
       chosung: [],
@@ -38,7 +38,7 @@ class ProjectState {
       targets,
     }
     this.project.components.push(newComponent)
-    this.selectedComponentId = newComponent.id
+    return newComponent.id
   }
 
   selectComponent(id: string | null) {
