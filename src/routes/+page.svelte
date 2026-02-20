@@ -26,12 +26,16 @@
 
   let exampleDialogOpen = $state(false);
 
-  const EXAMPLES: { name: string; file: string }[] = [{ name: '둥근모꼴', file: 'Dunggeunmo.json' }];
+  const EXAMPLES: { name: string; loader: () => Promise<FontProject> }[] = [
+    {
+      name: '둥근모꼴 (한글도깨비 8x4x4벌식)',
+      loader: () => import('$lib/assets/Dunggeunmo.json').then((m) => m.default as FontProject),
+    },
+  ];
 
-  async function loadExample(file: string) {
+  async function loadExample(loader: () => Promise<FontProject>) {
     try {
-      const mod = await import(`$lib/assets/${file}`);
-      const data: FontProject = mod.default;
+      const data = await loader();
       if (data.components) {
         projectState.loadProject(data);
         generatedData = null;
@@ -262,7 +266,7 @@
     </Dialog.Header>
     <div class="flex flex-col gap-2">
       {#each EXAMPLES as example}
-        <Button variant="outline" class="justify-start text-left h-auto py-3" onclick={() => loadExample(example.file)}>
+        <Button variant="outline" class="justify-start text-left h-auto" onclick={() => loadExample(example.loader)}>
           <BookOpen class="size-4 shrink-0" />
           <span class="font-medium">{example.name}</span>
         </Button>
