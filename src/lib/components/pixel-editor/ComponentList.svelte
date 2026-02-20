@@ -7,14 +7,13 @@
 
   interface Props {
     components: PixelComponent[];
-    selectedId: string | null;
     onSelect: (id: string) => void;
     onAdd: (type: ComponentType, typeIndex: number) => void;
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
   }
 
-  let { components, selectedId, onSelect, onAdd, onDelete, onDuplicate }: Props = $props();
+  let { components, onSelect, onAdd, onDelete, onDuplicate }: Props = $props();
 
   function getVariations(type: ComponentType, typeIndex: number): PixelComponent[] {
     return components.filter((c) => c.type === type && c.typeIndex === typeIndex);
