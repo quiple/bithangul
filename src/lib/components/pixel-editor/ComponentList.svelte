@@ -232,7 +232,7 @@
       <Dialog.Title>모든 {pendingCopy ? TYPE_LABEL[pendingCopy.type] : ''}에 복사</Dialog.Title>
       <Dialog.Description>
         {#if pendingCopy}
-          {TYPE_LABEL[pendingCopy.type]} <strong>'{pendingCopy.char}'</strong> 행의 컴포넌트를 나머지 모든 {TYPE_LABEL[
+          {TYPE_LABEL[pendingCopy.type]} <strong>‘{pendingCopy.char}’</strong> 행의 컴포넌트를 나머지 모든 {TYPE_LABEL[
             pendingCopy.type
           ]}에 덮어씁니다. 기존에 다른 행에 있던 컴포넌트는 <strong>모두 삭제</strong>됩니다.
         {/if}
