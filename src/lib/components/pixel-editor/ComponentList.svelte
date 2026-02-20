@@ -24,7 +24,7 @@
 {#snippet jamoRow(type: ComponentType, char: string, i: number)}
   {@const variations = getVariations(type, i)}
   <div class="flex gap-1 rounded-md p-1 hover:bg-muted">
-    <span class="w-7 text-center text-base font-semibold shrink-0 select-none leading-8">{char}</span>
+    <span class="w-4 text-center text-base font-semibold shrink-0 select-none leading-8">{char}</span>
     <div class="flex flex-wrap gap-x-1 gap-y-1.5 flex-1 min-w-0">
       {#each variations as comp (comp.id)}
         <div class="relative group h-8">
