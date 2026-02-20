@@ -59,16 +59,27 @@ class ProjectState {
   duplicateComponent(id: string) {
     const source = this.project.components.find((c) => c.id === id)
     if (!source) return
+
+    // 적용 범위 초기화: 자신의 자모 인덱스만 고정, 나머지는 기본값
+    const targets: PixelComponent['targets'] = {
+      chosung: [],
+      jungsung: [],
+      jongsung: [0],
+    }
+    if (source.type === 'chosung') {
+      targets.chosung = [source.typeIndex]
+    } else if (source.type === 'jungsung') {
+      targets.jungsung = [source.typeIndex]
+    } else if (source.type === 'jongsung') {
+      targets.jongsung = [source.typeIndex]
+    }
+
     const newComponent: PixelComponent = {
       id: crypto.randomUUID(),
       bitmap: source.bitmap.map((row) => [...row]),
       type: source.type,
       typeIndex: source.typeIndex,
-      targets: {
-        chosung: [...source.targets.chosung],
-        jungsung: [...source.targets.jungsung],
-        jongsung: [...source.targets.jongsung],
-      },
+      targets,
     }
     const index = this.project.components.indexOf(source)
     this.project.components.splice(index + 1, 0, newComponent)
