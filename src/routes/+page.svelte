@@ -8,10 +8,11 @@
   import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
   import { Spinner } from '$lib/components/ui/spinner/index.js';
-  import { Download, Upload, Play, FileType, FileCode } from '@lucide/svelte';
+  import { Download, Upload, Play, FileType, FileCode, CircleQuestionMark } from '@lucide/svelte';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
   import { exportBDF, exportHEX, downloadText } from '$lib/export';
   import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+  import * as Dialog from "$lib/components/ui/dialog/index.js";
 
   let worker: Worker;
   let generatedData = $state<ArrayBuffer | null>(null);
@@ -111,12 +112,27 @@
     <div class="flex items-center gap-4">
       <h1 class="font-bold text-lg truncate">BitHangul</h1>
       <ButtonGroup.Root>
-        <Button variant="outline" size="sm" onclick={handleLoadProject}>
-          <Upload /> 로드
-        </Button>
-        <Button variant="outline" size="sm" onclick={handleSaveProject}>
-          <Download /> 저장
-        </Button>
+        <ButtonGroup.Root>
+          <Button variant="outline" size="sm" onclick={handleLoadProject}>
+            <Upload /> 로드
+          </Button>
+          <Button variant="outline" size="sm" onclick={handleSaveProject}>
+            <Download /> 저장
+          </Button>
+        </ButtonGroup.Root>
+        <!-- <ButtonGroup.Root>
+          <Dialog.Root>
+            <Dialog.Trigger class={buttonVariants({size: 'sm', variant: "outline" })}>
+              <CircleQuestionMark /> 도움말
+            </Dialog.Trigger>
+            <Dialog.Content class="sm:max-w-2xl">
+              <Dialog.Header>
+                <Dialog.Title>도움말</Dialog.Title>
+              </Dialog.Header>
+              <p>한글도깨비의 8x4x4벌식 등 특정 벌수에 제한되지 않고 자유롭게 조합을 구성할 수 있습니다.</p>
+            </Dialog.Content>
+          </Dialog.Root>
+        </ButtonGroup.Root> -->
       </ButtonGroup.Root>
     </div>
 
