@@ -122,6 +122,11 @@
             <Download /> 저장
           </Button>
         </ButtonGroup.Root>
+        <ButtonGroup.Root>
+          <Button variant="outline" size="sm" onclick={handleSaveProject}>
+            <Download /> 예제 불러오기
+          </Button>
+        </ButtonGroup.Root>
       </ButtonGroup.Root>
     </div>
 
