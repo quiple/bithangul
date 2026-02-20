@@ -11,7 +11,7 @@
   import { Download, Upload, Play, FileType, FileCode } from '@lucide/svelte';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
   import { exportBDF, exportHEX, downloadText } from '$lib/export';
-  import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+  import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 
   let worker: Worker;
   let generatedData = $state<ArrayBuffer | null>(null);
@@ -137,8 +137,11 @@
         <ButtonGroup.Root>
           <Tooltip.Provider>
             <Tooltip.Root>
-              <Tooltip.Trigger class={buttonVariants({ variant: "outline", size: "sm" })} onclick={handleExportBDF}
-              disabled={!generatedData || isExportingBDF || isExportingHEX}>
+              <Tooltip.Trigger
+                class={buttonVariants({ variant: 'outline', size: 'sm' })}
+                onclick={handleExportBDF}
+                disabled={!generatedData || isExportingBDF || isExportingHEX}
+              >
                 {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
                 {isExportingBDF ? '내보내는 중…' : 'BDF로 내보내기'}
               </Tooltip.Trigger>
@@ -150,8 +153,11 @@
 
           <Tooltip.Provider>
             <Tooltip.Root>
-              <Tooltip.Trigger class={buttonVariants({ variant: "outline", size: "sm" })} onclick={handleExportHEX}
-              disabled={!generatedData || isExportingBDF || isExportingHEX}>
+              <Tooltip.Trigger
+                class={buttonVariants({ variant: 'outline', size: 'sm' })}
+                onclick={handleExportHEX}
+                disabled={!generatedData || isExportingBDF || isExportingHEX}
+              >
                 {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
                 {isExportingHEX ? '내보내는 중…' : 'HEX로 내보내기'}
               </Tooltip.Trigger>
@@ -194,6 +200,7 @@
           onSelect={(id) => projectState.selectComponent(id)}
           onAdd={(type, typeIndex) => projectState.addComponent(type, typeIndex)}
           onDelete={(id) => projectState.deleteComponent(id)}
+          onDuplicate={(id) => projectState.duplicateComponent(id)}
         />
       {/if}
     </Resizable.Pane>
