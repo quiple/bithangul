@@ -4,6 +4,7 @@
   import Thumbnail from '$lib/components/Thumbnail.svelte';
   import { Trash, Plus, Copy } from '@lucide/svelte';
   import { CHOSUNG, JUNGSUNG, JONGSUNG } from '$lib/hangul';
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
 
   interface Props {
     components: PixelComponent[];
