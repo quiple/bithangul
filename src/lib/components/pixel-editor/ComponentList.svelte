@@ -55,8 +55,15 @@
   }
 
   function requestCopyRowToAll(type: ComponentType, typeIndex: number, char: string) {
-    pendingCopy = { type, typeIndex, char };
-    confirmDialogOpen = true;
+    // 같은 타입의 다른 행에 기존 컴포넌트가 있는지 확인
+    const hasExisting = components.some((c) => c.type === type && c.typeIndex !== typeIndex);
+    if (hasExisting) {
+      pendingCopy = { type, typeIndex, char };
+      confirmDialogOpen = true;
+    } else {
+      // 덮어씌워질 컴포넌트가 없으면 바로 복사
+      onCopyRowToAll(type, typeIndex);
+    }
   }
 
   function confirmCopy() {
