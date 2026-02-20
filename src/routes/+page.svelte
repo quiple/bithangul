@@ -26,6 +26,9 @@
   /** 새로 추가되어 아직 저장되지 않은 컴포넌트 ID */
   let newlyCreatedId = $state<string | null>(null);
 
+  /** 컴포넌트 목록 스크롤 위치 보존 */
+  let componentListScrollTop = $state(0);
+
   let exampleDialogOpen = $state(false);
 
   const EXAMPLES: { name: string; loader: () => Promise<FontProject> }[] = [
@@ -234,6 +237,7 @@
         <!-- List Mode -->
         <ComponentList
           components={projectState.project.components}
+          bind:scrollTop={componentListScrollTop}
           onSelect={(id) => {
             newlyCreatedId = null;
             projectState.selectComponent(id);

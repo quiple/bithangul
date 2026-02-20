@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount, tick } from 'svelte';
   import { Button } from '$lib/components/ui/button';
   import type { PixelComponent, ComponentType } from '$lib/types';
   import Thumbnail from '$lib/components/Thumbnail.svelte';
@@ -8,6 +9,7 @@
 
   interface Props {
     components: PixelComponent[];
+    scrollTop?: number;
     onSelect: (id: string) => void;
     onAdd: (type: ComponentType, typeIndex: number) => void;
     onDelete: (id: string) => void;
@@ -15,7 +17,30 @@
     onCopyRowToAll: (type: ComponentType, sourceTypeIndex: number) => void;
   }
 
-  let { components, onSelect, onAdd, onDelete, onDuplicate, onCopyRowToAll }: Props = $props();
+  let {
+    components,
+    scrollTop = $bindable(0),
+    onSelect,
+    onAdd,
+    onDelete,
+    onDuplicate,
+    onCopyRowToAll,
+  }: Props = $props();
+
+  let scrollContainer: HTMLDivElement | undefined = $state();
+
+  onMount(async () => {
+    await tick();
+    if (scrollContainer && scrollTop > 0) {
+      scrollContainer.scrollTop = scrollTop;
+    }
+  });
+
+  function handleScroll() {
+    if (scrollContainer) {
+      scrollTop = scrollContainer.scrollTop;
+    }
+  }
 
   let confirmDialogOpen = $state(false);
   let pendingCopy = $state<{ type: ComponentType; typeIndex: number; char: string } | null>(null);
@@ -169,7 +194,7 @@
     <h2 class="font-bold truncate">컴포넌트</h2>
   </div>
 
-  <div class="overflow-y-auto overscroll-contain flex-1 min-h-0">
+  <div class="overflow-y-auto overscroll-contain flex-1 min-h-0" bind:this={scrollContainer} onscroll={handleScroll}>
     <div class="px-2 py-2 space-y-4">
       <!-- 초성 섹션 -->
       <section>
