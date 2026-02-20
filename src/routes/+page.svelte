@@ -8,10 +8,12 @@
   import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
   import { Spinner } from '$lib/components/ui/spinner/index.js';
-  import { Download, Upload, Play, FileType, FileCode } from '@lucide/svelte';
+  import { Download, Upload, Play, FileType, FileCode, BookOpen } from '@lucide/svelte';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
   import { exportBDF, exportHEX, downloadText } from '$lib/export';
   import * as Tooltip from '$lib/components/ui/tooltip/index.js';
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import type { FontProject } from '$lib/types';
 
   let worker: Worker;
   let generatedData = $state<ArrayBuffer | null>(null);
@@ -21,6 +23,25 @@
 
   /** 새로 추가되어 아직 저장되지 않은 컴포넌트 ID */
   let newlyCreatedId = $state<string | null>(null);
+
+  let exampleDialogOpen = $state(false);
+
+  const EXAMPLES: { name: string; file: string }[] = [{ name: '둥근모꼴', file: 'Dunggeunmo.json' }];
+
+  async function loadExample(file: string) {
+    try {
+      const mod = await import(`$lib/assets/${file}`);
+      const data: FontProject = mod.default;
+      if (data.components) {
+        projectState.loadProject(data);
+        generatedData = null;
+      }
+    } catch (err) {
+      console.error('예제 불러오기 실패:', err);
+      alert('예제를 불러오는 데 실패했습니다.');
+    }
+    exampleDialogOpen = false;
+  }
 
   onMount(() => {
     worker = new GeneratorWorker();
@@ -123,8 +144,8 @@
           </Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
-          <Button variant="outline" size="sm">
-            <Download /> 예제 불러오기
+          <Button variant="outline" size="sm" onclick={() => (exampleDialogOpen = true)}>
+            <BookOpen /> 예제 불러오기
           </Button>
         </ButtonGroup.Root>
       </ButtonGroup.Root>
@@ -231,3 +252,24 @@
     </Resizable.Pane>
   </Resizable.PaneGroup>
 </div>
+
+<!-- 예제 불러오기 다이얼로그 -->
+<Dialog.Root bind:open={exampleDialogOpen}>
+  <Dialog.Content>
+    <Dialog.Header>
+      <Dialog.Title>예제 불러오기</Dialog.Title>
+      <Dialog.Description>예제 프로젝트를 선택하면 현재 프로젝트를 대체합니다.</Dialog.Description>
+    </Dialog.Header>
+    <div class="flex flex-col gap-2">
+      {#each EXAMPLES as example}
+        <Button variant="outline" class="justify-start text-left h-auto py-3" onclick={() => loadExample(example.file)}>
+          <BookOpen class="size-4 shrink-0" />
+          <span class="font-medium">{example.name}</span>
+        </Button>
+      {/each}
+    </div>
+    <Dialog.Footer>
+      <Button variant="outline" onclick={() => (exampleDialogOpen = false)}>취소</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
