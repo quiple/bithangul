@@ -26,8 +26,32 @@
     jongsung: '종성',
   };
 
+  // 정렬 축 순서: 자신의 타입을 제외한 나머지 두 축
+  const SORT_AXES: Record<ComponentType, ('chosung' | 'jungsung' | 'jongsung')[]> = {
+    chosung: ['jungsung', 'jongsung'],
+    jungsung: ['chosung', 'jongsung'],
+    jongsung: ['chosung', 'jungsung'],
+  };
+
+  function targetSortKey(comp: PixelComponent): number[] {
+    const axes = SORT_AXES[comp.type];
+    return axes.map((axis) => {
+      const arr = comp.targets[axis];
+      return arr.length > 0 ? Math.min(...arr) : Infinity;
+    });
+  }
+
   function getVariations(type: ComponentType, typeIndex: number): PixelComponent[] {
-    return components.filter((c) => c.type === type && c.typeIndex === typeIndex);
+    return components
+      .filter((c) => c.type === type && c.typeIndex === typeIndex)
+      .sort((a, b) => {
+        const ka = targetSortKey(a);
+        const kb = targetSortKey(b);
+        for (let i = 0; i < ka.length; i++) {
+          if (ka[i] !== kb[i]) return ka[i] - kb[i];
+        }
+        return 0;
+      });
   }
 
   function requestCopyRowToAll(type: ComponentType, typeIndex: number, char: string) {
