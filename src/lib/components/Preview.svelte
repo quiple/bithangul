@@ -1,34 +1,30 @@
 <script lang="ts">
-  import PreviewItem from './PreviewItem.svelte';
+  import { composeHangul } from '$lib/hangul';
 
-  export let generatedData: ArrayBuffer | null = null;
+  let {
+    generatedData = null,
+  }: {
+    generatedData: ArrayBuffer | null;
+  } = $props();
 
   // 11,172자를 28열(종성 수)로 나누면 399행
-  // 각 행 = 같은 초성+중성 조합의 28가지 종성 변형
   const COLS = 28;
   const TOTAL_ITEMS = 11172;
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS); // 399
 
   // 셀 크기: 32px 캔버스 + 1px 테두리 = 33px
   const CELL_SIZE = 33;
-  // 행 높이: 셀 높이 + 행 레이블 영역
   const ROW_HEIGHT = CELL_SIZE;
 
-  let scrollTop = 0;
-  let containerHeight = 600;
-  let container: HTMLDivElement;
-
-  let dataVersion = 0;
-  $: if (generatedData !== null) dataVersion++; // 생성 완료마다 버전 증가
+  let scrollTop = $state(0);
+  let containerHeight = $state(600);
+  let container: HTMLDivElement = $state(undefined!);
 
   // 가상 스크롤: 보이는 행만 렌더링
-  $: startRow = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 2);
-  $: visibleRowCount = Math.ceil(containerHeight / ROW_HEIGHT) + 4;
-  $: endRow = Math.min(TOTAL_ROWS, startRow + visibleRowCount);
-  $: visibleRows = Array.from(
-    { length: endRow - startRow },
-    (_, i) => startRow + i,
-  );
+  let startRow = $derived(Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 2));
+  let visibleRowCount = $derived(Math.ceil(containerHeight / ROW_HEIGHT) + 4);
+  let endRow = $derived(Math.min(TOTAL_ROWS, startRow + visibleRowCount));
+  let visibleRows = $derived(Array.from({ length: endRow - startRow }, (_, i) => startRow + i));
 
   function onScroll(e: UIEvent) {
     scrollTop = (e.target as HTMLElement).scrollTop;
@@ -38,7 +34,58 @@
   function rowLabel(rowIdx: number): string {
     const firstItemIdx = rowIdx * COLS;
     if (firstItemIdx >= TOTAL_ITEMS) return '';
-    return String.fromCharCode(0xac00 + firstItemIdx);
+    const cho = Math.floor(firstItemIdx / (21 * 28));
+    const jung = Math.floor((firstItemIdx % (21 * 28)) / 28);
+    return composeHangul(cho, jung, 0);
+  }
+
+  // ── 행 단위 canvas 렌더링 (개별 PreviewItem × 28 → canvas × 1) ──
+  // 한 행의 28셀을 하나의 canvas에 일괄 렌더링하여 DOM 노드 수 대폭 감소
+  function drawRowCanvas(canvas: HTMLCanvasElement, rowIdx: number, data: ArrayBuffer | null) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const canvasW = COLS * CELL_SIZE;
+    ctx.clearRect(0, 0, canvasW, ROW_HEIGHT);
+
+    if (!data) return;
+
+    const view = new DataView(data);
+    const firstIdx = rowIdx * COLS;
+    const pixelScale = 2;
+
+    ctx.fillStyle = '#000';
+
+    for (let col = 0; col < COLS; col++) {
+      const itemIdx = firstIdx + col;
+      if (itemIdx >= TOTAL_ITEMS) break;
+
+      const offset = itemIdx * 32;
+      if (offset + 32 > data.byteLength) break;
+
+      const cellX = col * CELL_SIZE;
+
+      for (let r = 0; r < 16; r++) {
+        const rowVal = view.getUint16(offset + r * 2, false);
+        if (rowVal === 0) continue; // 빈 행 빠르게 건너뜀
+        for (let c = 0; c < 16; c++) {
+          if ((rowVal >> (15 - c)) & 1) {
+            ctx.fillRect(cellX + c * pixelScale, r * pixelScale, pixelScale, pixelScale);
+          }
+        }
+      }
+    }
+  }
+
+  // canvas에 대한 action: rowIdx 또는 data가 바뀌면 다시 그림
+  function rowCanvasAction(canvas: HTMLCanvasElement, params: { rowIdx: number; data: ArrayBuffer | null }) {
+    drawRowCanvas(canvas, params.rowIdx, params.data);
+    return {
+      update(newParams: { rowIdx: number; data: ArrayBuffer | null }) {
+        drawRowCanvas(canvas, newParams.rowIdx, newParams.data);
+      },
+    };
   }
 </script>
 
@@ -48,15 +95,13 @@
     class="flex-1 overflow-y-auto overflow-x-hidden relative"
     bind:this={container}
     bind:clientHeight={containerHeight}
-    on:scroll={onScroll}
+    onscroll={onScroll}
   >
     <!-- 전체 높이를 잡아주는 spacer -->
     <div style="height: {TOTAL_ROWS * ROW_HEIGHT}px; position: relative;">
-      {#each visibleRows as rowIdx (`${rowIdx}-${dataVersion}`)}
-        {@const firstIdx = rowIdx * COLS}
+      {#each visibleRows as rowIdx (rowIdx)}
         <div
-          style="position: absolute; top: {rowIdx *
-            ROW_HEIGHT}px; left: 0; right: 0; height: {ROW_HEIGHT}px;"
+          style="position: absolute; top: {rowIdx * ROW_HEIGHT}px; left: 0; right: 0; height: {ROW_HEIGHT}px;"
           class="flex items-center"
         >
           <!-- 행 레이블: 초성+중성 대표 글자 -->
@@ -66,21 +111,14 @@
             {rowLabel(rowIdx)}
           </div>
 
-          <!-- 28개 셀 -->
-          {#each { length: COLS } as _, colIdx}
-            {@const itemIdx = firstIdx + colIdx}
-            {#if itemIdx < TOTAL_ITEMS}
-              <div
-                class="flex-1 min-w-0 h-full flex items-center justify-center border-r last:border-r-0 border-b bg-white transition-colors relative overflow-hidden"
-              >
-                <PreviewItem index={itemIdx} data={generatedData} />
-              </div>
-            {:else}
-              <div
-                class="flex-1 min-w-0 h-full border-r last:border-r-0 bg-muted/20"
-              ></div>
-            {/if}
-          {/each}
+          <!-- 행 전체를 하나의 canvas로 렌더링 -->
+          <canvas
+            use:rowCanvasAction={{ rowIdx, data: generatedData }}
+            width={COLS * CELL_SIZE}
+            height={ROW_HEIGHT}
+            class="block flex-1 min-w-0 h-full"
+            style="image-rendering: pixelated;"
+          ></canvas>
         </div>
       {/each}
     </div>

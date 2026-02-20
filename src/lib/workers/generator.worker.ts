@@ -1,6 +1,4 @@
-import type {FontProject, PixelComponent} from '../types'
-
-import {decomposeHangul} from '../hangul'
+import type {FontProject} from '../types'
 
 interface GenerationResult {
   // 11,172 chars * 32 bytes (16 rows * 2 bytes)
@@ -19,47 +17,64 @@ function generateFont(project: FontProject): GenerationResult {
   const buffer = new ArrayBuffer(TOTAL_SYLLABLES * BYTES_PER_CHAR)
   const view = new DataView(buffer)
 
-  // Optimize components: flatten 2D array to 16x uint16
-  const optimizedComponents = project.components.map((comp) => ({
-    targets: comp.targets,
-    bitmap: flattenBitmap(comp.bitmap),
-  }))
+  // ── 최적화 1: 비트맵을 Uint16Array로 평탄화 ──
+  // ── 최적화 2: targets를 비트마스크로 전처리 (includes() O(n) → bitwise AND O(1)) ──
+  const compCount = project.components.length
+  const compBitmaps: Uint16Array[] = new Array(compCount)
+  // 비트마스크: chosung 19비트, jungsung 21비트, jongsung 28비트 → 각각 Uint32 1개면 충분
+  const compChoMask: Uint32Array = new Uint32Array(compCount)
+  const compJungMask: Uint32Array = new Uint32Array(compCount)
+  const compJongMask: Uint32Array = new Uint32Array(compCount)
+
+  for (let ci = 0; ci < compCount; ci++) {
+    const comp = project.components[ci]
+    compBitmaps[ci] = flattenBitmap(comp.bitmap)
+
+    // targets 배열 → 비트마스크
+    let choMask = 0
+    for (const idx of comp.targets.chosung) choMask |= 1 << idx
+    compChoMask[ci] = choMask
+
+    let jungMask = 0
+    for (const idx of comp.targets.jungsung) jungMask |= 1 << idx
+    compJungMask[ci] = jungMask
+
+    let jongMask = 0
+    for (const idx of comp.targets.jongsung) jongMask |= 1 << idx
+    compJongMask[ci] = jongMask
+  }
+
+  // ── 글리프 합성 ──
+  const result = new Uint16Array(16)
 
   for (let i = 0; i < TOTAL_SYLLABLES; i++) {
-    // Unicode value for Hangul Syllable starts at 0xAC00
-    const charCode = 0xac00 + i
-    const char = String.fromCharCode(charCode)
-    const parts = decomposeHangul(char)
+    // 한글 분해 인라인 (함수 호출 오버헤드 제거)
+    const cho = (i / 588) | 0
+    const jung = ((i % 588) / 28) | 0
+    const jong = i % 28
 
-    if (!parts) continue
+    // 이 음절에 해당하는 비트마스크
+    const choBit = 1 << cho
+    const jungBit = 1 << jung
+    const jongBit = 1 << jong
 
-    const {cho, jung, jong} = parts
+    // 결과 비트맵 초기화
+    for (let r = 0; r < 16; r++) result[r] = 0
 
-    // Start with empty bitmap (0)
-    let matchedBitmap = new Uint16Array(16) // 16 rows of 0
-
-    for (const comp of optimizedComponents) {
-      // Check match
-      const matchCho = comp.targets.chosung.includes(cho)
-      const matchJung = comp.targets.jungsung.includes(jung)
-      const matchJong = comp.targets.jongsung.includes(jong)
-
-      if (matchCho && matchJung && matchJong) {
-        // OR operation
+    for (let ci = 0; ci < compCount; ci++) {
+      // 비트 AND로 매칭 확인 (O(1))
+      if (compChoMask[ci] & choBit && compJungMask[ci] & jungBit && compJongMask[ci] & jongBit) {
+        const bmp = compBitmaps[ci]
         for (let r = 0; r < 16; r++) {
-          matchedBitmap[r] |= comp.bitmap[r]
+          result[r] |= bmp[r]
         }
       }
     }
 
-    // Write to buffer (Big Endian for standard view?)
-    // Let's use Big Endian so byte 0 is top-left 8 bits, byte 1 is top-right 8 bits?
-    // 16x16: row 0 is 16 bits.
-    // If row 0 is [1, 0, ..., 0], value is 0x8000.
-    // DataView setUint16(..., val, false) -> Big Endian.
+    // Big Endian으로 버퍼에 기록
     const offset = i * BYTES_PER_CHAR
     for (let r = 0; r < 16; r++) {
-      view.setUint16(offset + r * 2, matchedBitmap[r], false) // Big Endian
+      view.setUint16(offset + r * 2, result[r], false)
     }
   }
 

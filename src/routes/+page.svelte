@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Resizable from '$lib/components/ui/resizable/index.js';
-  import { onMount, tick } from 'svelte';
+  import { onMount } from 'svelte';
   import { projectState } from '$lib/state.svelte';
   import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte';
   import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte';
@@ -8,14 +8,16 @@
   import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
   import { Spinner } from '$lib/components/ui/spinner/index.js';
-  import { Download, Upload, Play, FileType, FileCode, BookOpen } from '@lucide/svelte';
+  import { Download, Upload, Play, FileCode, BookOpen } from '@lucide/svelte';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
-  import { exportBDF, exportHEX, downloadText } from '$lib/export';
+  import ExportWorker from '$lib/workers/export.worker?worker';
+  import { downloadText } from '$lib/export';
   import * as Tooltip from '$lib/components/ui/tooltip/index.js';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import type { FontProject } from '$lib/types';
 
-  let worker: Worker;
+  let generatorWorker: Worker;
+  let exportWorker: Worker;
   let generatedData = $state<ArrayBuffer | null>(null);
   let isGenerating = $state(false);
   let isExportingBDF = $state(false);
@@ -48,21 +50,35 @@
   }
 
   onMount(() => {
-    worker = new GeneratorWorker();
-    worker.onmessage = (e) => {
+    generatorWorker = new GeneratorWorker();
+    generatorWorker.onmessage = (e) => {
       generatedData = e.data.buffer;
       isGenerating = false;
     };
 
+    exportWorker = new ExportWorker();
+    exportWorker.onmessage = (e) => {
+      const { type, result } = e.data;
+      const name = projectState.project.name || 'bithangul';
+      if (type === 'bdf') {
+        downloadText(result, `${name}.bdf`, 'text/plain');
+        isExportingBDF = false;
+      } else if (type === 'hex') {
+        downloadText(result, `${name}.hex`, 'text/plain');
+        isExportingHEX = false;
+      }
+    };
+
     return () => {
-      worker.terminate();
+      generatorWorker.terminate();
+      exportWorker.terminate();
     };
   });
 
   function handleGenerate() {
     isGenerating = true;
     const snapshot = $state.snapshot(projectState.project);
-    worker.postMessage(snapshot);
+    generatorWorker.postMessage(snapshot);
   }
 
   function handleSaveProject() {
@@ -99,37 +115,21 @@
     input.click();
   }
 
-  async function handleExportBDF() {
+  function handleExportBDF() {
     if (!generatedData || isExportingBDF) return;
     isExportingBDF = true;
-    try {
-      // 대용량 문자열 생성을 비동기로 처리하여 UI 블로킹 방지
-      await tick();
-      const bufferCopy = generatedData.slice(0);
-      const bdf = exportBDF(bufferCopy, projectState.project.name || 'bithangul');
-      downloadText(bdf, `${projectState.project.name || 'bithangul'}.bdf`, 'text/plain');
-    } catch (err) {
-      console.error('BDF 내보내기 실패:', err);
-      alert('BDF 내보내기에 실패했습니다.');
-    } finally {
-      isExportingBDF = false;
-    }
+    // ArrayBuffer를 복사하여 Worker에 전송 (transfer로 소유권 이전)
+    const bufferCopy = generatedData.slice(0);
+    exportWorker.postMessage({ type: 'bdf', buffer: bufferCopy, fontName: projectState.project.name || 'bithangul' }, [
+      bufferCopy,
+    ]);
   }
 
-  async function handleExportHEX() {
+  function handleExportHEX() {
     if (!generatedData || isExportingHEX) return;
     isExportingHEX = true;
-    try {
-      await tick();
-      const bufferCopy = generatedData.slice(0);
-      const hex = exportHEX(bufferCopy);
-      downloadText(hex, `${projectState.project.name || 'bithangul'}.hex`, 'text/plain');
-    } catch (err) {
-      console.error('HEX 내보내기 실패:', err);
-      alert('HEX 내보내기에 실패했습니다.');
-    } finally {
-      isExportingHEX = false;
-    }
+    const bufferCopy = generatedData.slice(0);
+    exportWorker.postMessage({ type: 'hex', buffer: bufferCopy }, [bufferCopy]);
   }
 </script>
 
@@ -175,7 +175,7 @@
                 onclick={handleExportBDF}
                 disabled={!generatedData || isExportingBDF || isExportingHEX}
               >
-                {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
+                {#if isExportingBDF}<Spinner />{:else}<FileCode />{/if}
                 {isExportingBDF ? '내보내는 중…' : 'BDF로 내보내기'}
               </Tooltip.Trigger>
               <Tooltip.Content>

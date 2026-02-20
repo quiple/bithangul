@@ -41,10 +41,25 @@
     });
   }
 
-  function getVariations(type: ComponentType, typeIndex: number): PixelComponent[] {
-    return components
-      .filter((c) => c.type === type && c.typeIndex === typeIndex)
-      .sort((a, b) => {
+  // ── 최적화: 전체 variations를 한 번에 계산하여 Map으로 캐시 ──
+  // components가 변경될 때만 재계산됨 (개별 행마다 filter/sort 반복 X)
+  let variationsMap = $derived.by(() => {
+    const map = new Map<string, PixelComponent[]>();
+
+    // 그룹화
+    for (const comp of components) {
+      const key = `${comp.type}:${comp.typeIndex}`;
+      let list = map.get(key);
+      if (!list) {
+        list = [];
+        map.set(key, list);
+      }
+      list.push(comp);
+    }
+
+    // 그룹별 정렬
+    for (const list of map.values()) {
+      list.sort((a, b) => {
         const ka = targetSortKey(a);
         const kb = targetSortKey(b);
         for (let i = 0; i < ka.length; i++) {
@@ -52,6 +67,13 @@
         }
         return 0;
       });
+    }
+
+    return map;
+  });
+
+  function getVariations(type: ComponentType, typeIndex: number): PixelComponent[] {
+    return variationsMap.get(`${type}:${typeIndex}`) ?? [];
   }
 
   function requestCopyRowToAll(type: ComponentType, typeIndex: number, char: string) {
@@ -185,7 +207,7 @@
       <Dialog.Title>모든 {pendingCopy ? TYPE_LABEL[pendingCopy.type] : ''}에 복사</Dialog.Title>
       <Dialog.Description>
         {#if pendingCopy}
-          {TYPE_LABEL[pendingCopy.type]} <strong>‘{pendingCopy.char}’</strong> 행의 컴포넌트를 나머지 모든 {TYPE_LABEL[
+          {TYPE_LABEL[pendingCopy.type]} <strong>'{pendingCopy.char}'</strong> 행의 컴포넌트를 나머지 모든 {TYPE_LABEL[
             pendingCopy.type
           ]}에 덮어씁니다. 기존에 다른 행에 있던 컴포넌트는 <strong>모두 삭제</strong>됩니다.
         {/if}
