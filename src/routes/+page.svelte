@@ -123,7 +123,7 @@
           </Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
-          <Button variant="outline" size="sm" onclick={handleSaveProject}>
+          <Button variant="outline" size="sm">
             <Download /> 예제 불러오기
           </Button>
         </ButtonGroup.Root>
