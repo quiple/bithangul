@@ -116,7 +116,7 @@
       <ButtonGroup.Root>
         <ButtonGroup.Root>
           <Button variant="outline" size="sm" onclick={handleLoadProject}>
-            <Upload /> 로드
+            <Upload /> 로드...
           </Button>
           <Button variant="outline" size="sm" onclick={handleSaveProject}>
             <Download /> 저장
