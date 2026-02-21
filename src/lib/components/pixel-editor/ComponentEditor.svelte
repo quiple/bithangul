@@ -2,6 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import GridCanvas from './GridCanvas.svelte';
   import TargetSelector from './TargetSelector.svelte';
+  import ComponentPreviewGrid from './ComponentPreviewGrid.svelte';
   import type { PixelComponent } from '$lib/types';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
   import { ChevronLeft } from '@lucide/svelte';
@@ -61,5 +62,7 @@
       {siblingComponents}
       onUpdate={(t) => (localComponent.targets = t)}
     />
+
+    <ComponentPreviewGrid component={localComponent} />
   </div>
 </div>
