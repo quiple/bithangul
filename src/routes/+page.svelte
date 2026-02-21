@@ -244,9 +244,7 @@
             projectState.deleteComponent(id);
             handleGenerate();
           }}
-          onDuplicate={(id) => {
-            projectState.duplicateComponent(id);
-          }}
+          onDuplicate={(id) => projectState.duplicateComponent(id)}
           onCopyRowToAll={(type, typeIndex) => {
             projectState.copyRowToAll(type, typeIndex);
             handleGenerate();
