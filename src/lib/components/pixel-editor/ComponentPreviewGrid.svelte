@@ -208,9 +208,7 @@
   class="w-full flex flex-col gap-2 mt-4"
   bind:clientWidth={containerWidth}
 >
-  <div class="flex justify-between items-center">
-    <h3 class="font-bold text-sm">미리보기 ({affectedIndices.length}자)</h3>
-  </div>
+  <h3 class="pl-2 font-medium truncate">미리보기 ({affectedIndices.length}자)</h3>
 
   {#if previewData}
     <div
@@ -221,7 +219,7 @@
         bind:this={canvas}
         width={canvasWidth}
         height={canvasHeight}
-        class="block"
+        class="block -m-px"
         style="width: {canvasWidth}px; height: {canvasHeight}px; --border-color: var(--border, #e5e5e5);"
       ></canvas>
     </div>
