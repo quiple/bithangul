@@ -224,8 +224,8 @@
       ></canvas>
     </div>
   {:else}
-    <div class="text-sm text-muted-foreground p-4 border rounded-md text-center bg-muted/20">
-      데이터 생성 대기 중...
+    <div class="text-sm text-muted-foreground p-4 border rounded text-center">
+      컴포넌트가 적용될 자모를 ‘적용 범위’에서 선택하세요.
     </div>
   {/if}
 </div>
