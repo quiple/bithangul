@@ -205,15 +205,15 @@
 </script>
 
 <div
-  class="w-full flex flex-col gap-2 mt-4"
+  class="@container flex flex-col gap-2 mt-4"
   bind:clientWidth={containerWidth}
 >
   <h3 class="pl-2 font-medium truncate">미리보기 ({affectedIndices.length}자)</h3>
 
   {#if previewData}
     <div
-      class="border rounded overflow-hidden bg-white"
-      style="height: {canvasHeight}px; overflow-y: auto;"
+      class="border rounded overflow-hidden bg-white h-[calc(100vh-55rem)] @sm:h-[calc(100vh-52.25rem)] @md:h-[calc(100vh-49.5rem)]"
+      style="overflow-y: auto;"
     >
       <canvas
         bind:this={canvas}
