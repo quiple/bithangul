@@ -8,7 +8,7 @@
   import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
   import { Spinner } from '$lib/components/ui/spinner/index.js';
-  import { Download, Upload, Play, FileCode, BookOpen } from '@lucide/svelte';
+  import { Download, Upload, FileCode, BookOpen } from '@lucide/svelte';
   import GeneratorWorker from '$lib/workers/generator.worker?worker';
   import ExportWorker from '$lib/workers/export.worker?worker';
   import { downloadText } from '$lib/export';
@@ -44,6 +44,7 @@
       if (data.components) {
         projectState.loadProject(data);
         generatedData = null;
+        handleGenerate();
       }
     } catch (err) {
       console.error('예제 불러오기 실패:', err);
@@ -109,6 +110,7 @@
         if (data.components) {
           projectState.loadProject(data);
           generatedData = null;
+          handleGenerate();
         }
       } catch (err) {
         console.error(err);
@@ -160,16 +162,6 @@
 
     <div class="flex items-center">
       <ButtonGroup.Root>
-        <ButtonGroup.Root>
-          <Button size="sm" onclick={handleGenerate} disabled={isGenerating}>
-            {#if isGenerating}
-              <Spinner />
-            {:else}
-              <Play />
-            {/if}
-            {isGenerating ? '생성 중…' : '한글 음절 생성'}
-          </Button>
-        </ButtonGroup.Root>
         <ButtonGroup.Root>
           <Tooltip.Provider>
             <Tooltip.Root>
@@ -224,6 +216,7 @@
             projectState.updateComponent(updated.id, updated);
             newlyCreatedId = null;
             projectState.selectComponent(null);
+            handleGenerate();
           }}
           onCancel={() => {
             if (newlyCreatedId && newlyCreatedId === projectState.selectedComponentId) {
@@ -247,9 +240,17 @@
             newlyCreatedId = id;
             projectState.selectComponent(id);
           }}
-          onDelete={(id) => projectState.deleteComponent(id)}
-          onDuplicate={(id) => projectState.duplicateComponent(id)}
-          onCopyRowToAll={(type, typeIndex) => projectState.copyRowToAll(type, typeIndex)}
+          onDelete={(id) => {
+            projectState.deleteComponent(id);
+            handleGenerate();
+          }}
+          onDuplicate={(id) => {
+            projectState.duplicateComponent(id);
+          }}
+          onCopyRowToAll={(type, typeIndex) => {
+            projectState.copyRowToAll(type, typeIndex);
+            handleGenerate();
+          }}
         />
       {/if}
     </Resizable.Pane>
