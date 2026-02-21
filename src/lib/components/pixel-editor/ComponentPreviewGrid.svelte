@@ -136,7 +136,7 @@
   });
 
   // Calculate layout based on container width
-  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_BORDER) / INTERNAL_CELL)));
+  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_CELL / 2) / INTERNAL_CELL)))
   let rows = $derived(Math.ceil(affectedIndices.length / cols));
 
   let canvasWidth = $derived(cols * INTERNAL_CELL + INTERNAL_BORDER);
