@@ -115,7 +115,7 @@
       {label}
     </h3>
     <Button variant="outline" size="sm" class="h-6 px-2 text-xs" onclick={() => onOpenGroupManager(type)}>
-      <Settings class="mr-1 size-3" /> 그룹 관리
+      <Settings class="size-3" /> 그룹 관리
     </Button>
   </div>
 {/snippet}
