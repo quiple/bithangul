@@ -83,7 +83,8 @@ class ProjectState {
       result = nextResult
     }
 
-    return result
+    const filtered = result.filter((c) => Object.keys(c).length > 0)
+    return filtered.length > 0 ? filtered : result
   }
 
   private conditionsMatch(c1: Record<string, boolean>, c2: Record<string, boolean>) {
@@ -128,6 +129,9 @@ class ProjectState {
         }
       }
     }
+
+    // Completely strip out `{}` from components if the project has grown to have other valid conditions.
+    // If a type has groups defined, it shouldn't hold onto empty conditions.
 
     const newComponents: PixelComponent[] = []
     const typeInfo: Record<ComponentType, {count: number; start: number; otherTypes: ComponentType[]}> = {
