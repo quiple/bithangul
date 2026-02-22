@@ -7,6 +7,7 @@
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
   import { ChevronLeft } from '@lucide/svelte';
   import { untrack } from 'svelte';
+  import { CHOSUNG, JUNGSUNG, JONGSUNG } from '$lib/hangul';
 
   interface Props {
     component: PixelComponent;
@@ -38,7 +39,15 @@
   <div class="flex justify-between items-center mb-4 gap-2">
     <div class="flex items-center">
       <Button variant="ghost" size="icon-sm" onclick={onCancel}><ChevronLeft class="size-6" /></Button>
-      <h2 class="font-bold truncate">컴포넌트 편집</h2>
+      <h2 class="font-bold truncate">
+        컴포넌트 편집 <span class="ml-1 bg-ring text-primary-foreground px-1 py-0.5 rounded"
+          >{localComponent.type === 'chosung'
+            ? CHOSUNG[localComponent.typeIndex]
+            : localComponent.type === 'jungsung'
+              ? JUNGSUNG[localComponent.typeIndex]
+              : JONGSUNG[localComponent.typeIndex]}</span
+        >
+      </h2>
     </div>
     <ButtonGroup.Root>
       <ButtonGroup.Root>
