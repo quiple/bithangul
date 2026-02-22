@@ -3,7 +3,7 @@
     import * as Dialog from '$lib/components/ui/dialog/index.js';
     import { Input } from '$lib/components/ui/input/index.js';
     import { Toggle } from '$lib/components/ui/toggle/index.js';
-    import { Trash, Plus } from '@lucide/svelte';
+    import { Trash, Plus, SquareDashed } from '@lucide/svelte';
     import { Checkbox } from '$lib/components/ui/checkbox/index.js';
     import type { ComponentType, JamoGroup } from '$lib/types';
     import { CHOSUNG, JUNGSUNG, JONGSUNG } from '$lib/hangul';
@@ -133,7 +133,7 @@
 </script>
 
 <Dialog.Root {open} {onOpenChange}>
-    <Dialog.Content class="max-w-6xl max-h-[80vh] flex flex-col">
+    <Dialog.Content class="sm:max-w-3xl max-h-[90vh] flex flex-col">
         <Dialog.Header>
             <Dialog.Title>{type ? TITLE_MAP[type] : '그룹 관리'}</Dialog.Title>
             <Dialog.Description>바리에이션을 생성할 자모들을 묶어서 그룹화합니다.</Dialog.Description>
@@ -146,7 +146,7 @@
                         <Input
                             bind:value={group.name}
                             placeholder="그룹 별칭 (예: 이중모음)"
-                            class="max-w-xs shrink-0"
+                            class="max-w-60 shrink-0"
                         />
 
                         {#if type}
@@ -179,18 +179,18 @@
                         {/if}
 
                         <div class="flex-1 min-w-4"></div>
-                        <div class="flex items-center gap-2 shrink-0">
+                        <div class="flex items-center shrink-0 -mt-4 -mr-2">
                             <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon-sm"
                                 onclick={() => toggleAllItems(gIdx)}
                                 class="whitespace-nowrap"
                             >
-                                전체 선택/해제
+                                <SquareDashed />
                             </Button>
                             <Button
                                 variant="ghost"
-                                size="icon"
+                                size="icon-sm"
                                 onclick={() => removeGroup(gIdx)}
                                 class="text-destructive shrink-0"
                             >
@@ -199,7 +199,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                    <div class="grid grid-cols-4 sm:grid-cols-14 gap-1">
                         {#if type}
                             {#each ITEMS_MAP[type] as char, i}
                                 {#if type !== 'jongsung' || i !== 0}
