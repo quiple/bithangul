@@ -7,6 +7,7 @@
   import { ChevronLeft } from '@lucide/svelte';
   import { untrack } from 'svelte';
   import { CHOSUNG, JUNGSUNG, JONGSUNG } from '$lib/hangul';
+  import { projectState } from '$lib/state.svelte';
 
   interface Props {
     component: PixelComponent;
@@ -32,20 +33,50 @@
   function handleSave() {
     onSave($state.snapshot(localComponent));
   }
+
+  let activeGroupNames = $derived.by(() => {
+    const ObjectValues = Object.entries(localComponent.conditions || {});
+    const names: string[] = [];
+
+    const allGroups = [
+      ...projectState.project.groups.chosung,
+      ...projectState.project.groups.jungsung,
+      ...projectState.project.groups.jongsung,
+    ];
+
+    for (const [groupId, isActive] of ObjectValues) {
+      if (isActive) {
+        const group = allGroups.find((g) => g.id === groupId);
+        if (group) names.push(group.name);
+      }
+    }
+    return names;
+  });
 </script>
 
 <div class="flex flex-col p-2 h-full">
   <div class="flex justify-between items-center mb-4 gap-2">
-    <div class="flex items-center">
+    <div class="flex items-center gap-2">
       <Button variant="ghost" size="icon-sm" onclick={onCancel}><ChevronLeft class="size-6" /></Button>
-      <h2 class="font-bold truncate">
-        컴포넌트 편집 <span class="ml-1 bg-ring text-primary-foreground px-1 py-0.5 rounded"
+      <h2 class="font-bold truncate flex items-center">
+        컴포넌트 편집 <span class="ml-2 bg-ring text-primary-foreground px-1 py-0.5 rounded text-sm"
           >{localComponent.type === 'chosung'
             ? `초성 ${CHOSUNG[localComponent.typeIndex]}`
             : localComponent.type === 'jungsung'
               ? `중성 ${JUNGSUNG[localComponent.typeIndex]}`
               : `종성 ${JONGSUNG[localComponent.typeIndex]}`}</span
         >
+        {#if activeGroupNames.length > 0}
+          <div class="ml-2 flex gap-1">
+            {#each activeGroupNames as name}
+              <span class="bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded text-sm border">{name}</span>
+            {/each}
+          </div>
+        {:else if Object.keys(localComponent.conditions || {}).length > 0}
+          <div class="ml-2 flex gap-1">
+            <span class="bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-sm border">기본</span>
+          </div>
+        {/if}
       </h2>
     </div>
     <ButtonGroup.Root>
