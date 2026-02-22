@@ -218,7 +218,7 @@
 
   {#if previewData}
     <div
-      class="border rounded overflow-hidden bg-white h-[calc(100vh-35.5rem)]"
+      class="border rounded overflow-hidden bg-white h-[calc(100vh-37.75rem)]"
       style="overflow-y: auto;"
     >
       <canvas
