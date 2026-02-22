@@ -43,6 +43,10 @@ class ProjectState {
     const states: Record<string, boolean>[] = []
     const seen = new Set<string>()
 
+    if (groups.length === 0) {
+      return [{}]
+    }
+
     for (let i = startIndex; i < count; i++) {
       const state: Record<string, boolean> = {}
       // To ensure consistent property order in JSON stringify, sort keys
