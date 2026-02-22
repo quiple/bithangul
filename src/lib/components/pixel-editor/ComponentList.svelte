@@ -71,12 +71,44 @@
       list.push(comp);
     }
 
+    const allGroups = [
+      ...projectState.project.groups.chosung,
+      ...projectState.project.groups.jungsung,
+      ...projectState.project.groups.jongsung,
+    ];
+
     // Sort by conditions for consistent order
     for (const list of map.values()) {
       list.sort((a, b) => {
-        const strA = JSON.stringify(a.conditions);
-        const strB = JSON.stringify(b.conditions);
-        return strB.localeCompare(strA);
+        const condA = Object.keys(a.conditions || {}).filter((k) => a.conditions[k]);
+        const condB = Object.keys(b.conditions || {}).filter((k) => b.conditions[k]);
+
+        const aHasNoJongsung = condA.includes('no_jongsung') ? 1 : 0;
+        const bHasNoJongsung = condB.includes('no_jongsung') ? 1 : 0;
+        if (aHasNoJongsung !== bHasNoJongsung) return bHasNoJongsung - aHasNoJongsung;
+
+        if (condA.length !== condB.length) return condA.length - condB.length;
+
+        const getItems = (conds: string[]) => {
+          const items: number[] = [];
+          for (const k of conds) {
+            if (k === 'no_jongsung') continue;
+            const g = allGroups.find((x) => x.id === k);
+            if (g) items.push(...g.items);
+          }
+          return items.sort((x, y) => x - y);
+        };
+
+        const itemsA = getItems(condA);
+        const itemsB = getItems(condB);
+
+        for (let i = 0; i < Math.min(itemsA.length, itemsB.length); i++) {
+          if (itemsA[i] !== itemsB[i]) return itemsA[i] - itemsB[i];
+        }
+
+        const strA = formatConditions(a.conditions || {});
+        const strB = formatConditions(b.conditions || {});
+        return strA.localeCompare(strB, 'ko');
       });
     }
 
