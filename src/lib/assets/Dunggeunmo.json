@@ -30,26 +30,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "f3bc3636-cbc1-40b4-9b80-d20cb671d972",
+      "id": "270cbda6-0e9f-469d-b346-5854ff08f131",
       "bitmap": "000000007f800180018001800180018003000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 0,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "81768a18-5c5b-4d27-b120-a42607258312",
+      "id": "7196e936-8391-4826-ad81-25e24924d641",
       "bitmap": "00007f8001800180018003000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 0,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "b289d887-d124-4f6d-a9aa-86cee03c0288",
@@ -66,26 +58,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "c657e8cf-5cd6-4374-bf50-ad079d6d7795",
+      "id": "a33bdea3-a1a8-419c-ab1e-68e9f5e1eed5",
       "bitmap": "000000007f800180018001800180030000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 0,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "bb8cd3d5-7345-472f-a151-8f96d9234306",
+      "id": "be3f5fae-9be0-4887-9483-1e78ab9d3398",
       "bitmap": "00007f8001800180018003000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 0,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "6c867936-a844-43bb-b4a3-7e58ae446f6f",
@@ -116,26 +100,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "5aefa552-a72a-4834-b8c1-bd423b476f63",
+      "id": "ae940186-d50b-49d1-8301-c53a64279619",
       "bitmap": "000000007b801980198019801980198033000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 1,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "ce62016f-d3dd-435b-a8e0-28eb87ebbf55",
+      "id": "caa98ae4-eae3-4ce9-99f9-4b3caafb5e67",
       "bitmap": "00007f8019801980198033000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 1,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "81f3c089-feb8-436b-a4d7-0d6884071201",
@@ -152,26 +128,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "11f51a36-9be1-40f2-9834-72c6cfacfb22",
+      "id": "a0e12d85-aa3d-43ab-ad84-ed5af5551343",
       "bitmap": "000000007b801980198019803300000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 1,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "8350cf22-90ae-4069-9dd1-0d69fa4ab09f",
+      "id": "a1ed3147-b45b-42e4-8d18-c655f0c2cb1c",
       "bitmap": "00007f8019801980198033000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 1,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "3d2514fc-301e-4a53-a716-289cc00bda67",
@@ -202,26 +170,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "498d49bb-4b52-4e39-8f8b-ff2a45aded42",
+      "id": "c974517e-2c8f-4be8-b0c1-1586d3d47aa6",
       "bitmap": "000000006000600060006000600060003f800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 2,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "55804505-eed0-4255-adea-d18e8e821a74",
+      "id": "30a7c207-1521-4dbf-b27d-1427b0ab4505",
       "bitmap": "00006000600060003f8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 2,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "2f9ec415-0497-4a64-b73e-26d3a8bcbb23",
@@ -238,26 +198,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "e9eb0a97-4188-4838-be12-ffd822a56e55",
+      "id": "a7e6061c-6d89-4a93-b556-476beb08ff42",
       "bitmap": "0000000060006000600060003f80000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 2,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "7f9967b1-43d2-45d7-823c-a808dbc4f5d4",
+      "id": "1b0b0832-349d-475a-babf-6529f2b8af95",
       "bitmap": "00006000600060003f8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 2,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "99e78e3a-55e2-4d75-9e3d-c5a1c190440c",
@@ -288,26 +240,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "f872243c-2ab3-4f03-8eb9-ddcdfc17abd7",
+      "id": "e68a1593-1366-422a-befd-216fbacf69bc",
       "bitmap": "000000007f80600060006000600060003f800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 3,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "f99acced-8595-419d-b4cc-77d028b5288b",
+      "id": "d9843b48-919d-47e1-b2ad-7dec918d078b",
       "bitmap": "00007f80600060003f8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 3,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "36c4bf67-eeaa-47e0-be9a-ab09fe031806",
@@ -324,26 +268,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "d1aec566-e4ef-4bc6-9d67-e2a68b253129",
+      "id": "8a9c5d77-436a-437e-a411-7f6cdc11d009",
       "bitmap": "000000007f806000600060003f80000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 3,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "91b45639-eefe-463b-8f72-738b6bb6b3d4",
+      "id": "88d0f4f9-925c-4622-ac34-a59d756b1c6d",
       "bitmap": "00007f80600060003f8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 3,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "00e1b02a-4ebc-47a5-9d09-815a26b055a8",
@@ -374,26 +310,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "18294690-a5a9-4ebc-a597-cfaa562a40d8",
+      "id": "a441e53c-78b5-4d75-aca6-869cdcacf0da",
       "bitmap": "0000000077806600660066006600660033800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 4,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "4b65a375-ef6e-4a57-8fa6-20a7fee59c99",
+      "id": "0dda7159-1d97-4e4b-82ac-67653648a4c3",
       "bitmap": "00007780660066003b8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 4,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "54c5565a-bfc8-481d-bffe-5e703aa0da8a",
@@ -410,26 +338,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "ef1770d7-b792-4576-8d09-cc62a2e83956",
+      "id": "dbb53b1c-f112-435e-9583-b220146b10b9",
       "bitmap": "0000000077806600660066003b80000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 4,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "5d6e6ae6-4566-4cb4-b92c-f1f2aa57a831",
+      "id": "288d4d68-bcb4-4c10-a741-1856fa6a84e1",
       "bitmap": "00007780660066003b8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 4,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "4341441d-312f-40a8-a8b0-eca20cb1db7c",
@@ -460,26 +380,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "3204fa27-3f48-4330-ad9a-d7233578c1fa",
+      "id": "2edfbcd2-9d7e-4fc7-9323-2b6a62c8fd93",
       "bitmap": "000000007f80018001807f80600060003f800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 5,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "662f82c9-ad20-4ee9-a8a1-b1623efb4f74",
+      "id": "c1e4510d-f3e6-425c-bb41-a6da34593194",
       "bitmap": "00007f8001807f8060003f800000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 5,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "f85a99b5-2f7c-4af7-8265-86ef21b01fea",
@@ -496,26 +408,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "2e2eda65-9734-432f-9b27-edc9e645a19d",
+      "id": "87f38d71-f3c6-4faa-a3e4-bbce2e90499a",
       "bitmap": "000000007f8001807f8060003f80000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 5,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "98aab4bc-049c-4265-adca-a0b46e9fdf2b",
+      "id": "fb604fb3-2418-404b-b325-d742b9281069",
       "bitmap": "00007f8001807f8060003f800000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 5,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "407bdb3d-d444-4291-895d-ea72a826f59d",
@@ -546,26 +450,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "d6c4b307-a1b1-466e-a8ce-e84eaf2b5246",
+      "id": "52b5f6fb-002b-41d5-9376-3b8ecd88c0a1",
       "bitmap": "000000007f80618061806180618061803f000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 6,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "4dd02ca9-589f-464f-9ff1-35b4a19cab51",
+      "id": "c224ec7c-e19a-492d-acad-1de673f65079",
       "bitmap": "00007f80618061803f0000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 6,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "dae1529f-a0a5-41cd-85e0-31b49b252ec6",
@@ -582,26 +478,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "c2ff757c-74ab-4a43-b244-679af51cc081",
+      "id": "cc207fda-38f2-4fb4-93ac-cedc232e41ef",
       "bitmap": "000000007f806180618061803f00000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 6,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "70a57686-8c4b-4f68-b235-2d2a85a57f95",
+      "id": "6b6b93df-e75e-4816-b89d-fc4c88a44f50",
       "bitmap": "00007f80618061803f0000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 6,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "31a133d7-2ee1-4aed-b5fa-fab295f41e3b",
@@ -632,26 +520,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "061c424f-253a-48ab-9b9e-c4b8d64b1a9d",
+      "id": "d4ef5bc9-a46a-4b5c-ac48-c8b45334a93e",
       "bitmap": "000000006180618061807f80618061803f000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 7,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "10853cbe-f077-4237-8cd4-49c9dcb9ad72",
+      "id": "139dd638-9003-4922-b40d-e99b8e39ae95",
       "bitmap": "000061807f8061803f0000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 7,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "4ebbc69c-5b40-42cc-888f-3af8d4eaf49e",
@@ -668,26 +548,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "dbabc799-704f-4119-8b5b-99e5eacce3c6",
+      "id": "0fbdb682-d2e4-42fe-87ae-739d442ec77d",
       "bitmap": "00000000618061807f8061803f00000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 7,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "c61d44c4-9f02-4607-af55-e7c6af8b3606",
+      "id": "1eb85872-20ca-4bd8-acdb-20df8ddbb8d6",
       "bitmap": "000061807f8061803f0000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 7,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "45d1fd12-f685-4c9c-8dc8-1921a1d578d5",
@@ -718,26 +590,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "97860b03-ecd7-45d9-9761-175e9073717b",
+      "id": "94cacb7a-46e5-4a28-961a-ea445362397d",
       "bitmap": "000000006d806d806d807f806d806d803f000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 8,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "5b63bbe6-76ce-4dde-8de3-cd4558ff21ac",
+      "id": "74b31e33-9fcb-4c30-9886-cbf27373bb04",
       "bitmap": "00006d807f806d803f0000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 8,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "5d300138-13ba-4e01-b452-b62d11005f36",
@@ -754,26 +618,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "6078e34d-0e79-4cb7-bac1-121f22ff92f0",
+      "id": "23653b6e-3cab-4b15-b7d6-8d1ccac0f0db",
       "bitmap": "000000006d806d807f806d803f00000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 8,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "43fbc785-de0a-4682-b2bd-dcbb3b39d1c9",
+      "id": "48366a9b-1cb0-45bf-b420-758e5983bbc5",
       "bitmap": "00006d807f806d803f0000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 8,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "53f62d25-f51a-4ae4-bfdc-1685199800e3",
@@ -804,26 +660,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "62280f0a-e0f4-4dc2-bff3-bd37118d9048",
+      "id": "e23d5a8d-2655-40c7-b620-d14e848bf290",
       "bitmap": "000000000c000c000c000c001e00330061800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 9,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "bb4dd65e-3040-4d1c-a33a-b34c43f66749",
+      "id": "fe31aed4-e231-4c2c-b10a-63f35120b004",
       "bitmap": "00000c001e003300618000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 9,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "26a68e58-8f38-4bcd-bded-9f3b224f6385",
@@ -840,26 +688,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "5b21d057-324a-4863-a23b-95fd2e902977",
+      "id": "1d195056-02b1-47a1-a78e-38edb25bc492",
       "bitmap": "000000000c000c001e0033006180000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 9,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "e4244978-2852-4486-8144-d24a988032d1",
+      "id": "c8846f7b-a8c7-408a-a7ac-cd0d118d3677",
       "bitmap": "00000c001e003300618000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 9,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "635bf80b-ec9e-496f-a60d-938a91786302",
@@ -890,26 +730,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "182f25fe-2599-40a9-bd97-d4171ccb30fa",
+      "id": "46cc478a-b2e9-4c20-be13-01795a246866",
       "bitmap": "0000000036003600360036003e006f00d9800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 10,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "6c38f667-3e90-4e46-8bbf-67889a03faf6",
+      "id": "9a93436c-2685-4ecd-adf2-7b57dc621f90",
       "bitmap": "000036003e006f00d98000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 10,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "0ee641a7-ad6d-449c-ad48-ff6f7fdf088d",
@@ -926,26 +758,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "4c9db070-0ac4-4bc1-9384-c0f5f5909a84",
+      "id": "880f6e06-4f75-484c-b7f5-31f4e2af049a",
       "bitmap": "00000000360036003e006f00d980000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 10,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "c294b843-dba7-444f-b17f-9ca535a1f92b",
+      "id": "52fdfc0e-60f5-414a-acdf-266c936172c3",
       "bitmap": "000036003e006f00d98000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 10,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "9c8f57d3-3713-4333-b699-1e4586c3073a",
@@ -976,26 +800,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "761357b3-e711-48c5-ac39-d778df0896ff",
+      "id": "005ef53d-945d-4c15-a9ec-308b54f7a83c",
       "bitmap": "000000001e00330061806180618033001e000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 11,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "d09154a1-e4a2-4e34-be02-67fc35ff0b6d",
+      "id": "c1991fd4-ac32-45b5-b033-ae0878d02a57",
       "bitmap": "00001e007380618073801e000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 11,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "49bf78a9-5128-479e-ad82-bb2f13d53e3a",
@@ -1012,26 +828,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "bc1e982c-9463-413a-b102-cbeee891e8ac",
+      "id": "050ff364-7e53-46bb-9ce0-1f608fd3d6f1",
       "bitmap": "000000001e007380618073801e00000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 11,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "fca1c749-45b9-4815-859f-ee87a6a6b067",
+      "id": "a1009e32-297c-4a53-aac5-d1dfce1473af",
       "bitmap": "00001e007380618073801e000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 11,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "50b2d44c-56d0-4a1f-b243-0ddbc4d5eaf6",
@@ -1062,26 +870,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "551dcd20-d74d-4a79-8fd4-256a72748482",
+      "id": "8fde79ad-2c82-41cb-8ca6-e691b590e415",
       "bitmap": "000000007f800c000c000c001e00330061800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 12,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "84ae35d5-72f6-48cf-a483-49e9bb6b3543",
+      "id": "32b99b14-d716-4195-b1e6-e01febaa9417",
       "bitmap": "00007f801e003300618000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 12,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "a3fec9de-afd6-4807-831d-caaa78edef9d",
@@ -1098,26 +898,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "4f3a01dc-2e17-4fa8-8dac-d951a872c443",
+      "id": "2e599798-c9f8-45d3-ae96-e2aada62ad7e",
       "bitmap": "000000007f800c001e0033006180000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 12,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "f0cfdd3f-d2d9-4cca-8c07-520ecea34cea",
+      "id": "78f197a0-937a-4b62-b404-77ec7a2dadff",
       "bitmap": "00007f801e003300618000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 12,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "12317c8c-7101-4055-8ef9-d749fd94f07b",
@@ -1148,26 +940,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "523f1a9b-2c33-42c7-ba68-8a27fd470afa",
+      "id": "886bdf59-ba53-4e4f-a1a1-e6ad0b16c2da",
       "bitmap": "000000007f801b001b001b001b003f806cc00000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 13,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "7f33be02-b7ca-461c-b1cc-d93019aa5cb9",
+      "id": "b233dbed-c421-4749-8be1-2f8b22054bb6",
       "bitmap": "00007f8033003f006d8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 13,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "96c23f5a-4e33-4e9a-be72-19100cbb83cb",
@@ -1184,26 +968,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "6bc484d4-7e8b-4349-9873-d791dd2306cd",
+      "id": "116bf1ef-f409-4648-a89c-feaec0008c92",
       "bitmap": "000000007f801b001b003f806cc0000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 13,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "862014ef-889e-4999-bcfd-3d13461ada5a",
+      "id": "00f92fe2-9595-48fa-a715-fcf413d8346c",
       "bitmap": "00007f8033003f006d8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 13,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "4326e864-8cac-45b5-bbd2-b86b81556951",
@@ -1234,26 +1010,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "40e61d4b-2800-4031-a344-7ae6389f65ad",
+      "id": "3ea87cc3-a79b-4bd5-b232-420237401b5a",
       "bitmap": "00000c007f800c000c000c001e00330061800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 14,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "6c35028d-e545-4d8a-a99c-c0c0b5598fb0",
+      "id": "0dc90aa1-6fc3-4c4f-9c5e-7afff9c50f59",
       "bitmap": "00000c007f801e00330061800000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 14,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "cee6e48c-49dc-4d29-b799-4a9a77ed26fb",
@@ -1270,26 +1038,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "f3a7e777-bc1f-4c2f-a5c2-1a9542b56366",
+      "id": "55a0906e-1d49-441e-9dd8-afb2be9b14b0",
       "bitmap": "00000c007f800c001e0033006180000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 14,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "0e8b79ab-af24-44e8-b6de-ea5e3b4736f5",
+      "id": "c8c14fe4-6042-48b4-8186-10d452ccc436",
       "bitmap": "00000c007f801e00330061800000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 14,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "3cea0182-a5e5-4d03-b309-1b8bd3e90117",
@@ -1320,26 +1080,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "2fddcfec-ae64-4f66-a024-ee789d8209fc",
+      "id": "7fdaffe9-2f77-4717-b212-6ec3d33369a6",
       "bitmap": "000000007f80018001807f800180018003000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 15,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "c305bd25-0236-41bd-8cd8-be59fd1b9beb",
+      "id": "e62ad0e0-4405-4fe1-87b6-04d0fb1131ba",
       "bitmap": "00007f8001807f80018003000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 15,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "331d85be-ad28-49a8-a3ad-4b5c2535a4b8",
@@ -1356,26 +1108,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "6c3cde16-7be2-42c0-b1ef-b9f44d58d07b",
+      "id": "40532439-48ea-4c32-8817-3c7954c082e8",
       "bitmap": "000000007f8001807f8001800180030000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 15,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "a04e6d53-5ab3-4d45-8263-7a01ba95bb20",
+      "id": "805eaf1b-7441-444d-896c-28f286ef21d1",
       "bitmap": "00007f8001807f80018003000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 15,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "345ac1ef-b810-4792-a451-004893ffa7fb",
@@ -1406,26 +1150,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "33c8d569-ca5f-405c-86e3-fdf264402683",
+      "id": "a0f0279e-cb16-4306-80b4-b7dc70227554",
       "bitmap": "000000007f80600060007f00600060003f800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 16,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "40fa3cec-bc20-4e95-859b-49a03121f04c",
+      "id": "7a9d797a-2edd-4288-9c58-f0f68feb3acf",
       "bitmap": "00007f8060007f8060003f800000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 16,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "80d8ad27-6700-4f0d-88ed-7dbaadc9d1ad",
@@ -1442,26 +1178,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "2c1d3a9b-42ef-4d73-b1e0-1f70ed134011",
+      "id": "dd19f671-5969-4a3d-be19-105ec69d425d",
       "bitmap": "000000007f8060007f8060003f80000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 16,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "f745adb1-87e1-4e49-9e59-8fbe989cbca9",
+      "id": "179b9617-fd5a-47f5-b335-f75b5aec4f8a",
       "bitmap": "00007f8060007f8060003f800000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 16,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "622b0e06-8768-4b44-a19e-efcf5bd27496",
@@ -1492,26 +1220,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "9c610d27-794b-42cb-b521-0759be675835",
+      "id": "20492c2b-3043-49d5-aeea-f79a7e3567c1",
       "bitmap": "000000007f80330033003300330033007f800000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 17,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "3de62020-aa3f-4f93-b44e-0de9b4f5d926",
+      "id": "4f4f7868-1a8b-4f4c-99a6-85e7db2aa06e",
       "bitmap": "00007f80330033007f8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 17,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "1097ef92-9df4-4569-a548-f0ebd35c3b8f",
@@ -1528,26 +1248,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "2c409001-d932-4c47-9d4b-33cbf13c1b12",
+      "id": "c870be21-b3d9-49b5-8f7b-f8c238f99094",
       "bitmap": "000000007f803300330033007f80000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 17,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "8682ed80-1968-4062-ac35-9c2c139e8882",
+      "id": "63f9fd6a-f21a-4384-a47a-3f6938662ca7",
       "bitmap": "00007f80330033007f8000000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 17,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "883790e1-cd6e-4c0a-8c67-e3316197c54c",
@@ -1578,26 +1290,18 @@
       "conditions": {"256e072a-baf6-4526-97cd-f59780abff33": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "27d1279c-63e3-4da4-a9ff-995b934e6abb",
+      "id": "aed2102f-9c43-49e8-a648-328c2daf55ac",
       "bitmap": "00000c007f801e0033006180618033001e000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 18,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "no_jongsung": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "no_jongsung": true}
     },
     {
-      "id": "252bf725-b651-4c9c-8130-2b63a3719520",
+      "id": "b419cc69-6d0a-42d2-b6d9-5a5bf3eb2e4c",
       "bitmap": "00000c007f803f0061803f000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 18,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"6f5d29cb-a3c3-4ca1-9d1e-68379d2b638b": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "f756157f-761d-44ba-a231-0fdca539dbc3",
@@ -1614,26 +1318,18 @@
       "conditions": {"0d659a23-63cf-4ee6-b3fd-df0b14050e1c": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
-      "id": "6f8314eb-2b21-44e6-b570-61c047f2aa79",
+      "id": "456718f4-39d3-47d2-815b-5ac462b60b00",
       "bitmap": "00000c007f803f00618061803f00000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 18,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "no_jongsung": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "no_jongsung": true}
     },
     {
-      "id": "05895a2a-3b13-41a7-83ca-a4c5c32cba64",
+      "id": "dacb7c34-ac92-400c-9e75-eae41b434e4f",
       "bitmap": "00000c007f803f0061803f000000000000000000000000000000000000000000",
       "type": "chosung",
       "typeIndex": 18,
-      "conditions": {
-        "33235de4-5320-49d6-9fe4-6870970ecbd7": true,
-        "b79f5718-ced3-4832-bbf9-f70ce0eb3819": true,
-        "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true
-      }
+      "conditions": {"b79f5718-ced3-4832-bbf9-f70ce0eb3819": true, "c123749b-c3bf-41fc-b6b8-e09b8e01e18a": true}
     },
     {
       "id": "ef1ef9e4-2845-4525-8db2-879c05bf1778",
@@ -3008,15 +2704,9 @@
       {"id": "b79f5718-ced3-4832-bbf9-f70ce0eb3819", "name": "ㅝㅞㅟ", "items": [14, 15, 16], "appliesTo": ["chosung"]},
       {
         "id": "a74047c5-8b65-4074-91cd-b014e6b98555",
-        "name": "Group 6",
+        "name": "가로형 모음",
         "items": [8, 12, 13, 17, 18],
         "appliesTo": ["jongsung"]
-      },
-      {
-        "id": "33235de4-5320-49d6-9fe4-6870970ecbd7",
-        "name": "이중모음",
-        "items": [9, 10, 11, 14, 15, 16, 19],
-        "appliesTo": ["chosung"]
       },
       {
         "id": "52595a91-7f39-4498-8bfe-1565f84ce31b",
