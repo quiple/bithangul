@@ -8,7 +8,7 @@ class ProjectState {
     groups: {
       chosung: [],
       jungsung: [],
-      jongsung: [],
+      jongsung: [{id: 'no_jongsung', name: '받침 없음', items: [0]}],
     },
     components: [],
   })
@@ -183,6 +183,10 @@ class ProjectState {
   loadProject(data: FontProject) {
     if (!data.groups) {
       data.groups = {chosung: [], jungsung: [], jongsung: []}
+    }
+    // Ensure "no_jongsung" group exists
+    if (!data.groups.jongsung.find((g) => g.id === 'no_jongsung')) {
+      data.groups.jongsung.push({id: 'no_jongsung', name: '받침 없음', items: [0]})
     }
     // Update old components: ensure conditions object exists and remove `false` entries
     for (const c of data.components) {
