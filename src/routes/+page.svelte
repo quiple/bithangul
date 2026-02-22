@@ -36,7 +36,7 @@
   const EXAMPLES: { name: string; loader: () => Promise<FontProject> }[] = [
     {
       name: '둥근모꼴 (한글도깨비 8x4x4벌식)',
-      loader: () => import('$lib/assets/Dunggeunmo.json').then((m) => m.default as FontProject),
+      loader: () => import('$lib/assets/Dunggeunmo.json').then((m) => m.default as unknown as FontProject),
     },
   ];
 
