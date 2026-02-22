@@ -111,7 +111,7 @@
 {/snippet}
 
 {#snippet sectionHeader(type: ComponentType, label: string)}
-  <div class="flex items-center justify-between px-1 mb-1.5">
+  <div class="flex items-center justify-between pl-1">
     <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
       {label}
     </h3>
