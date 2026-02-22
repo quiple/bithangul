@@ -25,6 +25,12 @@
 
   let activeTab = $state('chosung');
 
+  $effect(() => {
+    if (componentType === activeTab) {
+      activeTab = componentType === 'chosung' ? 'jungsung' : 'chosung';
+    }
+  });
+
   /**
    * 특정 항목이 고정(fixed)인지 확인.
    * - 이 컴포넌트의 자모 타입 탭에서 typeIndex 항목은 항상 고정 선택
@@ -146,16 +152,22 @@
   </div>
 
   <Tabs bind:value={activeTab} class="flex-1 flex flex-col min-h-0">
-    <TabsList class="grid w-full grid-cols-3">
-      <TabsTrigger value="chosung">
-        초성 ({targets.chosung.length})
-      </TabsTrigger>
-      <TabsTrigger value="jungsung">
-        중성 ({targets.jungsung.length})
-      </TabsTrigger>
-      <TabsTrigger value="jongsung">
-        종성 ({targets.jongsung.filter((i) => i !== 0).length})
-      </TabsTrigger>
+    <TabsList class="grid w-full grid-cols-2">
+      {#if componentType !== 'chosung'}
+        <TabsTrigger value="chosung">
+          초성 ({targets.chosung.length})
+        </TabsTrigger>
+      {/if}
+      {#if componentType !== 'jungsung'}
+        <TabsTrigger value="jungsung">
+          중성 ({targets.jungsung.length})
+        </TabsTrigger>
+      {/if}
+      {#if componentType !== 'jongsung'}
+        <TabsTrigger value="jongsung">
+          종성 ({targets.jongsung.filter((i) => i !== 0).length})
+        </TabsTrigger>
+      {/if}
     </TabsList>
 
     <div class="grid grid-cols-4 @sm:grid-cols-6 @md:grid-cols-8 gap-2">
