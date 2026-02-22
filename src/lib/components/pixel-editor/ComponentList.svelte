@@ -53,9 +53,9 @@
       if (!cond[k]) continue; // backwards compatibility check for false values
       const g = allGroups.find((x) => x.id === k);
       const name = g ? g.name : k;
-      parts.push(`${name}과 결합`);
+      parts.push(name);
     }
-    return parts.join(', ');
+    return `${parts.join(', ')}과 결합`;
   }
 
   let variationsMap = $derived.by(() => {
