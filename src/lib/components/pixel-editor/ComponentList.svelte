@@ -50,9 +50,10 @@
     ];
 
     for (const k of keys) {
+      if (!cond[k]) continue; // backwards compatibility check for false values
       const g = allGroups.find((x) => x.id === k);
       const name = g ? g.name : k;
-      parts.push(cond[k] ? `${name}과 결합` : `${name} 외와 결합`);
+      parts.push(`${name}과 결합`);
     }
     return parts.join(', ');
   }
@@ -122,7 +123,7 @@
 
 <div class="flex flex-col h-full">
   <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2 border-b">
-    <h2 class="font-bold truncate">컴포넌트 바리에이션</h2>
+    <h2 class="font-bold truncate">컴포넌트</h2>
   </div>
 
   <div class="overflow-y-auto overscroll-contain flex-1 min-h-0" bind:this={scrollContainer} onscroll={handleScroll}>
