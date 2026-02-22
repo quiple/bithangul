@@ -144,18 +144,12 @@
     return buffer;
   });
 
-  // Calculate layout based on absolute optimal sizing, then CSS will scale it up
-  let cols = $derived(
-    Math.max(1, Math.floor((containerWidth + 20) / INTERNAL_CELL)) > 11
-      ? 11
-      : Math.max(1, Math.floor((containerWidth + 20) / INTERNAL_CELL)),
-  );
+  // Calculate layout based on container width
+  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_CELL / 2) / INTERNAL_CELL)));
   let rows = $derived(Math.ceil(affectedIndices.length / cols));
 
   let canvasWidth = $derived(cols * INTERNAL_CELL + INTERNAL_BORDER);
   let canvasHeight = $derived(Math.max(INTERNAL_CELL + INTERNAL_BORDER, rows * INTERNAL_CELL + INTERNAL_BORDER));
-
-  let cssCellSize = $derived(containerWidth / cols);
 
   // Determine border color from CSS variable
   function getBorderColor(canvas: HTMLCanvasElement): string {
@@ -223,14 +217,16 @@
   <h3 class="pl-2 font-medium truncate">미리보기 ({affectedIndices.length}자)</h3>
 
   {#if previewData}
-    <div class="border rounded overflow-hidden bg-white h-[calc(100vh-35.5rem)]" style="overflow-y: auto;">
+    <div
+      class="border rounded overflow-hidden bg-white h-[calc(100vh-35.5rem)]"
+      style="overflow-y: auto;"
+    >
       <canvas
         bind:this={canvas}
         width={canvasWidth}
         height={canvasHeight}
         class="block -m-px"
-        style="width: 100%; height: {rows *
-          cssCellSize}px; image-rendering: pixelated; --border-color: var(--border, #e5e5e5);"
+        style="width: {canvasWidth}px; height: {canvasHeight}px; --border-color: var(--border, #e5e5e5);"
       ></canvas>
     </div>
   {:else}
