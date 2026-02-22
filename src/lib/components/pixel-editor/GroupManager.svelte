@@ -18,11 +18,17 @@
     let { open, type, initialGroups, onOpenChange, onSave }: Props = $props();
 
     let draftGroups = $state<JamoGroup[]>([]);
+    let hiddenGroups = $state<JamoGroup[]>([]);
     let errorMsg = $state<string | null>(null);
 
     $effect(() => {
         if (open) {
-            draftGroups = initialGroups.map((g) => ({ ...g, items: [...g.items] }));
+            draftGroups = initialGroups
+                .filter((g) => g.id !== 'no_jongsung')
+                .map((g) => ({ ...g, items: [...g.items] }));
+            hiddenGroups = initialGroups
+                .filter((g) => g.id === 'no_jongsung')
+                .map((g) => ({ ...g, items: [...g.items] }));
             errorMsg = null;
         }
     });
@@ -85,7 +91,7 @@
             errorMsg = err;
             return;
         }
-        onSave(draftGroups);
+        onSave([...hiddenGroups, ...draftGroups]);
     }
 </script>
 
