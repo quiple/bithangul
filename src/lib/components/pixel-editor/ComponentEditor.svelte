@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import GridCanvas from './GridCanvas.svelte';
-  import TargetSelector from './TargetSelector.svelte';
   import ComponentPreviewGrid from './ComponentPreviewGrid.svelte';
   import type { PixelComponent } from '$lib/types';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
@@ -35,7 +34,7 @@
   }
 </script>
 
-<div class="flex flex-col p-2">
+<div class="flex flex-col p-2 h-full">
   <div class="flex justify-between items-center mb-4 gap-2">
     <div class="flex items-center">
       <Button variant="ghost" size="icon-sm" onclick={onCancel}><ChevronLeft class="size-6" /></Button>
@@ -59,18 +58,10 @@
     </ButtonGroup.Root>
   </div>
 
-  <div class="flex flex-col">
+  <div class="flex flex-col flex-1 min-h-0">
     <div class="flex justify-center mb-4">
       <GridCanvas bitmap={localComponent.bitmap} onUpdate={(bm) => (localComponent.bitmap = bm)} />
     </div>
-
-    <TargetSelector
-      targets={localComponent.targets}
-      componentType={localComponent.type}
-      typeIndex={localComponent.typeIndex}
-      {siblingComponents}
-      onUpdate={(t) => (localComponent.targets = t)}
-    />
 
     <ComponentPreviewGrid component={localComponent} />
   </div>

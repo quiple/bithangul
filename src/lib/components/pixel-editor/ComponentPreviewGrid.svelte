@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { projectState } from '$lib/state.svelte';
-    import type { PixelComponent } from '$lib/types';
+  import { projectState } from '$lib/state.svelte';
+  import type { PixelComponent, ComponentType } from '$lib/types';
+  import { CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT } from '$lib/hangul';
 
-    interface Props {
-
+  interface Props {
     component: PixelComponent;
   }
 
@@ -17,49 +17,67 @@
   let canvas: HTMLCanvasElement = $state(undefined!);
   let containerWidth = $state(0);
 
-  // Flatten bitmap helper
-  function flattenBitmap(bitmap: number[][]): Uint16Array {
-    const arr = new Uint16Array(16);
-    for (let r = 0; r < 16; r++) {
-      let val = 0;
-      for (let c = 0; c < 16; c++) {
-        if (bitmap[r][c]) {
-          val |= 1 << (15 - c); // MSB at index 0
+  function checkConditionMatch(
+    cho: number,
+    jung: number,
+    jong: number,
+    type: ComponentType,
+    conditions: Record<string, boolean>,
+  ) {
+    const groups = projectState.project.groups;
+    for (const [groupId, expected] of Object.entries(conditions)) {
+      let isIncluded = false;
+
+      const gCho = groups.chosung.find((g) => g.id === groupId);
+      if (gCho) {
+        isIncluded = gCho.items.includes(cho);
+      } else {
+        const gJung = groups.jungsung.find((g) => g.id === groupId);
+        if (gJung) {
+          isIncluded = gJung.items.includes(jung);
+        } else {
+          const gJong = groups.jongsung.find((g) => g.id === groupId);
+          if (gJong) {
+            isIncluded = gJong.items.includes(jong);
+          }
         }
       }
-      arr[r] = val;
+
+      if (isIncluded !== expected) return false;
     }
-    return arr;
+    return true;
   }
 
-  // Calculate affected indices based on component targets
+  // Calculate affected indices based on component conditions
   let affectedIndices = $derived.by(() => {
     const indices: number[] = [];
-    const { type, typeIndex, targets } = component;
-
-    const chosungs = [...targets.chosung].sort((a, b) => a - b);
-    const jungsungs = [...targets.jungsung].sort((a, b) => a - b);
-    const jongsungs = [...targets.jongsung].sort((a, b) => a - b);
+    const { type, typeIndex, conditions } = component;
 
     if (type === 'chosung') {
       const cho = typeIndex;
-      for (const jung of jungsungs) {
-        for (const jong of jongsungs) {
-          indices.push(cho * 588 + jung * 28 + jong);
+      for (let jung = 0; jung < JUNGSUNG_COUNT; jung++) {
+        for (let jong = 0; jong < JONGSUNG_COUNT; jong++) {
+          if (checkConditionMatch(cho, jung, jong, type, conditions)) {
+            indices.push(cho * 588 + jung * 28 + jong);
+          }
         }
       }
     } else if (type === 'jungsung') {
       const jung = typeIndex;
-      for (const cho of chosungs) {
-        for (const jong of jongsungs) {
-          indices.push(cho * 588 + jung * 28 + jong);
+      for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
+        for (let jong = 0; jong < JONGSUNG_COUNT; jong++) {
+          if (checkConditionMatch(cho, jung, jong, type, conditions)) {
+            indices.push(cho * 588 + jung * 28 + jong);
+          }
         }
       }
     } else if (type === 'jongsung') {
       const jong = typeIndex;
-      for (const cho of chosungs) {
-        for (const jung of jungsungs) {
-          indices.push(cho * 588 + jung * 28 + jong);
+      for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
+        for (let jung = 0; jung < JUNGSUNG_COUNT; jung++) {
+          if (checkConditionMatch(cho, jung, jong, type, conditions)) {
+            indices.push(cho * 588 + jung * 28 + jong);
+          }
         }
       }
     }
@@ -74,34 +92,18 @@
     const view = new DataView(buffer);
     const result = new Uint16Array(16);
 
-    // Pre-process components
-    // We need to use 'component' instead of the one in projectState if IDs match
-    const components = projectState.project.components.map(c =>
-      c.id === component.id ? component : c
-    );
+    const components = projectState.project.components.map((c) => (c.id === component.id ? component : c));
 
-    // Optimize: pre-calculate masks and flattened bitmaps for all components
-    const compCount = components.length;
-    const compBitmaps = new Array(compCount);
-    const compChoMask = new Uint32Array(compCount);
-    const compJungMask = new Uint32Array(compCount);
-    const compJongMask = new Uint32Array(compCount);
-
-    for (let ci = 0; ci < compCount; ci++) {
-      const comp = components[ci];
-      compBitmaps[ci] = flattenBitmap(comp.bitmap);
-
-      let choMask = 0;
-      for (const idx of comp.targets.chosung) choMask |= 1 << idx;
-      compChoMask[ci] = choMask;
-
-      let jungMask = 0;
-      for (const idx of comp.targets.jungsung) jungMask |= 1 << idx;
-      compJungMask[ci] = jungMask;
-
-      let jongMask = 0;
-      for (const idx of comp.targets.jongsung) jongMask |= 1 << idx;
-      compJongMask[ci] = jongMask;
+    // Group components by type+typeIndex for fast lookup
+    const lookup = new Map<string, PixelComponent[]>();
+    for (const c of components) {
+      const key = `${c.type}:${c.typeIndex}`;
+      let list = lookup.get(key);
+      if (!list) {
+        list = [];
+        lookup.set(key, list);
+      }
+      list.push(c);
     }
 
     for (let i = 0; i < affectedIndices.length; i++) {
@@ -110,21 +112,28 @@
       const jung = Math.floor((charIdx % 588) / 28);
       const jong = charIdx % 28;
 
-      const choBit = 1 << cho;
-      const jungBit = 1 << jung;
-      const jongBit = 1 << jong;
-
-      // Reset result
       for (let r = 0; r < 16; r++) result[r] = 0;
 
-      for (let ci = 0; ci < compCount; ci++) {
-        if (compChoMask[ci] & choBit && compJungMask[ci] & jungBit && compJongMask[ci] & jongBit) {
-          const bmp = compBitmaps[ci];
+      // Find the correctly matching components for this exact syllable
+      const applyComponent = (type: ComponentType, idx: number) => {
+        const list = lookup.get(`${type}:${idx}`) || [];
+        const matched = list.find((c) => checkConditionMatch(cho, jung, jong, c.type, c.conditions));
+        if (matched) {
           for (let r = 0; r < 16; r++) {
-            result[r] |= bmp[r];
+            let rowVal = 0;
+            for (let c = 0; c < 16; c++) {
+              if (matched.bitmap[r][c]) {
+                rowVal |= 1 << (15 - c);
+              }
+            }
+            result[r] |= rowVal;
           }
         }
-      }
+      };
+
+      applyComponent('chosung', cho);
+      applyComponent('jungsung', jung);
+      if (jong > 0) applyComponent('jongsung', jong);
 
       const offset = i * 32;
       for (let r = 0; r < 16; r++) {
@@ -136,7 +145,7 @@
   });
 
   // Calculate layout based on container width
-  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_CELL / 2) / INTERNAL_CELL)))
+  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_CELL / 2) / INTERNAL_CELL)));
   let rows = $derived(Math.ceil(affectedIndices.length / cols));
 
   let canvasWidth = $derived(cols * INTERNAL_CELL + INTERNAL_BORDER);
@@ -199,20 +208,17 @@
   $effect(() => {
     // Redraw whenever relevant dependencies change
     if (canvas && previewData && affectedIndices && cols && rows && canvasWidth && canvasHeight) {
-       requestAnimationFrame(draw);
+      requestAnimationFrame(draw);
     }
   });
 </script>
 
-<div
-  class="@container flex flex-col gap-2 mt-4"
-  bind:clientWidth={containerWidth}
->
+<div class="@container flex flex-col gap-2 mt-4" bind:clientWidth={containerWidth}>
   <h3 class="pl-2 font-medium truncate">미리보기 ({affectedIndices.length}자)</h3>
 
   {#if previewData}
     <div
-      class="border rounded overflow-hidden bg-white h-[calc(100vh-55rem)] @sm:h-[calc(100vh-52.25rem)] @md:h-[calc(100vh-49.5rem)]"
+      class="border rounded overflow-hidden bg-white h-[calc(100vh-15rem)] @sm:h-[calc(100vh-15rem)] @md:h-[calc(100vh-15rem)]"
       style="overflow-y: auto;"
     >
       <canvas
@@ -224,8 +230,6 @@
       ></canvas>
     </div>
   {:else}
-    <div class="text-sm text-muted-foreground p-4 border rounded text-center">
-      컴포넌트가 적용될 자모를 ‘적용 범위’에서 선택하세요.
-    </div>
+    <div class="text-sm text-muted-foreground p-4 border rounded text-center">조건에 맞는 자모가 없습니다.</div>
   {/if}
 </div>

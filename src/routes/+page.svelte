@@ -1,9 +1,10 @@
 <script lang="ts">
   import * as Resizable from '$lib/components/ui/resizable/index.js';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { projectState } from '$lib/state.svelte';
   import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte';
   import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte';
+  import GroupManager from '$lib/components/pixel-editor/GroupManager.svelte';
   import Preview from '$lib/components/Preview.svelte';
   import { Button, buttonVariants } from '$lib/components/ui/button';
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
@@ -14,7 +15,7 @@
   import { downloadText } from '$lib/export';
   import * as Tooltip from '$lib/components/ui/tooltip/index.js';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
-  import type { FontProject } from '$lib/types';
+  import type { FontProject, ComponentType, JamoGroup } from '$lib/types';
 
   let generatorWorker: Worker;
   let exportWorker: Worker;
@@ -23,13 +24,14 @@
   let isExportingBDF = $state(false);
   let isExportingHEX = $state(false);
 
-  /** 새로 추가되어 아직 저장되지 않은 컴포넌트 ID */
-  let newlyCreatedId = $state<string | null>(null);
-
   /** 컴포넌트 목록 스크롤 위치 보존 */
   let componentListScrollTop = $state(0);
 
   let exampleDialogOpen = $state(false);
+
+  // Group Manager State
+  let gmOpen = $state(false);
+  let gmType = $state<ComponentType | null>(null);
 
   const EXAMPLES: { name: string; loader: () => Promise<FontProject> }[] = [
     {
@@ -40,7 +42,8 @@
 
   async function loadExample(loader: () => Promise<FontProject>) {
     try {
-      const data = await loader();
+      let data = await loader();
+      data = deserializeProject(data);
       if (data.components) {
         projectState.loadProject(data);
         generatedData = null;
@@ -54,6 +57,11 @@
   }
 
   onMount(() => {
+    // Check if initial sync is needed
+    if (projectState.project.components.length === 0) {
+      projectState.syncComponents();
+    }
+
     generatorWorker = new GeneratorWorker();
     generatorWorker.onmessage = (e) => {
       generatedData = e.data.buffer;
@@ -85,8 +93,27 @@
     generatorWorker.postMessage(snapshot);
   }
 
+  function serializeProject(proj: FontProject): any {
+    const clone = structuredClone(proj) as any;
+    for (const c of clone.components) {
+      if (Array.isArray(c.bitmap)) {
+        let hex = '';
+        for (let r = 0; r < 16; r++) {
+          let val = 0;
+          for (let col = 0; col < 16; col++) {
+            if (c.bitmap[r][col]) val |= 1 << (15 - col);
+          }
+          hex += val.toString(16).padStart(4, '0');
+        }
+        c.bitmap = hex;
+      }
+    }
+    return clone;
+  }
+
   function handleSaveProject() {
-    const data = JSON.stringify($state.snapshot(projectState.project), null, 2);
+    const serialized = serializeProject($state.snapshot(projectState.project));
+    const data = JSON.stringify(serialized);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -94,6 +121,27 @@
     a.download = `${projectState.project.name || 'font-project'}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function deserializeProject(data: any): FontProject {
+    if (data.components) {
+      for (const c of data.components) {
+        if (typeof c.bitmap === 'string') {
+          const hex = c.bitmap;
+          const bitmap: number[][] = [];
+          for (let r = 0; r < 16; r++) {
+            const val = parseInt(hex.substring(r * 4, r * 4 + 4), 16);
+            const row: number[] = [];
+            for (let col = 0; col < 16; col++) {
+              row.push((val >> (15 - col)) & 1);
+            }
+            bitmap.push(row);
+          }
+          c.bitmap = bitmap;
+        }
+      }
+    }
+    return data as FontProject;
   }
 
   function handleLoadProject() {
@@ -106,7 +154,8 @@
       if (!file) return;
       const text = await file.text();
       try {
-        const data = JSON.parse(text);
+        let data = JSON.parse(text);
+        data = deserializeProject(data);
         if (data.components) {
           projectState.loadProject(data);
           generatedData = null;
@@ -123,7 +172,6 @@
   function handleExportBDF() {
     if (!generatedData || isExportingBDF) return;
     isExportingBDF = true;
-    // ArrayBuffer를 복사하여 Worker에 전송 (transfer로 소유권 이전)
     const bufferCopy = generatedData.slice(0);
     exportWorker.postMessage({ type: 'bdf', buffer: bufferCopy, fontName: projectState.project.name || 'bithangul' }, [
       bufferCopy,
@@ -139,7 +187,6 @@
 </script>
 
 <div class="h-screen w-screen flex flex-col bg-background text-foreground overflow-hidden">
-  <!-- Toolbar -->
   <header class="h-14 border-b px-4 gap-2 flex items-center justify-between shrink-0 bg-card">
     <div class="flex items-center gap-4">
       <h1 class="font-bold text-lg truncate">BitHangul</h1>
@@ -199,12 +246,9 @@
     </div>
   </header>
 
-  <!-- Main Content -->
   <Resizable.PaneGroup direction="horizontal" class="flex-1 flex overflow-hidden">
-    <!-- Left Panel -->
     <Resizable.Pane defaultSize={35} minSize={20} maxSize={60} class="flex flex-col bg-sidebar">
       {#if projectState.selectedComponentId && projectState.selectedComponent}
-        <!-- Edit Mode -->
         {@const sel = projectState.selectedComponent}
         {@const siblings = projectState.project.components.filter(
           (c) => c.id !== sel.id && c.type === sel.type && c.typeIndex === sel.typeIndex,
@@ -214,53 +258,34 @@
           siblingComponents={siblings}
           onSave={(updated) => {
             projectState.updateComponent(updated.id, updated);
-            newlyCreatedId = null;
             projectState.selectComponent(null);
             handleGenerate();
           }}
           onCancel={() => {
-            if (newlyCreatedId && newlyCreatedId === projectState.selectedComponentId) {
-              projectState.deleteComponent(newlyCreatedId);
-            }
-            newlyCreatedId = null;
             projectState.selectComponent(null);
           }}
         />
       {:else}
-        <!-- List Mode -->
         <ComponentList
           components={projectState.project.components}
           bind:scrollTop={componentListScrollTop}
           onSelect={(id) => {
-            newlyCreatedId = null;
             projectState.selectComponent(id);
           }}
-          onAdd={(type, typeIndex) => {
-            const id = projectState.addComponent(type, typeIndex);
-            newlyCreatedId = id;
-            projectState.selectComponent(id);
-          }}
-          onDelete={(id) => {
-            projectState.deleteComponent(id);
-            handleGenerate();
-          }}
-          onDuplicate={(id) => projectState.duplicateComponent(id)}
-          onCopyRowToAll={(type, typeIndex) => {
-            projectState.copyRowToAll(type, typeIndex);
-            handleGenerate();
+          onOpenGroupManager={(type) => {
+            gmType = type;
+            gmOpen = true;
           }}
         />
       {/if}
     </Resizable.Pane>
     <Resizable.Handle class="bg-card border-x w-2" />
-    <!-- Right Panel (Preview) -->
     <Resizable.Pane defaultSize={65} minSize={40} class="overflow-hidden">
       <Preview {generatedData} />
     </Resizable.Pane>
   </Resizable.PaneGroup>
 </div>
 
-<!-- 예제 불러오기 다이얼로그 -->
 <Dialog.Root bind:open={exampleDialogOpen}>
   <Dialog.Content>
     <Dialog.Header>
@@ -280,3 +305,17 @@
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
+
+<GroupManager
+  open={gmOpen}
+  type={gmType}
+  initialGroups={gmType ? projectState.project.groups[gmType] || [] : []}
+  onOpenChange={(v) => (gmOpen = v)}
+  onSave={(newGroups) => {
+    if (gmType) {
+      projectState.updateGroups(gmType, newGroups);
+      handleGenerate();
+    }
+    gmOpen = false;
+  }}
+/>
