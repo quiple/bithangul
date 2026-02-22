@@ -213,12 +213,12 @@
   });
 </script>
 
-<div class="@container flex flex-col gap-2 mt-4" bind:clientWidth={containerWidth}>
+<div class="flex flex-col gap-2" bind:clientWidth={containerWidth}>
   <h3 class="pl-2 font-medium truncate">미리보기 ({affectedIndices.length}자)</h3>
 
   {#if previewData}
     <div
-      class="border rounded overflow-hidden bg-white h-[calc(100vh-15rem)] @sm:h-[calc(100vh-15rem)] @md:h-[calc(100vh-15rem)]"
+      class="border rounded overflow-hidden bg-white h-[calc(100vh-35.5rem)]"
       style="overflow-y: auto;"
     >
       <canvas
