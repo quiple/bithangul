@@ -131,7 +131,7 @@
             {/each}
 
             <Button variant="outline" class="w-full border-dashed py-8 text-muted-foreground" onclick={addGroup}>
-                <Plus class="mr-2 size-4" />
+                <Plus class="size-4" />
                 새 그룹 추가
             </Button>
 
@@ -142,7 +142,7 @@
 
         <Dialog.Footer class="pt-2">
             <Button variant="outline" onclick={() => onOpenChange(false)}>취소</Button>
-            <Button onclick={handleSave}>저장 & 바리에이션 갱신</Button>
+            <Button onclick={handleSave}>저장</Button>
         </Dialog.Footer>
     </Dialog.Content>
 </Dialog.Root>
