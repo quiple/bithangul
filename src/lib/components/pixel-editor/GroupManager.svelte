@@ -104,7 +104,7 @@
             {#each draftGroups as group, gIdx (group.id)}
                 <div class="space-y-3 p-4 border rounded-lg bg-card">
                     <div class="flex items-center gap-2">
-                        <Input bind:value={group.name} placeholder="그룹 별칭 (예: 세로 모음)" class="max-w-xs" />
+                        <Input bind:value={group.name} placeholder="그룹 별칭 (예: 이중모음)" class="max-w-xs" />
                         <div class="flex-1"></div>
                         <Button variant="ghost" size="icon" onclick={() => removeGroup(gIdx)} class="text-destructive">
                             <Trash class="size-4" />
