@@ -22,5 +22,13 @@
     "functions": ["clsx", "cn"],
     "preserveWhitespace": true
   },
-  "ignorePatterns": ["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lock", "bun.lockb", "/static/"]
+  "ignorePatterns": [
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "bun.lock",
+    "bun.lockb",
+    "/static/",
+    "/src/lib/assets/*.json"
+  ]
 }
