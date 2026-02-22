@@ -84,7 +84,7 @@ class ProjectState {
     }
 
     const filtered = result.filter((c) => Object.keys(c).length > 0)
-    return filtered.length > 0 ? filtered : result
+    return filtered
   }
 
   private conditionsMatch(c1: Record<string, boolean>, c2: Record<string, boolean>) {
