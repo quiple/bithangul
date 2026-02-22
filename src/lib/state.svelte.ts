@@ -61,7 +61,7 @@ class ProjectState {
     return states
   }
 
-  private getCombinations(types: ComponentType[]) {
+  private getCombinations(types: ComponentType[], targetType: ComponentType) {
     const typeInfo = {
       chosung: {count: CHOSUNG_COUNT, startIndex: 0},
       jungsung: {count: JUNGSUNG_COUNT, startIndex: 0},
@@ -72,7 +72,8 @@ class ProjectState {
 
     for (const type of types) {
       const info = typeInfo[type]
-      const validStates = this.getGroupStatesForType(type, this.project.groups[type], info.count, info.startIndex)
+      const applicableGroups = this.project.groups[type].filter((g) => !g.appliesTo || g.appliesTo.includes(targetType))
+      const validStates = this.getGroupStatesForType(type, applicableGroups, info.count, info.startIndex)
 
       const nextResult: Record<string, boolean>[] = []
       for (const res of result) {
@@ -144,7 +145,7 @@ class ProjectState {
 
     for (const type of typeTypes) {
       const info = typeInfo[type]
-      const validConditions = this.getCombinations(info.otherTypes)
+      const validConditions = this.getCombinations(info.otherTypes, type)
 
       for (let i = info.start; i < info.count; i++) {
         const existingForJamo = this.project.components.filter((c) => c.type === type && c.typeIndex === i)

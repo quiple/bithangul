@@ -4,6 +4,7 @@ export interface JamoGroup {
   id: string
   name: string
   items: number[]
+  appliesTo?: ComponentType[] // Which component types this group affects. If undefined, applies to all other types.
 }
 
 export interface GroupsStructure {
