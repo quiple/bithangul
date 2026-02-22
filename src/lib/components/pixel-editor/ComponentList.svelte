@@ -76,7 +76,7 @@
       list.sort((a, b) => {
         const strA = JSON.stringify(a.conditions);
         const strB = JSON.stringify(b.conditions);
-        return strA.localeCompare(strB);
+        return strB.localeCompare(strA);
       });
     }
 
