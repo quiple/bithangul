@@ -48,7 +48,9 @@ class ProjectState {
       // To ensure consistent property order in JSON stringify, sort keys
       const sortedGroups = [...groups].sort((a, b) => a.id.localeCompare(b.id))
       for (const g of sortedGroups) {
-        state[g.id] = g.items.includes(i)
+        if (g.items.includes(i)) {
+          state[g.id] = true
+        }
       }
       const key = JSON.stringify(state)
       if (!seen.has(key)) {
@@ -116,6 +118,17 @@ class ProjectState {
   }
 
   syncComponents() {
+    // Normalize existing components' conditions by removing `false` entries
+    // to migrate older projects smoothly
+    for (const c of this.project.components) {
+      if (!c.conditions) c.conditions = {}
+      for (const k in c.conditions) {
+        if (c.conditions[k] === false) {
+          delete c.conditions[k]
+        }
+      }
+    }
+
     const newComponents: PixelComponent[] = []
     const typeInfo: Record<ComponentType, {count: number; start: number; otherTypes: ComponentType[]}> = {
       chosung: {count: CHOSUNG_COUNT, start: 0, otherTypes: ['jungsung', 'jongsung']},
@@ -167,9 +180,14 @@ class ProjectState {
     if (!data.groups) {
       data.groups = {chosung: [], jungsung: [], jongsung: []}
     }
-    // Update old components without conditions
+    // Update old components: ensure conditions object exists and remove `false` entries
     for (const c of data.components) {
       if (!c.conditions) c.conditions = {}
+      for (const k in c.conditions) {
+        if (c.conditions[k] === false) {
+          delete c.conditions[k]
+        }
+      }
     }
     this.project = data
     this.selectedComponentId = null
