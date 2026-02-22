@@ -42,10 +42,10 @@
       <h2 class="font-bold truncate">
         컴포넌트 편집 <span class="ml-1 bg-ring text-primary-foreground px-1 py-0.5 rounded"
           >{localComponent.type === 'chosung'
-            ? CHOSUNG[localComponent.typeIndex]
+            ? `초성 ${CHOSUNG[localComponent.typeIndex]}`
             : localComponent.type === 'jungsung'
-              ? JUNGSUNG[localComponent.typeIndex]
-              : JONGSUNG[localComponent.typeIndex]}</span
+              ? `중성 ${JUNGSUNG[localComponent.typeIndex]}`
+              : `종성 ${JONGSUNG[localComponent.typeIndex]}`}</span
         >
       </h2>
     </div>
