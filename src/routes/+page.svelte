@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Resizable from '$lib/components/ui/resizable/index.js';
-  import { onMount, tick } from 'svelte';
+  import { onMount } from 'svelte';
   import { projectState } from '$lib/state.svelte';
   import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte';
   import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte';
