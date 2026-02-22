@@ -123,6 +123,7 @@
   }
 
   function deserializeProject(data: any): FontProject {
+    let mappedGroups = false;
     if (data.components) {
       for (const c of data.components) {
         if (typeof c.bitmap === 'string') {
@@ -137,6 +138,38 @@
             bitmap.push(row);
           }
           c.bitmap = bitmap;
+        }
+
+        // Legacy 'targets' migration to 'conditions' & 'groups'
+        if ((c as any).targets && !c.conditions) {
+          mappedGroups = true;
+          if (!data.groups) data.groups = { chosung: [], jungsung: [], jongsung: [] };
+          c.conditions = {};
+          const targets = (c as any).targets;
+          for (const tType of ['chosung', 'jungsung', 'jongsung'] as const) {
+            if (tType === c.type) continue;
+            if (targets[tType] && targets[tType].length > 0) {
+              const itemsArr = [...targets[tType]].sort((a, b) => a - b);
+              // Exclude the 'no_jongsung' scenario if it's [0] for jongsung
+              if (tType === 'jongsung' && itemsArr.length === 1 && itemsArr[0] === 0) {
+                c.conditions['no_jongsung'] = true;
+              } else {
+                const str = itemsArr.join(',');
+                let existingPattern = data.groups[tType].find(
+                  (g: any) => [...g.items].sort((a, b) => a - b).join(',') === str,
+                );
+                if (!existingPattern) {
+                  existingPattern = {
+                    id: crypto.randomUUID(),
+                    name: `Group ${data.groups[tType].length + 1}`,
+                    items: itemsArr,
+                  };
+                  data.groups[tType].push(existingPattern);
+                }
+                c.conditions[existingPattern.id] = true;
+              }
+            }
+          }
         }
       }
     }
