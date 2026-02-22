@@ -15,7 +15,7 @@
   import { downloadText } from '$lib/export';
   import * as Tooltip from '$lib/components/ui/tooltip/index.js';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
-  import type { FontProject, ComponentType, JamoGroup } from '$lib/types';
+  import type { FontProject, ComponentType } from '$lib/types';
 
   let generatorWorker: Worker;
   let exportWorker: Worker;
@@ -26,7 +26,6 @@
 
   /** 컴포넌트 목록 스크롤 위치 보존 */
   let componentListScrollTop = $state(0);
-
   let exampleDialogOpen = $state(false);
 
   // Group Manager State
