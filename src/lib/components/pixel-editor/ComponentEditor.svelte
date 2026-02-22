@@ -72,10 +72,6 @@
               <span class="bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded text-sm border">{name}</span>
             {/each}
           </div>
-        {:else}
-          <div class="ml-2 flex gap-1">
-            <span class="bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-sm border">기본</span>
-          </div>
         {/if}
       </h2>
     </div>
