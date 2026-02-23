@@ -116,6 +116,12 @@
       update(newParams: { rowIdx: number; data: ArrayBuffer | null }) {
         drawRowCanvas(canvas, newParams.rowIdx, newParams.data);
       },
+      destroy() {
+        if (canvas) {
+          canvas.width = 0;
+          canvas.height = 0;
+        }
+      },
     };
   }
 </script>
