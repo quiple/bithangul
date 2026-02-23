@@ -1,7 +1,16 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
+
   let { bitmap, size = 32, class: className = '' }: { bitmap?: number[][]; size?: number; class?: string } = $props();
 
   let canvas: HTMLCanvasElement = $state(undefined!);
+
+  onDestroy(() => {
+    if (canvas) {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+  });
 
   $effect(() => {
     if (!bitmap || !canvas) return;
