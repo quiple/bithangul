@@ -319,7 +319,7 @@
   </div>
 
   <div class="overflow-y-auto overscroll-contain flex-1 min-h-0" bind:this={scrollContainer} onscroll={handleScroll}>
-    <div class="px-2 py-2 space-y-4">
+    <div class="px-2 pb-2 space-y-4">
       <Tabs.Content value="chosung" class="m-0 border-none p-0 outline-none">
         {@render sectionHeader('chosung', '초성')}
         {#each CHOSUNG as char, i}
