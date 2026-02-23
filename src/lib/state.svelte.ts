@@ -158,15 +158,12 @@ class ProjectState {
             continue
           }
 
-          // fallback: try best match
-          const bestMatch = this.findBestComponent(existingForJamo, cond)
+          // If no exact match (it's newly created variation), add an empty component
           newComponents.push({
             id: crypto.randomUUID(),
-            bitmap: bestMatch
-              ? bestMatch.bitmap.map((row) => [...row])
-              : Array(16)
-                  .fill(0)
-                  .map(() => Array(16).fill(0)),
+            bitmap: Array(16)
+              .fill(0)
+              .map(() => Array(16).fill(0)),
             type,
             typeIndex: i,
             conditions: cond,
