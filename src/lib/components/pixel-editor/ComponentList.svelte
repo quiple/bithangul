@@ -6,6 +6,7 @@
   import { Settings } from '@lucide/svelte';
   import { CHOSUNG, JUNGSUNG, JONGSUNG } from '$lib/hangul';
   import { projectState } from '$lib/state.svelte';
+  import * as Tabs from '$lib/components/ui/tabs';
 
   interface Props {
     components: PixelComponent[];
@@ -25,11 +26,19 @@
     }
   });
 
-  function handleScroll() {
-    if (scrollContainer) {
-      scrollTop = scrollContainer.scrollTop;
+  function handleScroll(e: Event) {
+    const target = e.currentTarget as HTMLDivElement;
+    if (target) {
+      scrollTop = target.scrollTop;
     }
   }
+
+  let activeTab = $state<ComponentType>('chosung');
+
+  $effect(() => {
+    // Attempt to restore scroll on tab switch, but typically each tab might have its own or share one.
+    // If sharing one overarching scroll container, it's easier.
+  });
 
   const TYPE_LABEL: Record<ComponentType, string> = {
     chosung: '초성',
@@ -288,46 +297,49 @@
   </div>
 {/snippet}
 
-{#snippet sectionHeader(type: ComponentType, label: string)}
-  <div class="flex items-center justify-between pl-1">
-    <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-      {label}
-    </h3>
+{#snippet sectionHeader(type: ComponentType)}
+  <div class="flex items-center justify-between pl-1 pb-2">
+    <div></div>
     <Button variant="outline" size="sm" class="h-6 px-2 text-xs" onclick={() => onOpenGroupManager(type)}>
       <Settings class="size-3" /> 그룹 관리
     </Button>
   </div>
 {/snippet}
 
-<div class="flex flex-col h-full">
+<Tabs.Root bind:value={activeTab as any} class="flex flex-col h-full min-h-0">
   <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2 border-b">
-    <h2 class="font-bold truncate">컴포넌트</h2>
+    <h2 class="font-bold truncate hidden sm:block">컴포넌트</h2>
+    <Tabs.List class="grid flex-1 max-w-[300px] grid-cols-3">
+      <Tabs.Trigger value="chosung">초성</Tabs.Trigger>
+      <Tabs.Trigger value="jungsung">중성</Tabs.Trigger>
+      <Tabs.Trigger value="jongsung">종성</Tabs.Trigger>
+    </Tabs.List>
   </div>
 
   <div class="overflow-y-auto overscroll-contain flex-1 min-h-0" bind:this={scrollContainer} onscroll={handleScroll}>
     <div class="px-2 py-2 space-y-4">
-      <section>
-        {@render sectionHeader('chosung', '초성')}
+      <Tabs.Content value="chosung" class="m-0 border-none p-0 outline-none">
+        {@render sectionHeader('chosung')}
         {#each CHOSUNG as char, i}
           {@render jamoRow('chosung', char, i)}
         {/each}
-      </section>
+      </Tabs.Content>
 
-      <section>
-        {@render sectionHeader('jungsung', '중성')}
+      <Tabs.Content value="jungsung" class="m-0 border-none p-0 outline-none">
+        {@render sectionHeader('jungsung')}
         {#each JUNGSUNG as char, i}
           {@render jamoRow('jungsung', char, i)}
         {/each}
-      </section>
+      </Tabs.Content>
 
-      <section>
-        {@render sectionHeader('jongsung', '종성')}
+      <Tabs.Content value="jongsung" class="m-0 border-none p-0 outline-none">
+        {@render sectionHeader('jongsung')}
         {#each JONGSUNG as char, i}
           {#if i !== 0}
             {@render jamoRow('jongsung', char, i)}
           {/if}
         {/each}
-      </section>
+      </Tabs.Content>
     </div>
   </div>
-</div>
+</Tabs.Root>
