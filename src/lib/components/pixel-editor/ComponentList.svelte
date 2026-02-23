@@ -297,9 +297,11 @@
   </div>
 {/snippet}
 
-{#snippet sectionHeader(type: ComponentType)}
-  <div class="flex items-center justify-between pl-1 pb-2">
-    <div></div>
+{#snippet sectionHeader(type: ComponentType, label: string)}
+  <div class="flex items-center justify-between pl-1">
+    <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      {label}
+    </h3>
     <Button variant="outline" size="sm" class="h-6 px-2 text-xs" onclick={() => onOpenGroupManager(type)}>
       <Settings class="size-3" /> 그룹 관리
     </Button>
@@ -309,7 +311,7 @@
 <Tabs.Root bind:value={activeTab as any} class="flex flex-col h-full min-h-0">
   <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2 border-b">
     <h2 class="font-bold truncate hidden sm:block">컴포넌트</h2>
-    <Tabs.List class="grid flex-1 max-w-[300px] grid-cols-3">
+    <Tabs.List class="grid flex-1 max-w-75 grid-cols-3">
       <Tabs.Trigger value="chosung">초성</Tabs.Trigger>
       <Tabs.Trigger value="jungsung">중성</Tabs.Trigger>
       <Tabs.Trigger value="jongsung">종성</Tabs.Trigger>
@@ -319,21 +321,21 @@
   <div class="overflow-y-auto overscroll-contain flex-1 min-h-0" bind:this={scrollContainer} onscroll={handleScroll}>
     <div class="px-2 py-2 space-y-4">
       <Tabs.Content value="chosung" class="m-0 border-none p-0 outline-none">
-        {@render sectionHeader('chosung')}
+        {@render sectionHeader('chosung', '초성')}
         {#each CHOSUNG as char, i}
           {@render jamoRow('chosung', char, i)}
         {/each}
       </Tabs.Content>
 
       <Tabs.Content value="jungsung" class="m-0 border-none p-0 outline-none">
-        {@render sectionHeader('jungsung')}
+        {@render sectionHeader('jungsung', '중성')}
         {#each JUNGSUNG as char, i}
           {@render jamoRow('jungsung', char, i)}
         {/each}
       </Tabs.Content>
 
       <Tabs.Content value="jongsung" class="m-0 border-none p-0 outline-none">
-        {@render sectionHeader('jongsung')}
+        {@render sectionHeader('jongsung', '종성')}
         {#each JONGSUNG as char, i}
           {#if i !== 0}
             {@render jamoRow('jongsung', char, i)}
