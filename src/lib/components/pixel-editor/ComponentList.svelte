@@ -289,7 +289,7 @@
   {@const pNodes = buildGroupTree(variations)}
 
   {#snippet compButton(comp: PixelComponent)}
-    <div class="relative group h-8">
+    <div class="relative group h-8.5">
       <Button
         variant="outline"
         class="rounded p-0 box-content overflow-hidden shrink-0"
@@ -302,9 +302,9 @@
     </div>
   {/snippet}
 
-  <div class="flex gap-1 rounded-md p-1 hover:bg-muted min-w-0">
+  <div class="flex gap-1 rounded-md p-1 hover:bg-muted min-w-0 hover:[&_.label]:bg-muted">
     <span class="w-4 text-center text-base font-semibold shrink-0 select-none leading-9">{char}</span>
-    <div class="flex flex-wrap gap-x-3 gap-y-2 flex-1 min-w-0 ml-1">
+    <div class="flex flex-wrap gap-1 flex-1 min-w-0 ml-1">
       {#each pNodes as pNode}
         {#if pNode.id === 'base'}
           <div class="flex flex-wrap gap-1 items-center">
@@ -316,11 +316,11 @@
           </div>
         {:else}
           <div
-            class="relative flex flex-wrap gap-1.5 px-1.5 pb-1.5 pt-2.5 rounded-md border-2 mt-1.5 min-h-[36px]"
+            class="relative flex flex-wrap gap-x-1.5 p-1 rounded-[12px] border-2 mt-1 min-h-9"
             style="border-color: {getGroupColor(pNode.id)};"
           >
             <span
-              class="absolute -top-2.5 left-2 px-1 text-[0.65rem] font-bold bg-background leading-none rounded whitespace-nowrap"
+              class="label absolute -top-2 left-1.25 px-px text-[9px] font-bold bg-sidebar leading-none whitespace-nowrap"
               style="color: {getGroupColor(pNode.id)}">{pNode.name}</span
             >
             {#each pNode.children as sNode}
@@ -332,11 +332,11 @@
                 </div>
               {:else}
                 <div
-                  class="relative flex flex-wrap gap-1 px-1 pb-1 pt-2 rounded border border-dashed mt-1"
+                  class="relative flex flex-wrap gap-1 p-0.5 rounded-sm border border-dashed mt-1.5"
                   style="border-color: {getGroupColor(sNode.id)};"
                 >
                   <span
-                    class="absolute -top-2 left-1 px-1 text-[0.55rem] font-bold bg-background leading-none rounded whitespace-nowrap"
+                    class="label absolute -top-2 left-0 px-px text-[9px] font-semibold bg-sidebar leading-none whitespace-nowrap"
                     style="color: {getGroupColor(sNode.id)}">{sNode.name}</span
                   >
                   {#each sNode.comps as comp (comp.id)}
