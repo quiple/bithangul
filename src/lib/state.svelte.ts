@@ -88,35 +88,15 @@ class ProjectState {
     return filtered
   }
 
-  private conditionsMatch(c1: Record<string, boolean>, c2: Record<string, boolean>) {
-    const keys1 = Object.keys(c1)
-    const keys2 = Object.keys(c2)
-    if (keys1.length !== keys2.length) return false
-    for (const key of keys1) {
-      if (c1[key] !== c2[key]) return false
+  private getConditionDistance(c1: Record<string, boolean>, c2: Record<string, boolean>) {
+    let dist = 0
+    for (const k in c1) {
+      if (!c2[k]) dist++
     }
-    return true
-  }
-
-  // Finds best existing component comparing keys
-  private findBestComponent(existingComps: PixelComponent[], newCond: Record<string, boolean>) {
-    if (existingComps.length === 0) return null
-    let bestComp = existingComps[0]
-    let maxMatches = -1
-
-    for (const cand of existingComps) {
-      let matches = 0
-      for (const key in newCond) {
-        if (cand.conditions[key] === newCond[key]) {
-          matches++
-        }
-      }
-      if (matches > maxMatches) {
-        maxMatches = matches
-        bestComp = cand
-      }
+    for (const k in c2) {
+      if (!c1[k]) dist++
     }
-    return bestComp
+    return dist
   }
 
   syncComponents() {
@@ -150,24 +130,49 @@ class ProjectState {
       for (let i = info.start; i < info.count; i++) {
         const existingForJamo = this.project.components.filter((c) => c.type === type && c.typeIndex === i)
 
-        for (const cond of validConditions) {
-          // Find an exact match if possible
-          const exactMatch = existingForJamo.find((c) => this.conditionsMatch(c.conditions, cond))
-          if (exactMatch) {
-            newComponents.push({...exactMatch, conditions: cond})
-            continue
-          }
+        const pairs: {cond: Record<string, boolean>; comp: PixelComponent; dist: number}[] = []
 
-          // If no exact match (it's newly created variation), add an empty component
-          newComponents.push({
-            id: crypto.randomUUID(),
-            bitmap: Array(16)
-              .fill(0)
-              .map(() => Array(16).fill(0)),
-            type,
-            typeIndex: i,
-            conditions: cond,
-          })
+        for (const cond of validConditions) {
+          for (const comp of existingForJamo) {
+            pairs.push({
+              cond,
+              comp,
+              dist: this.getConditionDistance(cond, comp.conditions),
+            })
+          }
+        }
+
+        pairs.sort((a, b) => a.dist - b.dist)
+
+        const assignedConds = new Set<Record<string, boolean>>()
+        const assignedComps = new Set<PixelComponent>()
+        const condToComp = new Map<Record<string, boolean>, PixelComponent>()
+
+        for (const pair of pairs) {
+          if (!assignedConds.has(pair.cond) && !assignedComps.has(pair.comp)) {
+            assignedConds.add(pair.cond)
+            assignedComps.add(pair.comp)
+            condToComp.set(pair.cond, pair.comp)
+          }
+        }
+
+        for (const cond of validConditions) {
+          const matchedComp = condToComp.get(cond)
+
+          if (matchedComp) {
+            newComponents.push({...matchedComp, conditions: cond})
+          } else {
+            // If it's a newly created variation without a matched existing component, create an empty component
+            newComponents.push({
+              id: crypto.randomUUID(),
+              bitmap: Array(16)
+                .fill(0)
+                .map(() => Array(16).fill(0)),
+              type,
+              typeIndex: i,
+              conditions: cond,
+            })
+          }
         }
       }
     }
