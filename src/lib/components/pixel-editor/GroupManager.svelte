@@ -22,6 +22,19 @@
     let hiddenGroups = $state<JamoGroup[]>([]);
     let errorMsg = $state<string | null>(null);
 
+    function getSortScore(group: JamoGroup): number {
+        if (!type || !group.appliesTo) return 0;
+        const targets = TARGET_TYPES_MAP[type];
+        if (!targets || targets.length < 2) return 0;
+        const hasFirst = group.appliesTo.includes(targets[0].value);
+        const hasSecond = group.appliesTo.includes(targets[1].value);
+
+        if (hasFirst && !hasSecond) return 1;
+        if (hasFirst && hasSecond) return 2;
+        if (!hasFirst && hasSecond) return 3;
+        return 4;
+    }
+
     $effect(() => {
         if (open) {
             draftGroups = initialGroups
@@ -30,7 +43,8 @@
                     ...g,
                     items: [...g.items],
                     appliesTo: g.appliesTo ? [...g.appliesTo] : type ? TARGET_TYPES_MAP[type].map((t) => t.value) : [],
-                }));
+                }))
+                .sort((a, b) => getSortScore(a) - getSortScore(b));
             hiddenGroups = initialGroups
                 .filter((g) => g.id === 'no_jongsung')
                 .map((g) => ({ ...g, items: [...g.items] }));
@@ -128,6 +142,7 @@
             errorMsg = err;
             return;
         }
+        draftGroups.sort((a, b) => getSortScore(a) - getSortScore(b));
         onSave([...hiddenGroups, ...draftGroups]);
     }
 </script>
@@ -155,25 +170,25 @@
                                     >적용 대상:</span
                                 >
                                 <div class="flex">
-                                {#each TARGET_TYPES_MAP[type] as target}
-                                    <label
-                                        class="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted py-1 px-1.5 rounded-md"
-                                    >
-                                        <Checkbox
-                                            checked={group.appliesTo?.includes(target.value)}
-                                            onCheckedChange={(checked) => {
-                                                const current =
-                                                    group.appliesTo || TARGET_TYPES_MAP[type!].map((t) => t.value);
-                                                if (checked) {
-                                                    group.appliesTo = [...current, target.value];
-                                                } else {
-                                                    group.appliesTo = current.filter((t) => t !== target.value);
-                                                }
-                                            }}
-                                        />
-                                        {target.label}
-                                    </label>
-                                {/each}
+                                    {#each TARGET_TYPES_MAP[type] as target}
+                                        <label
+                                            class="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted py-1 px-1.5 rounded-md"
+                                        >
+                                            <Checkbox
+                                                checked={group.appliesTo?.includes(target.value)}
+                                                onCheckedChange={(checked) => {
+                                                    const current =
+                                                        group.appliesTo || TARGET_TYPES_MAP[type!].map((t) => t.value);
+                                                    if (checked) {
+                                                        group.appliesTo = [...current, target.value];
+                                                    } else {
+                                                        group.appliesTo = current.filter((t) => t !== target.value);
+                                                    }
+                                                }}
+                                            />
+                                            {target.label}
+                                        </label>
+                                    {/each}
                                 </div>
                             </div>
                         {/if}
