@@ -205,10 +205,19 @@
     }
   }
 
+  import { onDestroy } from 'svelte';
+
   $effect(() => {
     // Redraw whenever relevant dependencies change
     if (canvas && previewData && affectedIndices && cols && rows && canvasWidth && canvasHeight) {
       requestAnimationFrame(draw);
+    }
+  });
+
+  onDestroy(() => {
+    if (canvas) {
+      canvas.width = 0;
+      canvas.height = 0;
     }
   });
 </script>
@@ -217,10 +226,7 @@
   <h3 class="pl-2 font-medium truncate">미리보기 ({affectedIndices.length}자)</h3>
 
   {#if previewData}
-    <div
-      class="border rounded overflow-hidden bg-white h-[calc(100vh-37.75rem)]"
-      style="overflow-y: auto;"
-    >
+    <div class="border rounded overflow-hidden bg-white h-[calc(100vh-37.75rem)]" style="overflow-y: auto;">
       <canvas
         bind:this={canvas}
         width={canvasWidth}
