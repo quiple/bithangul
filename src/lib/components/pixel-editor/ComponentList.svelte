@@ -38,18 +38,23 @@
   };
 
   let groupMeta = $derived.by(() => {
-    const map = new Map<string, { name: string; priority: number; minItem: number }>();
+    const map = new Map<string, { name: string; priority: number; itemCount: number; minItem: number }>();
     const add = (arr: any[], prio: number) => {
       for (const g of arr)
-        map.set(g.id, { name: g.name, priority: prio, minItem: g.items.length > 0 ? Math.min(...g.items) : 999 });
+        map.set(g.id, {
+          name: g.name,
+          priority: prio,
+          itemCount: g.items.length,
+          minItem: g.items.length > 0 ? Math.min(...g.items) : 999,
+        });
     };
     add(projectState.project.groups.jongsung, 1);
     add(projectState.project.groups.jungsung, 2);
     add(projectState.project.groups.chosung, 3);
 
-    map.set('no_jongsung', { name: '받침 없음', priority: 1, minItem: -1 });
-    map.set('base', { name: '기본 결합', priority: 1, minItem: -1 });
-    map.set('none', { name: '없음', priority: 1, minItem: -1 });
+    map.set('no_jongsung', { name: '받침 없음', priority: 1, itemCount: 1, minItem: -1 });
+    map.set('base', { name: '기본 결합', priority: 1, itemCount: 999, minItem: -1 });
+    map.set('none', { name: '없음', priority: 1, itemCount: 999, minItem: -1 });
     return map;
   });
 
@@ -58,6 +63,9 @@
   }
   function getGroupPriority(id: string) {
     return groupMeta.get(id)?.priority || 4;
+  }
+  function getGroupItemCount(id: string) {
+    return groupMeta.get(id)?.itemCount ?? 0;
   }
   function getGroupMinItem(id: string) {
     return groupMeta.get(id)?.minItem ?? 999;
@@ -125,6 +133,9 @@
       const pA = getGroupPriority(a);
       const pB = getGroupPriority(b);
       if (pA !== pB) return pA - pB;
+      const cA = getGroupItemCount(a);
+      const cB = getGroupItemCount(b);
+      if (cA !== cB) return cB - cA;
       const mA = getGroupMinItem(a);
       const mB = getGroupMinItem(b);
       if (mA !== mB) return mA - mB;
