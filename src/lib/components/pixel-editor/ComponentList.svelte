@@ -197,15 +197,42 @@
     children: SGNode[];
   }
 
+  function getGroupPriority(id: string) {
+    if (id === 'no_jongsung' || id === 'base' || id === 'none') return 1;
+    if (projectState.project.groups.jongsung.some((g) => g.id === id)) return 1;
+    if (projectState.project.groups.jungsung.some((g) => g.id === id)) return 2;
+    if (projectState.project.groups.chosung.some((g) => g.id === id)) return 3;
+    return 4;
+  }
+
+  function getGroupMinItem(id: string) {
+    if (id === 'no_jongsung' || id === 'base' || id === 'none') return -1;
+    const allGroups = [
+      ...projectState.project.groups.chosung,
+      ...projectState.project.groups.jungsung,
+      ...projectState.project.groups.jongsung,
+    ];
+    const g = allGroups.find((x) => x.id === id);
+    return g && g.items.length > 0 ? Math.min(...g.items) : 999;
+  }
+
+  function sortConditions(conds: string[]) {
+    return conds.sort((a, b) => {
+      const pA = getGroupPriority(a);
+      const pB = getGroupPriority(b);
+      if (pA !== pB) return pA - pB;
+      const mA = getGroupMinItem(a);
+      const mB = getGroupMinItem(b);
+      if (mA !== mB) return mA - mB;
+      return getGroupName(a).localeCompare(getGroupName(b), 'ko');
+    });
+  }
+
   function buildGroupTree(variations: PixelComponent[]): PGNode[] {
     const pgMap = new Map<string, PixelComponent[]>();
     for (const comp of variations) {
       const activeGroups = Object.keys(comp.conditions || {}).filter((k) => comp.conditions[k]);
-      activeGroups.sort((a, b) => {
-        if (a === 'no_jongsung') return 1;
-        if (b === 'no_jongsung') return -1;
-        return getGroupName(a).localeCompare(getGroupName(b), 'ko');
-      });
+      sortConditions(activeGroups);
 
       const primaryId = activeGroups.length > 0 ? activeGroups[0] : 'base';
       if (!pgMap.has(primaryId)) {
@@ -219,11 +246,7 @@
       const sgMap = new Map<string, PixelComponent[]>();
       for (const comp of comps) {
         const activeGroups = Object.keys(comp.conditions || {}).filter((k) => comp.conditions[k]);
-        activeGroups.sort((a, b) => {
-          if (a === 'no_jongsung') return 1;
-          if (b === 'no_jongsung') return -1;
-          return getGroupName(a).localeCompare(getGroupName(b), 'ko');
-        });
+        sortConditions(activeGroups);
         const secondaryId = activeGroups.length > 1 ? activeGroups[1] : 'none';
         if (!sgMap.has(secondaryId)) {
           sgMap.set(secondaryId, []);
@@ -233,11 +256,15 @@
 
       const children: SGNode[] = [];
       for (const [sId, sComps] of sgMap.entries()) {
+        sComps.sort((a, b) => variations.indexOf(a) - variations.indexOf(b));
         children.push({ id: sId, name: getGroupName(sId), comps: sComps });
       }
       children.sort((a, b) => {
         if (a.id === 'none') return -1;
         if (b.id === 'none') return 1;
+        const mA = getGroupMinItem(a.id);
+        const mB = getGroupMinItem(b.id);
+        if (mA !== mB) return mA - mB;
         return a.name.localeCompare(b.name, 'ko');
       });
       pNodes.push({ id: pId, name: getGroupName(pId), children });
@@ -246,6 +273,11 @@
     pNodes.sort((a, b) => {
       if (a.id === 'base') return -1;
       if (b.id === 'base') return 1;
+      if (a.id === 'no_jongsung') return -1;
+      if (b.id === 'no_jongsung') return 1;
+      const mA = getGroupMinItem(a.id);
+      const mB = getGroupMinItem(b.id);
+      if (mA !== mB) return mA - mB;
       return a.name.localeCompare(b.name, 'ko');
     });
     return pNodes;
