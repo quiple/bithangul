@@ -37,90 +37,37 @@
     jongsung: '종성',
   };
 
-  function formatConditions(cond: Record<string, boolean>) {
-    const keys = Object.keys(cond);
-    if (keys.length === 0) return '기본 결합';
+  let groupMeta = $derived.by(() => {
+    const map = new Map<string, { name: string; priority: number; minItem: number }>();
+    const add = (arr: any[], prio: number) => {
+      for (const g of arr)
+        map.set(g.id, { name: g.name, priority: prio, minItem: g.items.length > 0 ? Math.min(...g.items) : 999 });
+    };
+    add(projectState.project.groups.jongsung, 1);
+    add(projectState.project.groups.jungsung, 2);
+    add(projectState.project.groups.chosung, 3);
 
-    // Attempt to map group Id to group name by looking up in project groups
-    const parts = [];
-    const allGroups = [
-      ...projectState.project.groups.chosung,
-      ...projectState.project.groups.jungsung,
-      ...projectState.project.groups.jongsung,
-    ];
-
-    for (const k of keys) {
-      if (!cond[k]) continue; // backwards compatibility check for false values
-      if (k === 'no_jongsung') {
-        parts.push('받침 없음');
-        continue;
-      }
-      const g = allGroups.find((x) => x.id === k);
-      const name = g ? g.name : k;
-      parts.push(name);
-    }
-    return parts.length > 0 ? `${parts.join(', ')}과 결합` : '기본 결합';
-  }
-
-  let variationsMap = $derived.by(() => {
-    const map = new Map<string, PixelComponent[]>();
-
-    for (const comp of components) {
-      const key = `${comp.type}:${comp.typeIndex}`;
-      let list = map.get(key);
-      if (!list) {
-        list = [];
-        map.set(key, list);
-      }
-      list.push(comp);
-    }
-
-    const allGroups = [
-      ...projectState.project.groups.chosung,
-      ...projectState.project.groups.jungsung,
-      ...projectState.project.groups.jongsung,
-    ];
-
-    // Sort by conditions for consistent order
-    for (const list of map.values()) {
-      list.sort((a, b) => {
-        const condA = Object.keys(a.conditions || {}).filter((k) => a.conditions[k]);
-        const condB = Object.keys(b.conditions || {}).filter((k) => b.conditions[k]);
-
-        const aHasNoJongsung = condA.includes('no_jongsung') ? 1 : 0;
-        const bHasNoJongsung = condB.includes('no_jongsung') ? 1 : 0;
-        if (aHasNoJongsung !== bHasNoJongsung) return bHasNoJongsung - aHasNoJongsung;
-
-        if (condA.length !== condB.length) return condA.length - condB.length;
-
-        const getItems = (conds: string[]) => {
-          const items: number[] = [];
-          for (const k of conds) {
-            if (k === 'no_jongsung') continue;
-            const g = allGroups.find((x) => x.id === k);
-            if (g) items.push(...g.items);
-          }
-          return items.sort((x, y) => x - y);
-        };
-
-        const itemsA = getItems(condA);
-        const itemsB = getItems(condB);
-
-        for (let i = 0; i < Math.min(itemsA.length, itemsB.length); i++) {
-          if (itemsA[i] !== itemsB[i]) return itemsA[i] - itemsB[i];
-        }
-
-        const strA = formatConditions(a.conditions || {});
-        const strB = formatConditions(b.conditions || {});
-        return strA.localeCompare(strB, 'ko');
-      });
-    }
-
+    map.set('no_jongsung', { name: '받침 없음', priority: 1, minItem: -1 });
+    map.set('base', { name: '기본 결합', priority: 1, minItem: -1 });
+    map.set('none', { name: '없음', priority: 1, minItem: -1 });
     return map;
   });
 
-  function getVariations(type: ComponentType, typeIndex: number): PixelComponent[] {
-    return variationsMap.get(`${type}:${typeIndex}`) ?? [];
+  function getGroupName(id: string) {
+    return groupMeta.get(id)?.name || id;
+  }
+  function getGroupPriority(id: string) {
+    return groupMeta.get(id)?.priority || 4;
+  }
+  function getGroupMinItem(id: string) {
+    return groupMeta.get(id)?.minItem ?? 999;
+  }
+
+  function formatConditions(cond: Record<string, boolean> | undefined) {
+    if (!cond) return '기본 결합';
+    const keys = Object.keys(cond).filter((k) => cond[k]);
+    if (keys.length === 0) return '기본 결합';
+    return keys.map((k) => getGroupName(k)).join(', ') + '과 결합';
   }
 
   const GROUP_COLORS = [
@@ -138,47 +85,23 @@
     '#d946ef',
   ];
 
-  function getGroupName(id: string) {
-    if (id === 'no_jongsung') return '받침 없음';
-    if (id === 'base') return '기본 결합';
-    if (id === 'none') return '없음';
-    const allGroups = [
-      ...projectState.project.groups.chosung,
-      ...projectState.project.groups.jungsung,
-      ...projectState.project.groups.jongsung,
-    ];
-    const g = allGroups.find((x) => x.id === id);
-    return g ? g.name : id;
-  }
-
   let groupColorMap = $derived.by(() => {
     const map = new Map<string, string>();
-    let colorIndex = 0;
-
-    // collect all unique group IDs
-    const allLists = Array.from(variationsMap.values());
     const uniqueIds = new Set<string>();
-
-    for (const list of allLists) {
-      for (const comp of list) {
-        const keys = Object.keys(comp.conditions || {}).filter((k) => comp.conditions[k]);
-        for (const k of keys) {
-          uniqueIds.add(k);
-        }
+    for (const comp of components) {
+      for (const k in comp.conditions || {}) {
+        if (comp.conditions[k]) uniqueIds.add(k);
       }
     }
-
     const sortedIds = Array.from(uniqueIds).filter((id) => id !== 'no_jongsung');
     sortedIds.sort((a, b) => getGroupName(a).localeCompare(getGroupName(b), 'ko'));
 
+    let colorIndex = 0;
     for (const id of sortedIds) {
-      if (!map.has(id)) {
-        map.set(id, GROUP_COLORS[colorIndex % GROUP_COLORS.length]);
-        colorIndex++;
-      }
+      map.set(id, GROUP_COLORS[colorIndex % GROUP_COLORS.length]);
+      colorIndex++;
     }
-    map.set('no_jongsung', '#94a3b8'); // slate-400
-
+    map.set('no_jongsung', '#94a3b8');
     return map;
   });
 
@@ -197,25 +120,6 @@
     children: SGNode[];
   }
 
-  function getGroupPriority(id: string) {
-    if (id === 'no_jongsung' || id === 'base' || id === 'none') return 1;
-    if (projectState.project.groups.jongsung.some((g) => g.id === id)) return 1;
-    if (projectState.project.groups.jungsung.some((g) => g.id === id)) return 2;
-    if (projectState.project.groups.chosung.some((g) => g.id === id)) return 3;
-    return 4;
-  }
-
-  function getGroupMinItem(id: string) {
-    if (id === 'no_jongsung' || id === 'base' || id === 'none') return -1;
-    const allGroups = [
-      ...projectState.project.groups.chosung,
-      ...projectState.project.groups.jungsung,
-      ...projectState.project.groups.jongsung,
-    ];
-    const g = allGroups.find((x) => x.id === id);
-    return g && g.items.length > 0 ? Math.min(...g.items) : 999;
-  }
-
   function sortConditions(conds: string[]) {
     return conds.sort((a, b) => {
       const pA = getGroupPriority(a);
@@ -228,65 +132,86 @@
     });
   }
 
-  function buildGroupTree(variations: PixelComponent[]): PGNode[] {
-    const pgMap = new Map<string, PixelComponent[]>();
-    for (const comp of variations) {
-      const activeGroups = Object.keys(comp.conditions || {}).filter((k) => comp.conditions[k]);
-      sortConditions(activeGroups);
+  function sortComps(comps: PixelComponent[]) {
+    return comps.sort((a, b) => {
+      const condA = Object.keys(a.conditions || {}).filter((k) => a.conditions[k]);
+      const condB = Object.keys(b.conditions || {}).filter((k) => b.conditions[k]);
+      const sA = sortConditions(condA).join(',');
+      const sB = sortConditions(condB).join(',');
+      if (sA !== sB) return sA.localeCompare(sB, 'ko');
+      return a.id.localeCompare(b.id);
+    });
+  }
 
-      const primaryId = activeGroups.length > 0 ? activeGroups[0] : 'base';
-      if (!pgMap.has(primaryId)) {
-        pgMap.set(primaryId, []);
+  let treeNodesMap = $derived.by(() => {
+    const map = new Map<string, PixelComponent[]>();
+    for (const comp of components) {
+      const key = `${comp.type}:${comp.typeIndex}`;
+      let list = map.get(key);
+      if (!list) {
+        list = [];
+        map.set(key, list);
       }
-      pgMap.get(primaryId)!.push(comp);
+      list.push(comp);
     }
 
-    const pNodes: PGNode[] = [];
-    for (const [pId, comps] of pgMap.entries()) {
-      const sgMap = new Map<string, PixelComponent[]>();
+    const tMap = new Map<string, PGNode[]>();
+    for (const [key, comps] of map.entries()) {
+      const pgMap = new Map<string, PixelComponent[]>();
       for (const comp of comps) {
-        const activeGroups = Object.keys(comp.conditions || {}).filter((k) => comp.conditions[k]);
-        sortConditions(activeGroups);
-        const secondaryId = activeGroups.length > 1 ? activeGroups[1] : 'none';
-        if (!sgMap.has(secondaryId)) {
-          sgMap.set(secondaryId, []);
-        }
-        sgMap.get(secondaryId)!.push(comp);
+        const activeGroups = sortConditions(Object.keys(comp.conditions || {}).filter((k) => comp.conditions[k]));
+        const primaryId = activeGroups.length > 0 ? activeGroups[0] : 'base';
+        if (!pgMap.has(primaryId)) pgMap.set(primaryId, []);
+        pgMap.get(primaryId)!.push(comp);
       }
 
-      const children: SGNode[] = [];
-      for (const [sId, sComps] of sgMap.entries()) {
-        sComps.sort((a, b) => variations.indexOf(a) - variations.indexOf(b));
-        children.push({ id: sId, name: getGroupName(sId), comps: sComps });
+      const pNodes: PGNode[] = [];
+      for (const [pId, pComps] of pgMap.entries()) {
+        const sgMap = new Map<string, PixelComponent[]>();
+        for (const comp of pComps) {
+          const activeGroups = sortConditions(Object.keys(comp.conditions || {}).filter((k) => comp.conditions[k]));
+          const secondaryId = activeGroups.length > 1 ? activeGroups[1] : 'none';
+          if (!sgMap.has(secondaryId)) sgMap.set(secondaryId, []);
+          sgMap.get(secondaryId)!.push(comp);
+        }
+
+        const children: SGNode[] = [];
+        for (const [sId, sComps] of sgMap.entries()) {
+          children.push({ id: sId, name: getGroupName(sId), comps: sortComps(sComps) });
+        }
+        children.sort((a, b) => {
+          if (a.id === 'none') return -1;
+          if (b.id === 'none') return 1;
+          const mA = getGroupMinItem(a.id);
+          const mB = getGroupMinItem(b.id);
+          if (mA !== mB) return mA - mB;
+          return a.name.localeCompare(b.name, 'ko');
+        });
+        pNodes.push({ id: pId, name: getGroupName(pId), children });
       }
-      children.sort((a, b) => {
-        if (a.id === 'none') return -1;
-        if (b.id === 'none') return 1;
+
+      pNodes.sort((a, b) => {
+        if (a.id === 'base') return -1;
+        if (b.id === 'base') return 1;
+        if (a.id === 'no_jongsung') return -1;
+        if (b.id === 'no_jongsung') return 1;
         const mA = getGroupMinItem(a.id);
         const mB = getGroupMinItem(b.id);
         if (mA !== mB) return mA - mB;
         return a.name.localeCompare(b.name, 'ko');
       });
-      pNodes.push({ id: pId, name: getGroupName(pId), children });
+      tMap.set(key, pNodes);
     }
+    return tMap;
+  });
 
-    pNodes.sort((a, b) => {
-      if (a.id === 'base') return -1;
-      if (b.id === 'base') return 1;
-      if (a.id === 'no_jongsung') return -1;
-      if (b.id === 'no_jongsung') return 1;
-      const mA = getGroupMinItem(a.id);
-      const mB = getGroupMinItem(b.id);
-      if (mA !== mB) return mA - mB;
-      return a.name.localeCompare(b.name, 'ko');
-    });
-    return pNodes;
+  function getTreeNodes(type: ComponentType, typeIndex: number): PGNode[] {
+    return treeNodesMap.get(`${type}:${typeIndex}`) ?? [];
   }
 </script>
 
 {#snippet jamoRow(type: ComponentType, char: string, i: number)}
-  {@const variations = getVariations(type, i)}
-  {@const pNodes = buildGroupTree(variations)}
+  {@const pNodes = getTreeNodes(type, i)}
 
   {#snippet compButton(comp: PixelComponent)}
     <div class="relative group h-8.5">
