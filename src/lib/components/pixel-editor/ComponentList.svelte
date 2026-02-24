@@ -11,11 +11,18 @@
   interface Props {
     components: PixelComponent[];
     scrollTop?: number;
+    activeTab?: ComponentType;
     onSelect: (id: string) => void;
     onOpenGroupManager: (type: ComponentType) => void;
   }
 
-  let { components, scrollTop = $bindable(0), onSelect, onOpenGroupManager }: Props = $props();
+  let {
+    components,
+    scrollTop = $bindable(0),
+    activeTab = $bindable('chosung'),
+    onSelect,
+    onOpenGroupManager,
+  }: Props = $props();
 
   let scrollContainer: HTMLDivElement | undefined = $state();
 
@@ -32,8 +39,6 @@
       scrollTop = target.scrollTop;
     }
   }
-
-  let activeTab = $state<ComponentType>('chosung');
 
   $effect(() => {
     // Attempt to restore scroll on tab switch, but typically each tab might have its own or share one.
