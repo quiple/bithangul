@@ -270,7 +270,7 @@
             >
             {#each pNode.children as sNode}
               {#if sNode.id === 'none'}
-                <div class="flex flex-wrap items-end pb-0.75 gap-1">
+                <div class={['flex flex-wrap gap-1', pNode.children.length > 1 && 'items-end pb-0.75']}>
                   {#each sNode.comps as comp (comp.id)}
                     {@render compButton(comp)}
                   {/each}
