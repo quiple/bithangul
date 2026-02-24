@@ -314,7 +314,7 @@
 {/snippet}
 
 <Tabs.Root bind:value={activeTab as any} class="flex flex-col h-full min-h-0 gap-0">
-  <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2 border-b">
+  <div class="flex justify-between items-center pl-4 pr-1 py-1 shrink-0 gap-2 border-b">
     <h2 class="font-bold truncate hidden sm:block">컴포넌트</h2>
     <Tabs.List class="grid flex-1 max-w-75 grid-cols-3">
       <Tabs.Trigger value="chosung">초성</Tabs.Trigger>
