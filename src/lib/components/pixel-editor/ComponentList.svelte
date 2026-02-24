@@ -261,7 +261,7 @@
           </div>
         {:else}
           <div
-            class="relative flex flex-wrap gap-x-1.5 p-1 rounded-[12px] border-2 mt-1 min-h-9"
+            class="relative flex flex-wrap gap-x-1 p-0.5 rounded-[10px] border-2 mt-1 min-h-9"
             style="border-color: {getGroupColor(pNode.id)};"
           >
             <span
@@ -270,14 +270,14 @@
             >
             {#each pNode.children as sNode}
               {#if sNode.id === 'none'}
-                <div class={['flex flex-wrap items-end gap-1', pNode.children.length > 1 && 'pb-0.75']}>
+                <div class={['flex flex-wrap items-end gap-1 p-0.75']}>
                   {#each sNode.comps as comp (comp.id)}
                     {@render compButton(comp)}
                   {/each}
                 </div>
               {:else}
                 <div
-                  class="relative flex flex-wrap gap-1 p-0.5 rounded-sm border border-dashed mt-1.5"
+                  class="relative flex flex-wrap gap-1 p-0.5 rounded-sm border border-dashed mt-2"
                   style="border-color: {getGroupColor(sNode.id)};"
                 >
                   <span
