@@ -26,6 +26,7 @@
 
   /** 컴포넌트 목록 스크롤 위치 보존 */
   let componentListScrollTop = $state(0);
+  let componentListActiveTab = $state<ComponentType>('chosung');
   let exampleDialogOpen = $state(false);
 
   // Group Manager State
@@ -301,6 +302,7 @@
         <ComponentList
           components={projectState.project.components}
           bind:scrollTop={componentListScrollTop}
+          bind:activeTab={componentListActiveTab}
           onSelect={(id) => {
             projectState.selectComponent(id);
           }}
