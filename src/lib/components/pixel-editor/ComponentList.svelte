@@ -261,11 +261,11 @@
           </div>
         {:else}
           <div
-            class="relative flex flex-wrap gap-x-1 p-0.5 rounded-[10px] border-2 mt-1 min-h-9"
+            class="relative flex flex-wrap gap-x-0.5 p-0.5 rounded-[10px] border-2 mt-1 min-h-9"
             style="border-color: {getGroupColor(pNode.id)};"
           >
             <span
-              class="label absolute -top-2 left-1.25 px-px text-[9px] font-bold bg-sidebar leading-none whitespace-nowrap"
+              class="label absolute -top-1.75 left-0.75 px-px text-[9px] font-bold bg-sidebar leading-none whitespace-nowrap"
               style="color: {getGroupColor(pNode.id)}">{pNode.name}</span
             >
             {#each pNode.children as sNode}
@@ -281,7 +281,7 @@
                   style="border-color: {getGroupColor(sNode.id)};"
                 >
                   <span
-                    class="label absolute -top-2 left-0 px-px text-[9px] font-semibold bg-sidebar leading-none whitespace-nowrap"
+                    class="label absolute rounded -top-2 left-0 px-px text-[9px] font-semibold bg-sidebar leading-none whitespace-nowrap"
                     style="color: {getGroupColor(sNode.id)}">{sNode.name}</span
                   >
                   {#each sNode.comps as comp (comp.id)}
