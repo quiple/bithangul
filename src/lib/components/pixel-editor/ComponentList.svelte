@@ -303,7 +303,7 @@
 {/snippet}
 
 {#snippet sectionHeader(type: ComponentType, label: string)}
-  <div class="flex items-center justify-between pl-1">
+  <div class="flex items-start justify-between pl-1 mt-2">
     <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
       {label}
     </h3>
@@ -313,7 +313,7 @@
   </div>
 {/snippet}
 
-<Tabs.Root bind:value={activeTab as any} class="flex flex-col h-full min-h-0">
+<Tabs.Root bind:value={activeTab as any} class="flex flex-col h-full min-h-0 gap-0">
   <div class="flex justify-between items-center pl-4 p-2 shrink-0 gap-2 border-b">
     <h2 class="font-bold truncate hidden sm:block">컴포넌트</h2>
     <Tabs.List class="grid flex-1 max-w-75 grid-cols-3">
