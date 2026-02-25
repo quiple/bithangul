@@ -1,5 +1,6 @@
 <script lang="ts">
   import { composeHangul } from '$lib/hangul';
+  import { getBorderColor } from '$lib/bitmap';
 
   let {
     generatedData = null,
@@ -50,12 +51,6 @@
     const cho = Math.floor(firstItemIdx / (21 * 28));
     const jung = Math.floor((firstItemIdx % (21 * 28)) / 28);
     return composeHangul(cho, jung, 0);
-  }
-
-  // CSS 변수에서 border 색상을 읽어옴
-  function getBorderColor(canvas: HTMLCanvasElement): string {
-    const style = getComputedStyle(canvas);
-    return style.getPropertyValue('--border-color').trim() || '#e5e5e5';
   }
 
   // ── 행 단위 canvas 렌더링 (내부 해상도 고정) ──

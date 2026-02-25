@@ -2,6 +2,8 @@
   import { projectState } from '$lib/state.svelte';
   import type { PixelComponent, ComponentType } from '$lib/types';
   import { CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT } from '$lib/hangul';
+  import { getBorderColor, flattenBitmap } from '$lib/bitmap';
+  import { checkConditionMatch } from '$lib/conditions';
 
   interface Props {
     component: PixelComponent;
@@ -17,35 +19,8 @@
   let canvas: HTMLCanvasElement = $state(undefined!);
   let containerWidth = $state(0);
 
-  function checkConditionMatch(
-    cho: number,
-    jung: number,
-    jong: number,
-    type: ComponentType,
-    conditions: Record<string, boolean>,
-  ) {
-    const groups = projectState.project.groups;
-    for (const [groupId, expected] of Object.entries(conditions)) {
-      let isIncluded = false;
-
-      const gCho = groups.chosung.find((g) => g.id === groupId);
-      if (gCho) {
-        isIncluded = gCho.items.includes(cho);
-      } else {
-        const gJung = groups.jungsung.find((g) => g.id === groupId);
-        if (gJung) {
-          isIncluded = gJung.items.includes(jung);
-        } else {
-          const gJong = groups.jongsung.find((g) => g.id === groupId);
-          if (gJong) {
-            isIncluded = gJong.items.includes(jong);
-          }
-        }
-      }
-
-      if (isIncluded !== expected) return false;
-    }
-    return true;
+  function matchCondition(cho: number, jung: number, jong: number, conditions: Record<string, boolean>) {
+    return checkConditionMatch(cho, jung, jong, conditions, projectState.project.groups);
   }
 
   // Calculate affected indices based on component conditions
@@ -57,7 +32,7 @@
       const cho = typeIndex;
       for (let jung = 0; jung < JUNGSUNG_COUNT; jung++) {
         for (let jong = 0; jong < JONGSUNG_COUNT; jong++) {
-          if (checkConditionMatch(cho, jung, jong, type, conditions)) {
+          if (matchCondition(cho, jung, jong, conditions)) {
             indices.push(cho * 588 + jung * 28 + jong);
           }
         }
@@ -66,7 +41,7 @@
       const jung = typeIndex;
       for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
         for (let jong = 0; jong < JONGSUNG_COUNT; jong++) {
-          if (checkConditionMatch(cho, jung, jong, type, conditions)) {
+          if (matchCondition(cho, jung, jong, conditions)) {
             indices.push(cho * 588 + jung * 28 + jong);
           }
         }
@@ -75,7 +50,7 @@
       const jong = typeIndex;
       for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
         for (let jung = 0; jung < JUNGSUNG_COUNT; jung++) {
-          if (checkConditionMatch(cho, jung, jong, type, conditions)) {
+          if (matchCondition(cho, jung, jong, conditions)) {
             indices.push(cho * 588 + jung * 28 + jong);
           }
         }
@@ -117,16 +92,11 @@
       // Find the correctly matching components for this exact syllable
       const applyComponent = (type: ComponentType, idx: number) => {
         const list = lookup.get(`${type}:${idx}`) || [];
-        const matched = list.find((c) => checkConditionMatch(cho, jung, jong, c.type, c.conditions));
+        const matched = list.find((c) => matchCondition(cho, jung, jong, c.conditions));
         if (matched) {
+          const bmp = flattenBitmap(matched.bitmap);
           for (let r = 0; r < 16; r++) {
-            let rowVal = 0;
-            for (let c = 0; c < 16; c++) {
-              if (matched.bitmap[r][c]) {
-                rowVal |= 1 << (15 - c);
-              }
-            }
-            result[r] |= rowVal;
+            result[r] |= bmp[r];
           }
         }
       };
@@ -150,12 +120,6 @@
 
   let canvasWidth = $derived(cols * INTERNAL_CELL + INTERNAL_BORDER);
   let canvasHeight = $derived(Math.max(INTERNAL_CELL + INTERNAL_BORDER, rows * INTERNAL_CELL + INTERNAL_BORDER));
-
-  // Determine border color from CSS variable
-  function getBorderColor(canvas: HTMLCanvasElement): string {
-    const style = getComputedStyle(canvas);
-    return style.getPropertyValue('--border-color').trim() || '#e5e5e5';
-  }
 
   function draw() {
     if (!canvas || !previewData) return;

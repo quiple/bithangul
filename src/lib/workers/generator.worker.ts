@@ -1,5 +1,7 @@
 import type {FontProject, GroupsStructure, ComponentType} from '../types'
 
+import {flattenBitmap} from '../bitmap'
+
 interface GenerationResult {
   // 11,172 chars * 32 bytes (16 rows * 2 bytes)
   buffer: ArrayBuffer
@@ -96,18 +98,4 @@ function generateFont(project: FontProject): GenerationResult {
   }
 
   return {buffer}
-}
-
-function flattenBitmap(bitmap: number[][]): Uint16Array {
-  const arr = new Uint16Array(16)
-  for (let r = 0; r < 16; r++) {
-    let val = 0
-    for (let c = 0; c < 16; c++) {
-      if (bitmap[r][c]) {
-        val |= 1 << (15 - c)
-      }
-    }
-    arr[r] = val
-  }
-  return arr
 }

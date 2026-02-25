@@ -1,5 +1,6 @@
 import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '$lib/types'
 
+import {createEmptyBitmap} from '$lib/bitmap'
 import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT} from '$lib/hangul'
 
 class ProjectState {
@@ -99,16 +100,22 @@ class ProjectState {
     return dist
   }
 
-  syncComponents() {
-    // Normalize existing components' conditions by removing `false` entries
-    // to migrate older projects smoothly
-    for (const c of this.project.components) {
-      if (!c.conditions) c.conditions = {}
-      for (const k in c.conditions) {
-        if (c.conditions[k] === false) {
-          delete c.conditions[k]
-        }
+  /**
+   * conditions 객체에서 `false` 엔트리를 제거하여 정규화합니다.
+   */
+  private normalizeConditions(comp: PixelComponent) {
+    if (!comp.conditions) comp.conditions = {}
+    for (const k in comp.conditions) {
+      if (comp.conditions[k] === false) {
+        delete comp.conditions[k]
       }
+    }
+  }
+
+  syncComponents() {
+    // Normalize existing components' conditions
+    for (const c of this.project.components) {
+      this.normalizeConditions(c)
     }
 
     // Completely strip out `{}` from components if the project has grown to have other valid conditions.
@@ -165,9 +172,7 @@ class ProjectState {
             // If it's a newly created variation without a matched existing component, create an empty component
             newComponents.push({
               id: crypto.randomUUID(),
-              bitmap: Array(16)
-                .fill(0)
-                .map(() => Array(16).fill(0)),
+              bitmap: createEmptyBitmap(),
               type,
               typeIndex: i,
               conditions: cond,
@@ -191,14 +196,9 @@ class ProjectState {
     if (!data.groups.jongsung.find((g) => g.id === 'no_jongsung')) {
       data.groups.jongsung.push({id: 'no_jongsung', name: '받침 없음', items: [0]})
     }
-    // Update old components: ensure conditions object exists and remove `false` entries
+    // Update old components: normalize conditions
     for (const c of data.components) {
-      if (!c.conditions) c.conditions = {}
-      for (const k in c.conditions) {
-        if (c.conditions[k] === false) {
-          delete c.conditions[k]
-        }
-      }
+      this.normalizeConditions(c)
     }
     this.project = data
     this.selectedComponentId = null

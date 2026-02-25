@@ -22,6 +22,12 @@ self.onmessage = (e: MessageEvent<ExportMessage>) => {
   ;(self as unknown as Worker).postMessage({type, result})
 }
 
+// 공통 Hex 변환 유틸리티 (모듈 최상위에 한 번만 정의)
+const HEX = '0123456789ABCDEF'
+function toHex4(val: number): string {
+  return HEX[(val >> 12) & 0xf] + HEX[(val >> 8) & 0xf] + HEX[(val >> 4) & 0xf] + HEX[val & 0xf]
+}
+
 function exportBDF(buffer: ArrayBuffer, fontName: string): string {
   const TOTAL = 11172
   const START = 0xac00
@@ -30,7 +36,7 @@ function exportBDF(buffer: ArrayBuffer, fontName: string): string {
 
   // 전체 줄 수 추정: 헤더 ~12줄 + 글리프당 ~24줄 + 마무리 1줄
   const estimatedLines = 12 + TOTAL * 24 + 1
-  const lines: string[] = new Array(estimatedLines)
+  const lines: string[] = Array.from({length: estimatedLines})
   let lineIdx = 0
 
   // ── 파일 헤더 ──
@@ -46,21 +52,11 @@ function exportBDF(buffer: ArrayBuffer, fontName: string): string {
   lines[lineIdx++] = 'ENDPROPERTIES'
   lines[lineIdx++] = `CHARS ${TOTAL}`
 
-  // Hex lookup table
-  const HEX = '0123456789ABCDEF'
-  function toHex4(val: number): string {
-    return HEX[(val >> 12) & 0xf] + HEX[(val >> 8) & 0xf] + HEX[(val >> 4) & 0xf] + HEX[val & 0xf]
-  }
-
-  function toHex4CP(val: number): string {
-    return HEX[(val >> 12) & 0xf] + HEX[(val >> 8) & 0xf] + HEX[(val >> 4) & 0xf] + HEX[val & 0xf]
-  }
-
   for (let i = 0; i < TOTAL; i++) {
     const codePoint = START + i
     const offset = i * 32
 
-    lines[lineIdx++] = `STARTCHAR U+${toHex4CP(codePoint)}`
+    lines[lineIdx++] = `STARTCHAR U+${toHex4(codePoint)}`
     lines[lineIdx++] = `ENCODING ${codePoint}`
     lines[lineIdx++] = 'SWIDTH 1000 0'
     lines[lineIdx++] = 'DWIDTH 16 0'
@@ -85,12 +81,7 @@ function exportHEX(buffer: ArrayBuffer): string {
   const START = 0xac00
   const view = new DataView(buffer)
 
-  const HEX = '0123456789ABCDEF'
-  function toHex4(val: number): string {
-    return HEX[(val >> 12) & 0xf] + HEX[(val >> 8) & 0xf] + HEX[(val >> 4) & 0xf] + HEX[val & 0xf]
-  }
-
-  const lines: string[] = new Array(TOTAL)
+  const lines: string[] = Array.from({length: TOTAL})
 
   for (let i = 0; i < TOTAL; i++) {
     const codePoint = START + i
