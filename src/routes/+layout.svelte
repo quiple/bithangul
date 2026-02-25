@@ -1,7 +1,9 @@
 <script lang="ts">
-  import '#app.css';
-  import favicon from '$lib/assets/favicon.svg';
-  import { projectState } from '$lib/state.svelte';
+  import '#app.css'
+  import favicon from '$lib/assets/favicon.svg'
+  import favicon32 from '$lib/assets/favicon.png'
+  import appleTouchIcon from '$lib/assets/apple-touch-icon.png'
+  import {projectState} from '$lib/state.svelte'
 
   let { children } = $props();
 
@@ -38,7 +40,9 @@
   <meta property="og:url" content="https://bithangul.quiple.dev" />
   <link rel="canonical" href="https://bithangul.quiple.dev" />
   <meta property="og:locale" content="ko_KR" />
-  <link rel="icon" href={favicon} />
+  <link rel="icon" type="image/png" sizes="32x32" href={favicon32} />
+  <link rel="icon" type="image/svg+xml" sizes="any" href={favicon} />
+  <link rel="apple-touch-icon" type="image/png" href={appleTouchIcon} />
 </svelte:head>
 
 {@render children()}
