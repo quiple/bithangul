@@ -112,7 +112,16 @@
       errorMsg = error
       return
     }
-    onSave(draftGroups.map((group) => ({...group, conditions: structuredClone(group.conditions)})))
+    onSave(
+      draftGroups.map((group) => ({
+        id: group.id,
+        name: group.name,
+        splitOperationId: group.splitOperationId,
+        conditions: Object.fromEntries(
+          Object.entries(group.conditions).map(([conditionType, items]) => [conditionType, items ? [...items] : items]),
+        ),
+      })),
+    )
   }
 
   function getItemLabel(conditionType: ComponentType, index: number) {
