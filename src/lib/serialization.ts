@@ -15,6 +15,79 @@ const TYPE_COUNTS: Record<ComponentType, number> = {
 }
 const TYPE_LABELS: Record<ComponentType, string> = {chosung: '초성', jungsung: '중성', jongsung: '종성'}
 
+function sameItems(first: number[], second: number[]) {
+  return first.length === second.length && first.every((item, index) => item === second[index])
+}
+
+function mergeVariationNames(first: string, second: string) {
+  const firstParts = first.split(' · ')
+  const secondParts = second.split(' · ')
+  const commonParts = firstParts.filter((part) => secondParts.includes(part))
+  const uniqueParts = [
+    ...firstParts.filter((part) => !commonParts.includes(part)),
+    ...secondParts.filter((part) => !commonParts.includes(part)),
+  ]
+  if (uniqueParts.length === 0) return first
+  return commonParts.length > 0 ? `${uniqueParts.join('·')} · ${commonParts.join(' · ')}` : `${first} / ${second}`
+}
+
+function mergeDuplicateVariations(data: any, groups: GroupsStructure) {
+  for (const targetType of TYPES) {
+    const conditionTypes = TYPES.filter((type) => type !== targetType)
+    const expectedRows = targetType === 'jongsung' ? JONGSUNG_COUNT - 1 : TYPE_COUNTS[targetType]
+    let merged = true
+
+    while (merged) {
+      merged = false
+      const targetGroups = groups[targetType]
+
+      pairLoop: for (let firstIndex = 0; firstIndex < targetGroups.length; firstIndex++) {
+        for (let secondIndex = firstIndex + 1; secondIndex < targetGroups.length; secondIndex++) {
+          const first = targetGroups[firstIndex]
+          const second = targetGroups[secondIndex]
+          const differingTypes = conditionTypes.filter(
+            (type) =>
+              !sameItems(
+                first.conditions[type] || Array.from({length: TYPE_COUNTS[type]}, (_, index) => index),
+                second.conditions[type] || Array.from({length: TYPE_COUNTS[type]}, (_, index) => index),
+              ),
+          )
+          if (differingTypes.length !== 1) continue
+
+          const firstComponents = (data.components || []).filter(
+            (component: any) => component.type === targetType && component.conditions[first.id],
+          )
+          const secondComponents = (data.components || []).filter(
+            (component: any) => component.type === targetType && component.conditions[second.id],
+          )
+          if (firstComponents.length !== expectedRows || secondComponents.length !== expectedRows) continue
+
+          const secondByRow = new Map(secondComponents.map((component: any) => [component.typeIndex, component]))
+          const hasSameBitmaps = firstComponents.every((component: any) => {
+            const other = secondByRow.get(component.typeIndex) as any
+            return other && JSON.stringify(component.bitmap) === JSON.stringify(other.bitmap)
+          })
+          if (!hasSameBitmaps) continue
+
+          const differingType = differingTypes[0]
+          const firstItems =
+            first.conditions[differingType] || Array.from({length: TYPE_COUNTS[differingType]}, (_, index) => index)
+          const secondItems =
+            second.conditions[differingType] || Array.from({length: TYPE_COUNTS[differingType]}, (_, index) => index)
+          first.conditions[differingType] = [...new Set([...firstItems, ...secondItems])].sort((a, b) => a - b)
+          first.name = mergeVariationNames(first.name, second.name)
+          groups[targetType] = targetGroups.filter((group) => group.id !== second.id)
+          data.components = data.components.filter(
+            (component: any) => !(component.type === targetType && component.conditions[second.id]),
+          )
+          merged = true
+          break pairLoop
+        }
+      }
+    }
+  }
+}
+
 function getLegacyConditionKey(conditions: Record<string, boolean>) {
   return Object.keys(conditions || {})
     .filter((groupId) => conditions[groupId])
@@ -135,5 +208,6 @@ export function deserializeProject(data: any): FontProject {
     }
   }
   migrateLegacyGroupModel(data)
+  mergeDuplicateVariations(data, data.groups)
   return data as FontProject
 }
