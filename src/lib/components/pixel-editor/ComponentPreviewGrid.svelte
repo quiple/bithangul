@@ -24,34 +24,45 @@
     return checkConditionMatch(cho, jung, jong, conditions, projectState.project.groups)
   }
 
-  // Calculate affected indices based on component conditions
+  let previewComponents = $derived(
+    projectState.project.components.map((candidate) => (candidate.id === component.id ? component : candidate)),
+  )
+
+  let componentLookup = $derived.by(() => {
+    const lookup = new Map<string, PixelComponent[]>()
+    for (const candidate of previewComponents) {
+      const key = `${candidate.type}:${candidate.typeIndex}`
+      const list = lookup.get(key) || []
+      list.push(candidate)
+      lookup.set(key, list)
+    }
+    return lookup
+  })
+
+  function getBestMatch(type: ComponentType, typeIndex: number, cho: number, jung: number, jong: number) {
+    let best: PixelComponent | undefined
+    let bestSpecificity = -1
+    for (const candidate of componentLookup.get(`${type}:${typeIndex}`) || []) {
+      if (!matchCondition(cho, jung, jong, candidate.conditions || {})) continue
+      const specificity = Object.values(candidate.conditions || {}).filter(Boolean).length
+      if (specificity > bestSpecificity) {
+        best = candidate
+        bestSpecificity = specificity
+      }
+    }
+    return best
+  }
+
+  // Only show syllables where this variation wins over broader fallback variations.
   let affectedIndices = $derived.by(() => {
     const indices: number[] = []
-    const {type, typeIndex, conditions} = component
-
-    if (type === 'chosung') {
-      const cho = typeIndex
+    for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
+      if (component.type === 'chosung' && component.typeIndex !== cho) continue
       for (let jung = 0; jung < JUNGSUNG_COUNT; jung++) {
+        if (component.type === 'jungsung' && component.typeIndex !== jung) continue
         for (let jong = 0; jong < JONGSUNG_COUNT; jong++) {
-          if (matchCondition(cho, jung, jong, conditions)) {
-            indices.push(cho * 588 + jung * 28 + jong)
-          }
-        }
-      }
-    } else if (type === 'jungsung') {
-      const jung = typeIndex
-      for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
-        for (let jong = 0; jong < JONGSUNG_COUNT; jong++) {
-          if (matchCondition(cho, jung, jong, conditions)) {
-            indices.push(cho * 588 + jung * 28 + jong)
-          }
-        }
-      }
-    } else if (type === 'jongsung') {
-      const jong = typeIndex
-      for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
-        for (let jung = 0; jung < JUNGSUNG_COUNT; jung++) {
-          if (matchCondition(cho, jung, jong, conditions)) {
+          if (component.type === 'jongsung' && component.typeIndex !== jong) continue
+          if (getBestMatch(component.type, component.typeIndex, cho, jung, jong)?.id === component.id) {
             indices.push(cho * 588 + jung * 28 + jong)
           }
         }
@@ -68,20 +79,6 @@
     const view = new DataView(buffer)
     const result = new Uint16Array(16)
 
-    const components = projectState.project.components.map((c) => (c.id === component.id ? component : c))
-
-    // Group components by type+typeIndex for fast lookup
-    const lookup = new Map<string, PixelComponent[]>()
-    for (const c of components) {
-      const key = `${c.type}:${c.typeIndex}`
-      let list = lookup.get(key)
-      if (!list) {
-        list = []
-        lookup.set(key, list)
-      }
-      list.push(c)
-    }
-
     for (let i = 0; i < affectedIndices.length; i++) {
       const charIdx = affectedIndices[i]
       const cho = Math.floor(charIdx / 588)
@@ -92,8 +89,7 @@
 
       // Find the correctly matching components for this exact syllable
       const applyComponent = (type: ComponentType, idx: number) => {
-        const list = lookup.get(`${type}:${idx}`) || []
-        const matched = list.find((c) => matchCondition(cho, jung, jong, c.conditions))
+        const matched = getBestMatch(type, idx, cho, jung, jong)
         if (matched) {
           const bmp = flattenBitmap(matched.bitmap)
           for (let r = 0; r < 16; r++) {

@@ -57,6 +57,12 @@ function generateFont(project: FontProject): GenerationResult {
   const compChoMask: Uint32Array = new Uint32Array(compCount)
   const compJungMask: Uint32Array = new Uint32Array(compCount)
   const compJongMask: Uint32Array = new Uint32Array(compCount)
+  const compSpecificity: Uint8Array = new Uint8Array(compCount)
+  const componentsByType: Record<ComponentType, number[][]> = {
+    chosung: Array.from({length: 19}, () => []),
+    jungsung: Array.from({length: 21}, () => []),
+    jongsung: Array.from({length: 28}, () => []),
+  }
 
   const groups = project.groups || {chosung: [], jungsung: [], jongsung: []}
 
@@ -67,6 +73,8 @@ function generateFont(project: FontProject): GenerationResult {
     compChoMask[ci] = computeMaskForType('chosung', comp.type, comp.typeIndex, comp.conditions || {}, groups)
     compJungMask[ci] = computeMaskForType('jungsung', comp.type, comp.typeIndex, comp.conditions || {}, groups)
     compJongMask[ci] = computeMaskForType('jongsung', comp.type, comp.typeIndex, comp.conditions || {}, groups)
+    compSpecificity[ci] = Object.values(comp.conditions || {}).filter(Boolean).length
+    componentsByType[comp.type][comp.typeIndex].push(ci)
   }
 
   const result = new Uint16Array(16)
@@ -82,14 +90,30 @@ function generateFont(project: FontProject): GenerationResult {
 
     for (let r = 0; r < 16; r++) result[r] = 0
 
-    for (let ci = 0; ci < compCount; ci++) {
-      if (compChoMask[ci] & choBit && compJungMask[ci] & jungBit && compJongMask[ci] & jongBit) {
-        const bmp = compBitmaps[ci]
-        for (let r = 0; r < 16; r++) {
-          result[r] |= bmp[r]
+    const applyBestMatch = (type: ComponentType, typeIndex: number) => {
+      let bestIndex = -1
+      let bestSpecificity = -1
+      for (const ci of componentsByType[type][typeIndex]) {
+        if (
+          compChoMask[ci] & choBit &&
+          compJungMask[ci] & jungBit &&
+          compJongMask[ci] & jongBit &&
+          compSpecificity[ci] > bestSpecificity
+        ) {
+          bestIndex = ci
+          bestSpecificity = compSpecificity[ci]
         }
       }
+      if (bestIndex === -1) return
+      const bitmap = compBitmaps[bestIndex]
+      for (let r = 0; r < 16; r++) {
+        result[r] |= bitmap[r]
+      }
     }
+
+    applyBestMatch('chosung', cho)
+    applyBestMatch('jungsung', jung)
+    if (jong > 0) applyBestMatch('jongsung', jong)
 
     const offset = i * BYTES_PER_CHAR
     for (let r = 0; r < 16; r++) {

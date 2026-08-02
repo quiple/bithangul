@@ -1,9 +1,10 @@
 <script lang="ts">
-  import type {FontProject, ComponentType} from '$lib/types'
+  import type {FontProject, ComponentType, PixelComponent} from '$lib/types'
 
   import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte'
   import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte'
   import GroupManager from '$lib/components/pixel-editor/GroupManager.svelte'
+  import SplitComponentDialog from '$lib/components/pixel-editor/SplitComponentDialog.svelte'
   import Preview from '$lib/components/Preview.svelte'
   import {Button, buttonVariants} from '$lib/components/ui/button'
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js'
@@ -34,6 +35,11 @@
   // Group Manager State
   let gmOpen = $state(false)
   let gmType = $state<ComponentType | null>(null)
+
+  // Component context-menu actions
+  let splitDialogOpen = $state(false)
+  let splitTarget = $state<PixelComponent | null>(null)
+  let deleteTarget = $state<PixelComponent | null>(null)
 
   const EXAMPLES: {name: string; loader: () => Promise<FontProject>}[] = [
     {
@@ -236,6 +242,13 @@
           onSelect={(id) => {
             projectState.selectComponent(id)
           }}
+          onSplit={(component) => {
+            splitTarget = component
+            splitDialogOpen = true
+          }}
+          onDelete={(component) => {
+            deleteTarget = component
+          }}
           onOpenGroupManager={(type) => {
             gmType = type
             gmOpen = true
@@ -283,3 +296,44 @@
     gmOpen = false
   }}
 />
+
+<SplitComponentDialog
+  open={splitDialogOpen}
+  component={splitTarget}
+  onOpenChange={(open) => {
+    splitDialogOpen = open
+    if (!open) splitTarget = null
+  }}
+  onSplit={(selections) => {
+    if (!splitTarget) return
+    const newComponent = projectState.splitComponent(splitTarget.id, selections)
+    if (newComponent) {
+      handleGenerate()
+      projectState.selectComponent(newComponent.id)
+    }
+  }}
+/>
+
+<Dialog.Root open={deleteTarget !== null} onOpenChange={(open) => !open && (deleteTarget = null)}>
+  <Dialog.Content>
+    <Dialog.Header>
+      <Dialog.Title>컴포넌트를 삭제할까요?</Dialog.Title>
+      <Dialog.Description>
+        이 컴포넌트의 자형이 해당 조합에서 제거됩니다. 필요한 경우 삭제하기 전에 프로젝트를 저장해 주세요.
+      </Dialog.Description>
+    </Dialog.Header>
+    <Dialog.Footer>
+      <Button variant="outline" onclick={() => (deleteTarget = null)}>취소</Button>
+      <Button
+        variant="destructive"
+        onclick={() => {
+          if (deleteTarget) {
+            projectState.deleteComponent(deleteTarget.id)
+            deleteTarget = null
+            handleGenerate()
+          }
+        }}>삭제</Button
+      >
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>

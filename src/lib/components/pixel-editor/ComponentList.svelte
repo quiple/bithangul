@@ -3,10 +3,11 @@
 
   import Thumbnail from '$lib/components/Thumbnail.svelte'
   import {Button} from '$lib/components/ui/button'
+  import * as ContextMenu from '$lib/components/ui/context-menu/index.js'
   import * as Tabs from '$lib/components/ui/tabs'
   import {CHOSUNG, JUNGSUNG, JONGSUNG} from '$lib/hangul'
   import {projectState} from '$lib/state.svelte'
-  import {Settings} from '@lucide/svelte'
+  import {CopyPlus, Settings, Trash2} from '@lucide/svelte'
   import {onMount, tick} from 'svelte'
 
   interface Props {
@@ -14,6 +15,8 @@
     scrollTop?: number
     activeTab?: ComponentType
     onSelect: (id: string) => void
+    onSplit: (component: PixelComponent) => void
+    onDelete: (component: PixelComponent) => void
     onOpenGroupManager: (type: ComponentType) => void
   }
 
@@ -22,6 +25,8 @@
     scrollTop = $bindable(0),
     activeTab = $bindable('chosung'),
     onSelect,
+    onSplit,
+    onDelete,
     onOpenGroupManager,
   }: Props = $props()
 
@@ -240,17 +245,30 @@
   {@const pNodes = getTreeNodes(type, i)}
 
   {#snippet compButton(comp: PixelComponent)}
-    <div class="group relative h-8.5">
-      <Button
-        variant="outline"
-        class="box-content shrink-0 overflow-hidden rounded p-0"
-        style="width: 2rem; height: 2rem;"
-        onclick={() => onSelect(comp.id)}
-        title={formatConditions(comp.conditions || {})}
-      >
-        <Thumbnail bitmap={comp.bitmap} size={32} class="transition group-hover:brightness-95" />
-      </Button>
-    </div>
+    <ContextMenu.Root>
+      <ContextMenu.Trigger class="group relative block h-8.5">
+        <Button
+          variant="outline"
+          class="box-content shrink-0 overflow-hidden rounded p-0"
+          style="width: 2rem; height: 2rem;"
+          onclick={() => onSelect(comp.id)}
+          title={formatConditions(comp.conditions || {})}
+        >
+          <Thumbnail bitmap={comp.bitmap} size={32} class="transition group-hover:brightness-95" />
+        </Button>
+      </ContextMenu.Trigger>
+      <ContextMenu.Content class="w-52">
+        <ContextMenu.Item onSelect={() => onSplit(comp)}>
+          <CopyPlus />
+          컴포넌트 나누기
+        </ContextMenu.Item>
+        <ContextMenu.Separator />
+        <ContextMenu.Item variant="destructive" onSelect={() => onDelete(comp)}>
+          <Trash2 />
+          컴포넌트 삭제
+        </ContextMenu.Item>
+      </ContextMenu.Content>
+    </ContextMenu.Root>
   {/snippet}
 
   <div class="flex min-w-0 gap-1 rounded-md p-1 hover:bg-muted hover:[&_.label]:bg-muted">

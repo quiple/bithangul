@@ -1,7 +1,7 @@
 import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '$lib/types'
 
 import {createEmptyBitmap} from '$lib/bitmap'
-import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT} from '$lib/hangul'
+import {CHOSUNG, CHOSUNG_COUNT, JUNGSUNG, JUNGSUNG_COUNT, JONGSUNG, JONGSUNG_COUNT} from '$lib/hangul'
 
 class ProjectState {
   project = $state<FontProject>({
@@ -12,6 +12,7 @@ class ProjectState {
       jongsung: [{id: 'no_jongsung', name: '받침 없음', items: [0]}],
     },
     components: [],
+    deletedComponentKeys: [],
   })
 
   selectedComponentId = $state<string | null>(null)
@@ -31,6 +32,95 @@ class ProjectState {
     if (index !== -1) {
       this.project.components[index] = updated
     }
+  }
+
+  private getComponentKey(component: Pick<PixelComponent, 'type' | 'typeIndex' | 'conditions'>) {
+    const conditionIds = Object.keys(component.conditions || {})
+      .filter((id) => component.conditions[id])
+      .sort()
+    return `${component.type}:${component.typeIndex}:${conditionIds.join(',')}`
+  }
+
+  private getSplitGroupName(type: ComponentType, items: number[]) {
+    const chars = type === 'chosung' ? CHOSUNG : type === 'jungsung' ? JUNGSUNG : JONGSUNG
+    const labels = items.map((index) => (type === 'jongsung' && index === 0 ? '받침 없음' : chars[index]))
+    const preview = labels.slice(0, 4).join('·')
+    return `${type === 'chosung' ? '초성' : type === 'jungsung' ? '중성' : '종성'} ${preview}${labels.length > 4 ? ` 외 ${labels.length - 4}개` : ''}`
+  }
+
+  splitComponent(id: string, selections: Partial<Record<ComponentType, number[]>>) {
+    const source = this.project.components.find((component) => component.id === id)
+    if (!source) return null
+
+    const nextConditions = {...source.conditions}
+    const splitGroupIds: string[] = []
+
+    for (const type of ['chosung', 'jungsung', 'jongsung'] as ComponentType[]) {
+      if (type === source.type) continue
+      const items = [...new Set(selections[type] || [])].sort((a, b) => a - b)
+      if (items.length === 0) continue
+
+      let group = this.project.groups[type].find(
+        (candidate) =>
+          candidate.appliesTo?.length === 1 &&
+          candidate.appliesTo[0] === source.type &&
+          candidate.items.length === items.length &&
+          candidate.items.every((item, index) => item === items[index]),
+      )
+
+      if (!group) {
+        group = {
+          id: crypto.randomUUID(),
+          name: this.getSplitGroupName(type, items),
+          items,
+          appliesTo: [source.type],
+        }
+        this.project.groups[type].push(group)
+      }
+
+      nextConditions[group.id] = true
+      splitGroupIds.push(group.id)
+    }
+
+    if (splitGroupIds.length === 0) return null
+
+    this.syncComponents(true)
+
+    const exactKey = this.getComponentKey({
+      type: source.type,
+      typeIndex: source.typeIndex,
+      conditions: nextConditions,
+    })
+    const exactMatch = this.project.components.find((component) => this.getComponentKey(component) === exactKey)
+    if (exactMatch) return exactMatch
+
+    return (
+      this.project.components
+        .filter(
+          (component) =>
+            component.type === source.type &&
+            component.typeIndex === source.typeIndex &&
+            splitGroupIds.every((groupId) => component.conditions[groupId]),
+        )
+        .sort(
+          (a, b) =>
+            this.getConditionDistance(a.conditions, nextConditions) -
+            this.getConditionDistance(b.conditions, nextConditions),
+        )[0] || null
+    )
+  }
+
+  deleteComponent(id: string) {
+    const component = this.project.components.find((candidate) => candidate.id === id)
+    if (!component) return
+
+    const key = this.getComponentKey(component)
+    if (!this.project.deletedComponentKeys?.includes(key)) {
+      this.project.deletedComponentKeys = [...(this.project.deletedComponentKeys || []), key]
+    }
+
+    this.project.components = this.project.components.filter((candidate) => candidate.id !== id)
+    if (this.selectedComponentId === id) this.selectedComponentId = null
   }
 
   // --- Group Management ---
@@ -112,7 +202,7 @@ class ProjectState {
     }
   }
 
-  syncComponents() {
+  syncComponents(copyNewBitmaps = false) {
     // Normalize existing components' conditions
     for (const c of this.project.components) {
       this.normalizeConditions(c)
@@ -121,6 +211,7 @@ class ProjectState {
     // Completely strip out `{}` from components if the project has grown to have other valid conditions.
     // If a type has groups defined, it shouldn't hold onto empty conditions.
 
+    const deletedKeys = new Set(this.project.deletedComponentKeys || [])
     const newComponents: PixelComponent[] = []
     const typeInfo: Record<ComponentType, {count: number; start: number; otherTypes: ComponentType[]}> = {
       chosung: {count: CHOSUNG_COUNT, start: 0, otherTypes: ['jungsung', 'jongsung']},
@@ -164,15 +255,25 @@ class ProjectState {
         }
 
         for (const cond of validConditions) {
+          const componentKey = this.getComponentKey({type, typeIndex: i, conditions: cond})
+          if (deletedKeys.has(componentKey)) continue
           const matchedComp = condToComp.get(cond)
 
           if (matchedComp) {
             newComponents.push({...matchedComp, conditions: cond})
           } else {
-            // If it's a newly created variation without a matched existing component, create an empty component
+            const nearestComponent = copyNewBitmaps
+              ? existingForJamo.reduce<PixelComponent | null>((nearest, candidate) => {
+                  if (!nearest) return candidate
+                  return this.getConditionDistance(candidate.conditions, cond) <
+                    this.getConditionDistance(nearest.conditions, cond)
+                    ? candidate
+                    : nearest
+                }, null)
+              : null
             newComponents.push({
               id: crypto.randomUUID(),
-              bitmap: createEmptyBitmap(),
+              bitmap: nearestComponent ? nearestComponent.bitmap.map((row) => [...row]) : createEmptyBitmap(),
               type,
               typeIndex: i,
               conditions: cond,
@@ -183,7 +284,7 @@ class ProjectState {
     }
 
     this.project.components = newComponents
-    if (this.selectedComponentId && !newComponents.find((c) => c.id === this.selectedComponentId)) {
+    if (this.selectedComponentId && !this.project.components.find((c) => c.id === this.selectedComponentId)) {
       this.selectedComponentId = null
     }
   }
@@ -192,6 +293,7 @@ class ProjectState {
     if (!data.groups) {
       data.groups = {chosung: [], jungsung: [], jongsung: []}
     }
+    data.deletedComponentKeys ||= []
     // Ensure "no_jongsung" group exists
     if (!data.groups.jongsung.find((g) => g.id === 'no_jongsung')) {
       data.groups.jongsung.push({id: 'no_jongsung', name: '받침 없음', items: [0]})

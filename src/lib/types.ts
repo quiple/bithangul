@@ -25,4 +25,5 @@ export interface FontProject {
   name: string
   groups: GroupsStructure
   components: PixelComponent[]
+  deletedComponentKeys?: string[]
 }
