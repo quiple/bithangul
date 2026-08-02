@@ -114,9 +114,22 @@
     </Button>
   </div>
 
-  <div class="grid grid-cols-2 gap-2">
-    {#each sortedComponents as component (component.id)}
-      {@render componentItem(component)}
+  <div class="space-y-4">
+    {#each JAMO[type] as jamo, typeIndex}
+      {#if type !== 'jongsung' || typeIndex !== 0}
+        {@const jamoComponents = sortedComponents.filter((component) => component.typeIndex === typeIndex)}
+        <section>
+          <div class="mb-2 flex items-center gap-2 border-b pb-1">
+            <h4 class="text-base font-bold">{jamo}</h4>
+            <span class="text-xs text-muted-foreground">{jamoComponents.length}개</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            {#each jamoComponents as component (component.id)}
+              {@render componentItem(component)}
+            {/each}
+          </div>
+        </section>
+      {/if}
     {/each}
   </div>
 {/snippet}
