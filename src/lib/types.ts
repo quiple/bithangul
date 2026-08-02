@@ -5,6 +5,7 @@ export interface JamoGroup {
   name: string
   items: number[]
   appliesTo?: ComponentType[] // Which component types this group affects. If undefined, applies to all other types.
+  splitOperationId?: string // Groups created together by a component split share this id.
 }
 
 export interface GroupsStructure {

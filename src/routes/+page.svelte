@@ -40,6 +40,13 @@
   let splitDialogOpen = $state(false)
   let splitTarget = $state<PixelComponent | null>(null)
   let deleteTarget = $state<PixelComponent | null>(null)
+  let deletePlan = $derived(deleteTarget ? projectState.getComponentDeletionPlan(deleteTarget.id) : null)
+
+  const COMPONENT_TYPE_LABEL: Record<ComponentType, string> = {
+    chosung: '초성',
+    jungsung: '중성',
+    jongsung: '종성',
+  }
 
   const EXAMPLES: {name: string; loader: () => Promise<FontProject>}[] = [
     {
@@ -317,22 +324,29 @@
 <Dialog.Root open={deleteTarget !== null} onOpenChange={(open) => !open && (deleteTarget = null)}>
   <Dialog.Content>
     <Dialog.Header>
-      <Dialog.Title>컴포넌트를 삭제할까요?</Dialog.Title>
+      <Dialog.Title>그룹 규칙을 삭제할까요?</Dialog.Title>
       <Dialog.Description>
-        같은 조합 조건을 가진 컴포넌트가 모든 행에서 제거됩니다. 필요한 경우 삭제하기 전에 프로젝트를 저장해 주세요.
+        {#if deletePlan && deletePlan.groups.length > 0}
+          그룹 관리에서 ‘{deletePlan.groups.map(({group}) => group.name).join(', ')}’의
+          {COMPONENT_TYPE_LABEL[deletePlan.component.type]} 적용을 제거합니다. 이 규칙에서 파생된 모든 행의
+          {deletePlan.affectedComponentCount}개 컴포넌트가 함께 정리됩니다.
+        {:else}
+          이 컴포넌트에는 삭제할 수 있는 그룹 규칙이 없습니다.
+        {/if}
       </Dialog.Description>
     </Dialog.Header>
     <Dialog.Footer>
       <Button variant="outline" onclick={() => (deleteTarget = null)}>취소</Button>
       <Button
         variant="destructive"
+        disabled={!deletePlan || deletePlan.groups.length === 0}
         onclick={() => {
           if (deleteTarget) {
-            projectState.deleteComponent(deleteTarget.id)
+            const deleted = projectState.deleteComponent(deleteTarget.id)
             deleteTarget = null
-            handleGenerate()
+            if (deleted) handleGenerate()
           }
-        }}>모든 행에서 삭제</Button
+        }}>그룹과 컴포넌트 삭제</Button
       >
     </Dialog.Footer>
   </Dialog.Content>

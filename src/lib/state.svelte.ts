@@ -58,6 +58,7 @@ class ProjectState {
 
     const nextConditions = {...source.conditions}
     const splitGroupIds: string[] = []
+    const splitOperationId = crypto.randomUUID()
 
     for (const type of ['chosung', 'jungsung', 'jongsung'] as ComponentType[]) {
       if (type === source.type) continue
@@ -78,6 +79,7 @@ class ProjectState {
           name: this.getSplitGroupName(type, items),
           items,
           appliesTo: [source.type],
+          splitOperationId,
         }
         this.project.groups[type].push(group)
       }
@@ -114,32 +116,89 @@ class ProjectState {
     )
   }
 
-  deleteComponent(id: string) {
+  getComponentDeletionPlan(id: string) {
     const component = this.project.components.find((candidate) => candidate.id === id)
-    if (!component) return
+    if (!component) return null
 
-    const targetConditionKey = this.getConditionKey(component.conditions)
-    const typeRange = {
-      chosung: {start: 0, count: CHOSUNG_COUNT},
-      jungsung: {start: 0, count: JUNGSUNG_COUNT},
-      jongsung: {start: 1, count: JONGSUNG_COUNT},
-    }
-    const deletedKeys = new Set(this.project.deletedComponentKeys || [])
-    for (let typeIndex = typeRange[component.type].start; typeIndex < typeRange[component.type].count; typeIndex++) {
-      deletedKeys.add(this.getComponentKey({type: component.type, typeIndex, conditions: component.conditions}))
-    }
-    this.project.deletedComponentKeys = [...deletedKeys]
+    const typePriority: Record<ComponentType, number> = {jongsung: 1, jungsung: 2, chosung: 3}
+    const activeGroups = (['chosung', 'jungsung', 'jongsung'] as ComponentType[])
+      .flatMap((sourceType) =>
+        this.project.groups[sourceType].map((group) => ({
+          sourceType,
+          group,
+        })),
+      )
+      .filter(
+        ({sourceType, group}) =>
+          group.id !== 'no_jongsung' &&
+          component.conditions[group.id] &&
+          sourceType !== component.type &&
+          (!group.appliesTo || group.appliesTo.includes(component.type)),
+      )
+      .sort((a, b) => {
+        const priorityDifference = typePriority[a.sourceType] - typePriority[b.sourceType]
+        if (priorityDifference !== 0) return priorityDifference
+        if (a.group.items.length !== b.group.items.length) return b.group.items.length - a.group.items.length
+        const aMin = a.group.items.length > 0 ? Math.min(...a.group.items) : Number.MAX_SAFE_INTEGER
+        const bMin = b.group.items.length > 0 ? Math.min(...b.group.items) : Number.MAX_SAFE_INTEGER
+        if (aMin !== bMin) return aMin - bMin
+        return a.group.name.localeCompare(b.group.name, 'ko')
+      })
 
-    const deletedIds = new Set(
-      this.project.components
-        .filter(
-          (candidate) =>
-            candidate.type === component.type && this.getConditionKey(candidate.conditions) === targetConditionKey,
+    const deepestGroup = activeGroups.at(-1)
+    if (!deepestGroup) return {component, groups: [], affectedComponentCount: 0}
+
+    const splitOperationId = deepestGroup.group.splitOperationId
+    const groups = splitOperationId
+      ? (['chosung', 'jungsung', 'jongsung'] as ComponentType[]).flatMap((sourceType) =>
+          this.project.groups[sourceType]
+            .filter(
+              (group) =>
+                group.splitOperationId === splitOperationId &&
+                sourceType !== component.type &&
+                (!group.appliesTo || group.appliesTo.includes(component.type)),
+            )
+            .map((group) => ({sourceType, group})),
         )
-        .map((candidate) => candidate.id),
-    )
-    this.project.components = this.project.components.filter((candidate) => !deletedIds.has(candidate.id))
-    if (this.selectedComponentId && deletedIds.has(this.selectedComponentId)) this.selectedComponentId = null
+      : [deepestGroup]
+    const groupIds = new Set(groups.map(({group}) => group.id))
+    const affectedComponentCount = this.project.components.filter(
+      (candidate) =>
+        candidate.type === component.type && [...groupIds].some((groupId) => candidate.conditions[groupId]),
+    ).length
+
+    return {component, groups, affectedComponentCount}
+  }
+
+  deleteComponent(id: string) {
+    const plan = this.getComponentDeletionPlan(id)
+    if (!plan || plan.groups.length === 0) return null
+
+    const targetType = plan.component.type
+    const allTypes = ['chosung', 'jungsung', 'jongsung'] as ComponentType[]
+    for (const {sourceType, group} of plan.groups) {
+      const possibleTargets = allTypes.filter((type) => type !== sourceType)
+      const currentTargets = group.appliesTo || possibleTargets
+      const remainingTargets = currentTargets.filter((type) => type !== targetType)
+
+      if (remainingTargets.length === 0) {
+        this.project.groups[sourceType] = this.project.groups[sourceType].filter(
+          (candidate) => candidate.id !== group.id,
+        )
+      } else {
+        this.project.groups[sourceType] = this.project.groups[sourceType].map((candidate) =>
+          candidate.id === group.id ? {...candidate, appliesTo: remainingTargets} : candidate,
+        )
+      }
+    }
+
+    const removedGroupIds = new Set(plan.groups.map(({group}) => group.id))
+    this.project.deletedComponentKeys = (this.project.deletedComponentKeys || []).filter((key) => {
+      const conditionIds = key.split(':').at(-1)?.split(',') || []
+      return !conditionIds.some((conditionId) => removedGroupIds.has(conditionId))
+    })
+    this.syncComponents()
+    return plan
   }
 
   // --- Group Management ---
