@@ -169,7 +169,7 @@
         onclick={() => onSelect(component.id)}
         title={`${COMPONENT_TYPE_LABELS[component.type]} ${jamo} · ${variationName}`}
       >
-        <span class="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background">
+        <span class="flex size-10 shrink-0 items-center justify-center overflow-hidden bg-background">
           <Thumbnail bitmap={component.bitmap} size={40} class="transition group-hover:brightness-95" />
         </span>
         <span class="min-w-0 flex-1 leading-tight">
