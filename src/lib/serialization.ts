@@ -160,14 +160,33 @@ function migrateLegacyGroupModel(data: any) {
  * 2D 배열 bitmap을 hex 문자열로 압축합니다.
  */
 export function serializeProject(proj: FontProject): any {
-  const {components, ...metadata} = proj
   return {
-    ...structuredClone(metadata),
-    components: components.map((component) => ({
-      ...component,
+    name: proj.name,
+    groupModelVersion: proj.groupModelVersion,
+    groups: Object.fromEntries(
+      COMPONENT_TYPES.map((type) => [
+        type,
+        proj.groups[type].map((group) => ({
+          id: group.id,
+          name: group.name,
+          splitOperationId: group.splitOperationId,
+          conditions: Object.fromEntries(
+            Object.entries(group.conditions).map(([conditionType, items]) => [
+              conditionType,
+              items ? [...items] : items,
+            ]),
+          ),
+        })),
+      ]),
+    ),
+    components: proj.components.map((component) => ({
+      id: component.id,
+      type: component.type,
+      typeIndex: component.typeIndex,
       conditions: {...component.conditions},
       bitmap: bitmapToHex(component.bitmap),
     })),
+    deletedComponentKeys: proj.deletedComponentKeys ? [...proj.deletedComponentKeys] : [],
   }
 }
 
