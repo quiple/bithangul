@@ -1,27 +1,27 @@
 <script lang="ts">
   import '#app.css'
-  import favicon from '$lib/assets/favicon.svg'
-  import favicon32 from '$lib/assets/favicon.png'
   import appleTouchIcon from '$lib/assets/apple-touch-icon.png'
+  import favicon32 from '$lib/assets/favicon.png'
+  import favicon from '$lib/assets/favicon.svg'
   import {projectState} from '$lib/state.svelte'
 
-  let { children } = $props();
+  let {children} = $props()
 
   $effect(() => {
-    const isDirty = projectState.project.components.length > 0;
+    const isDirty = projectState.project.components.length > 0
 
     function handleBeforeUnload(e: BeforeUnloadEvent) {
-      e.preventDefault();
+      e.preventDefault()
     }
 
     if (isDirty) {
-      window.addEventListener('beforeunload', handleBeforeUnload);
+      window.addEventListener('beforeunload', handleBeforeUnload)
     }
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  });
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  })
 </script>
 
 <svelte:head>

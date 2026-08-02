@@ -1,157 +1,158 @@
 <script lang="ts">
-  import * as Resizable from '$lib/components/ui/resizable/index.js';
-  import { onMount } from 'svelte';
-  import { projectState } from '$lib/state.svelte';
-  import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte';
-  import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte';
-  import GroupManager from '$lib/components/pixel-editor/GroupManager.svelte';
-  import Preview from '$lib/components/Preview.svelte';
-  import { Button, buttonVariants } from '$lib/components/ui/button';
-  import * as ButtonGroup from '$lib/components/ui/button-group/index.js';
-  import { Spinner } from '$lib/components/ui/spinner/index.js';
-  import { Download, Upload, FileCode, BookOpen } from '@lucide/svelte';
-  import GeneratorWorker from '$lib/workers/generator.worker?worker';
-  import ExportWorker from '$lib/workers/export.worker?worker';
-  import { downloadText } from '$lib/export';
-  import { serializeProject, deserializeProject } from '$lib/serialization';
-  import * as Tooltip from '$lib/components/ui/tooltip/index.js';
-  import * as Dialog from '$lib/components/ui/dialog/index.js';
-  import type { FontProject, ComponentType } from '$lib/types';
+  import type {FontProject, ComponentType} from '$lib/types'
 
-  let generatorWorker: Worker;
-  let exportWorker: Worker;
-  let generatedData = $state<ArrayBuffer | null>(null);
-  let isGenerating = $state(false);
-  let isExportingBDF = $state(false);
-  let isExportingHEX = $state(false);
+  import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte'
+  import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte'
+  import GroupManager from '$lib/components/pixel-editor/GroupManager.svelte'
+  import Preview from '$lib/components/Preview.svelte'
+  import {Button, buttonVariants} from '$lib/components/ui/button'
+  import * as ButtonGroup from '$lib/components/ui/button-group/index.js'
+  import * as Dialog from '$lib/components/ui/dialog/index.js'
+  import * as Resizable from '$lib/components/ui/resizable/index.js'
+  import {Spinner} from '$lib/components/ui/spinner/index.js'
+  import * as Tooltip from '$lib/components/ui/tooltip/index.js'
+  import {downloadText} from '$lib/export'
+  import {serializeProject, deserializeProject} from '$lib/serialization'
+  import {projectState} from '$lib/state.svelte'
+  import ExportWorker from '$lib/workers/export.worker?worker'
+  import GeneratorWorker from '$lib/workers/generator.worker?worker'
+  import {Download, Upload, FileCode, BookOpen} from '@lucide/svelte'
+  import {onMount} from 'svelte'
+
+  let generatorWorker: Worker
+  let exportWorker: Worker
+  let generatedData = $state<ArrayBuffer | null>(null)
+  let isGenerating = $state(false)
+  let isExportingBDF = $state(false)
+  let isExportingHEX = $state(false)
 
   /** 컴포넌트 목록 스크롤 위치 보존 */
-  let componentListScrollTop = $state(0);
-  let componentListActiveTab = $state<ComponentType>('chosung');
-  let exampleDialogOpen = $state(false);
+  let componentListScrollTop = $state(0)
+  let componentListActiveTab = $state<ComponentType>('chosung')
+  let exampleDialogOpen = $state(false)
 
   // Group Manager State
-  let gmOpen = $state(false);
-  let gmType = $state<ComponentType | null>(null);
+  let gmOpen = $state(false)
+  let gmType = $state<ComponentType | null>(null)
 
-  const EXAMPLES: { name: string; loader: () => Promise<FontProject> }[] = [
+  const EXAMPLES: {name: string; loader: () => Promise<FontProject>}[] = [
     {
       name: '둥근모꼴 (한글도깨비 8x4x4벌식)',
       loader: () => import('$lib/assets/Dunggeunmo.json').then((m) => m.default as unknown as FontProject),
     },
-  ];
+  ]
 
   async function loadExample(loader: () => Promise<FontProject>) {
     try {
-      let data = await loader();
-      data = deserializeProject(data);
+      let data = await loader()
+      data = deserializeProject(data)
       if (data.components) {
-        projectState.loadProject(data);
-        generatedData = null;
-        handleGenerate();
+        projectState.loadProject(data)
+        generatedData = null
+        handleGenerate()
       }
     } catch (err) {
-      console.error('예제 불러오기 실패:', err);
-      alert('예제를 불러오는 데 실패했습니다.');
+      console.error('예제 불러오기 실패:', err)
+      alert('예제를 불러오는 데 실패했습니다.')
     }
-    exampleDialogOpen = false;
+    exampleDialogOpen = false
   }
 
   onMount(() => {
     // Check if initial sync is needed
     if (projectState.project.components.length === 0) {
-      projectState.syncComponents();
+      projectState.syncComponents()
     }
 
-    generatorWorker = new GeneratorWorker();
+    generatorWorker = new GeneratorWorker()
     generatorWorker.onmessage = (e) => {
-      generatedData = e.data.buffer;
-      isGenerating = false;
-    };
+      generatedData = e.data.buffer
+      isGenerating = false
+    }
 
-    exportWorker = new ExportWorker();
+    exportWorker = new ExportWorker()
     exportWorker.onmessage = (e) => {
-      const { type, result } = e.data;
-      const name = projectState.project.name || 'bithangul';
+      const {type, result} = e.data
+      const name = projectState.project.name || 'bithangul'
       if (type === 'bdf') {
-        downloadText(result, `${name}.bdf`, 'text/plain');
-        isExportingBDF = false;
+        downloadText(result, `${name}.bdf`, 'text/plain')
+        isExportingBDF = false
       } else if (type === 'hex') {
-        downloadText(result, `${name}.hex`, 'text/plain');
-        isExportingHEX = false;
+        downloadText(result, `${name}.hex`, 'text/plain')
+        isExportingHEX = false
       }
-    };
+    }
 
     return () => {
-      generatorWorker.terminate();
-      exportWorker.terminate();
-    };
-  });
+      generatorWorker.terminate()
+      exportWorker.terminate()
+    }
+  })
 
   function handleGenerate() {
-    isGenerating = true;
-    const snapshot = $state.snapshot(projectState.project);
-    generatorWorker.postMessage(snapshot);
+    isGenerating = true
+    const snapshot = $state.snapshot(projectState.project)
+    generatorWorker.postMessage(snapshot)
   }
 
   function handleSaveProject() {
-    const serialized = serializeProject($state.snapshot(projectState.project));
-    const data = JSON.stringify(serialized);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${projectState.project.name || 'font-project'}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const serialized = serializeProject($state.snapshot(projectState.project))
+    const data = JSON.stringify(serialized)
+    const blob = new Blob([data], {type: 'application/json'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${projectState.project.name || 'font-project'}.json`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   function handleLoadProject() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
     input.onchange = async (e) => {
-      const target = e.target as HTMLInputElement;
-      const file = target.files?.[0];
-      if (!file) return;
-      const text = await file.text();
+      const target = e.target as HTMLInputElement
+      const file = target.files?.[0]
+      if (!file) return
+      const text = await file.text()
       try {
-        let data = JSON.parse(text);
-        data = deserializeProject(data);
+        let data = JSON.parse(text)
+        data = deserializeProject(data)
         if (data.components) {
-          projectState.loadProject(data);
-          generatedData = null;
-          handleGenerate();
+          projectState.loadProject(data)
+          generatedData = null
+          handleGenerate()
         }
       } catch (err) {
-        console.error(err);
-        alert('Failed to load project');
+        console.error(err)
+        alert('Failed to load project')
       }
-    };
-    input.click();
+    }
+    input.click()
   }
 
   function handleExportBDF() {
-    if (!generatedData || isExportingBDF) return;
-    isExportingBDF = true;
-    const bufferCopy = generatedData.slice(0);
-    exportWorker.postMessage({ type: 'bdf', buffer: bufferCopy, fontName: projectState.project.name || 'bithangul' }, [
+    if (!generatedData || isExportingBDF) return
+    isExportingBDF = true
+    const bufferCopy = generatedData.slice(0)
+    exportWorker.postMessage({type: 'bdf', buffer: bufferCopy, fontName: projectState.project.name || 'bithangul'}, [
       bufferCopy,
-    ]);
+    ])
   }
 
   function handleExportHEX() {
-    if (!generatedData || isExportingHEX) return;
-    isExportingHEX = true;
-    const bufferCopy = generatedData.slice(0);
-    exportWorker.postMessage({ type: 'hex', buffer: bufferCopy }, [bufferCopy]);
+    if (!generatedData || isExportingHEX) return
+    isExportingHEX = true
+    const bufferCopy = generatedData.slice(0)
+    exportWorker.postMessage({type: 'hex', buffer: bufferCopy}, [bufferCopy])
   }
 </script>
 
-<div class="h-screen w-screen flex flex-col bg-background text-foreground overflow-hidden">
-  <header class="h-14 border-b px-4 gap-2 flex items-center justify-between shrink-0 bg-card">
+<div class="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
+  <header class="flex h-14 shrink-0 items-center justify-between gap-2 border-b bg-card px-4">
     <div class="flex items-center gap-4">
-      <h1 class="font-bold text-lg truncate">BitHangul</h1>
+      <h1 class="truncate text-lg font-bold">BitHangul</h1>
       <ButtonGroup.Root>
         <ButtonGroup.Root>
           <Button variant="outline" size="sm" onclick={handleLoadProject}>
@@ -175,7 +176,7 @@
           <Tooltip.Provider>
             <Tooltip.Root>
               <Tooltip.Trigger
-                class={buttonVariants({ variant: 'outline', size: 'sm' })}
+                class={buttonVariants({variant: 'outline', size: 'sm'})}
                 onclick={handleExportBDF}
                 disabled={!generatedData || isExportingBDF || isExportingHEX}
               >
@@ -191,7 +192,7 @@
           <Tooltip.Provider>
             <Tooltip.Root>
               <Tooltip.Trigger
-                class={buttonVariants({ variant: 'outline', size: 'sm' })}
+                class={buttonVariants({variant: 'outline', size: 'sm'})}
                 onclick={handleExportHEX}
                 disabled={!generatedData || isExportingBDF || isExportingHEX}
               >
@@ -208,7 +209,7 @@
     </div>
   </header>
 
-  <Resizable.PaneGroup direction="horizontal" class="flex-1 flex overflow-hidden">
+  <Resizable.PaneGroup direction="horizontal" class="flex flex-1 overflow-hidden">
     <Resizable.Pane defaultSize={35} minSize={20} maxSize={60} class="flex flex-col bg-sidebar">
       {#if projectState.selectedComponentId && projectState.selectedComponent}
         {@const sel = projectState.selectedComponent}
@@ -219,12 +220,12 @@
           component={sel}
           siblingComponents={siblings}
           onSave={(updated) => {
-            projectState.updateComponent(updated.id, updated);
-            projectState.selectComponent(null);
-            handleGenerate();
+            projectState.updateComponent(updated.id, updated)
+            projectState.selectComponent(null)
+            handleGenerate()
           }}
           onCancel={() => {
-            projectState.selectComponent(null);
+            projectState.selectComponent(null)
           }}
         />
       {:else}
@@ -233,16 +234,16 @@
           bind:scrollTop={componentListScrollTop}
           bind:activeTab={componentListActiveTab}
           onSelect={(id) => {
-            projectState.selectComponent(id);
+            projectState.selectComponent(id)
           }}
           onOpenGroupManager={(type) => {
-            gmType = type;
-            gmOpen = true;
+            gmType = type
+            gmOpen = true
           }}
         />
       {/if}
     </Resizable.Pane>
-    <Resizable.Handle class="bg-card border-x w-2" />
+    <Resizable.Handle class="w-2 border-x bg-card" />
     <Resizable.Pane defaultSize={65} minSize={40} class="overflow-hidden">
       <Preview {generatedData} />
     </Resizable.Pane>
@@ -257,7 +258,7 @@
     </Dialog.Header>
     <div class="flex flex-col gap-2">
       {#each EXAMPLES as example}
-        <Button variant="outline" class="justify-start text-left h-auto" onclick={() => loadExample(example.loader)}>
+        <Button variant="outline" class="h-auto justify-start text-left" onclick={() => loadExample(example.loader)}>
           <BookOpen class="size-4 shrink-0" />
           <span class="font-medium">{example.name}</span>
         </Button>
@@ -276,9 +277,9 @@
   onOpenChange={(v) => (gmOpen = v)}
   onSave={(newGroups) => {
     if (gmType) {
-      projectState.updateGroups(gmType, newGroups);
-      handleGenerate();
+      projectState.updateGroups(gmType, newGroups)
+      handleGenerate()
     }
-    gmOpen = false;
+    gmOpen = false
   }}
 />
