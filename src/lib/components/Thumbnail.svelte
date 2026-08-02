@@ -4,6 +4,8 @@
   let {bitmap, size = 32, class: className = ''}: {bitmap?: number[][]; size?: number; class?: string} = $props()
 
   const BITMAP_SIZE = 16
+  const PIXEL_SCALE = 3
+  const CANVAS_SIZE = BITMAP_SIZE * PIXEL_SCALE
   let canvas: HTMLCanvasElement = $state(undefined!)
 
   onDestroy(() => {
@@ -23,13 +25,13 @@
     const cols = Math.min(bitmap[0]?.length ?? 0, BITMAP_SIZE)
     if (rows === 0 || cols === 0) return
 
-    ctx.clearRect(0, 0, BITMAP_SIZE, BITMAP_SIZE)
+    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
     ctx.fillStyle = 'black'
 
     for (let r = 0; r < rows; r++) {
       const row = bitmap[r]
       for (let c = 0; c < cols; c++) {
-        if (row[c]) ctx.fillRect(c, r, 1, 1)
+        if (row[c]) ctx.fillRect(c * PIXEL_SCALE, r * PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE)
       }
     }
   })
@@ -37,8 +39,8 @@
 
 <canvas
   bind:this={canvas}
-  width={BITMAP_SIZE}
-  height={BITMAP_SIZE}
+  width={CANVAS_SIZE}
+  height={CANVAS_SIZE}
   style={`width: ${size}px; height: ${size}px;`}
   class="block bg-background {className}"
 ></canvas>
