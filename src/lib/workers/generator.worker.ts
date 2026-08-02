@@ -1,6 +1,7 @@
 import type {FontProject, GroupsStructure, ComponentType} from '../types'
 
 import {flattenBitmap} from '../bitmap'
+import {findVariationGroup, getConditionSpecificity} from '../conditions'
 
 interface GenerationResult {
   // 11,172 chars * 32 bytes (16 rows * 2 bytes)
@@ -25,18 +26,16 @@ function computeMaskForType(
   }
 
   const count = targetJamoType === 'chosung' ? 19 : targetJamoType === 'jungsung' ? 21 : 28
-  const groupsForTarget = projectGroups[targetJamoType]
-
   let mask = 0
   for (let i = 0; i < count; i++) {
     let match = true
     for (const [groupId, expected] of Object.entries(conditions)) {
-      const g = groupsForTarget.find((x) => x.id === groupId)
-      if (g) {
-        if (g.items.includes(i) !== expected) {
-          match = false
-          break
-        }
+      const found = findVariationGroup(projectGroups, groupId)
+      const selectedItems = found?.group.conditions[targetJamoType]
+      const isIncluded = selectedItems ? selectedItems.includes(i) : Boolean(found)
+      if (isIncluded !== expected) {
+        match = false
+        break
       }
     }
     if (match) {
@@ -57,7 +56,7 @@ function generateFont(project: FontProject): GenerationResult {
   const compChoMask: Uint32Array = new Uint32Array(compCount)
   const compJungMask: Uint32Array = new Uint32Array(compCount)
   const compJongMask: Uint32Array = new Uint32Array(compCount)
-  const compSpecificity: Uint8Array = new Uint8Array(compCount)
+  const compSpecificity: Uint16Array = new Uint16Array(compCount)
   const componentsByType: Record<ComponentType, number[][]> = {
     chosung: Array.from({length: 19}, () => []),
     jungsung: Array.from({length: 21}, () => []),
@@ -73,7 +72,7 @@ function generateFont(project: FontProject): GenerationResult {
     compChoMask[ci] = computeMaskForType('chosung', comp.type, comp.typeIndex, comp.conditions || {}, groups)
     compJungMask[ci] = computeMaskForType('jungsung', comp.type, comp.typeIndex, comp.conditions || {}, groups)
     compJongMask[ci] = computeMaskForType('jongsung', comp.type, comp.typeIndex, comp.conditions || {}, groups)
-    compSpecificity[ci] = Object.values(comp.conditions || {}).filter(Boolean).length
+    compSpecificity[ci] = getConditionSpecificity(comp.conditions || {}, groups)
     componentsByType[comp.type][comp.typeIndex].push(ci)
   }
 

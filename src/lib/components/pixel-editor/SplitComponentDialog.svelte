@@ -125,14 +125,14 @@
     <Dialog.Header>
       <Dialog.Title>컴포넌트 나누기</Dialog.Title>
       <Dialog.Description>
-        {componentLabel} 컴포넌트를 기준으로 그룹 규칙을 만들고, 같은 자모 종류의 모든 행에 바리에이션을 추가합니다.
+        {componentLabel} 컴포넌트를 기준으로 새 바리에이션을 만들고, 같은 자모 종류의 모든 행에 추가합니다.
       </Dialog.Description>
     </Dialog.Header>
 
     <div class="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
       <p class="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-        선택한 각 영역은 그룹 관리에 새 그룹으로 추가됩니다. 새로 만들어지는 모든 컴포넌트는 각 행의 기존 자형을
-        복사합니다. 선택하지 않거나 모두 선택한 영역은 새 그룹을 만들지 않습니다.
+        선택한 조합은 해당 컴포넌트 종류의 바리에이션 관리에 하나의 규칙으로 추가됩니다. 새로 만들어지는 모든 컴포넌트는
+        각 행의 기존 자형을 복사합니다.
       </p>
 
       {#each availableTypes as type}
@@ -172,7 +172,7 @@
 
     <Dialog.Footer class="pt-2">
       <Button variant="outline" onclick={() => onOpenChange(false)}>취소</Button>
-      <Button onclick={handleSplit}>그룹 만들고 나누기</Button>
+      <Button onclick={handleSplit}>바리에이션 만들고 나누기</Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

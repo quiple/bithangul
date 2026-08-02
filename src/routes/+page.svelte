@@ -324,14 +324,15 @@
 <Dialog.Root open={deleteTarget !== null} onOpenChange={(open) => !open && (deleteTarget = null)}>
   <Dialog.Content>
     <Dialog.Header>
-      <Dialog.Title>그룹 규칙을 삭제할까요?</Dialog.Title>
+      <Dialog.Title>바리에이션을 삭제할까요?</Dialog.Title>
       <Dialog.Description>
         {#if deletePlan && deletePlan.groups.length > 0}
-          그룹 관리에서 ‘{deletePlan.groups.map(({group}) => group.name).join(', ')}’의
-          {COMPONENT_TYPE_LABEL[deletePlan.component.type]} 적용을 제거합니다. 이 규칙에서 파생된 모든 행의
+          {COMPONENT_TYPE_LABEL[deletePlan.component.type]} 바리에이션 관리에서 ‘{deletePlan.groups
+            .map(({group}) => group.name)
+            .join(', ')}’ 규칙을 제거합니다. 이 규칙에서 파생된 모든 행의
           {deletePlan.affectedComponentCount}개 컴포넌트가 함께 정리됩니다.
         {:else}
-          이 컴포넌트에는 삭제할 수 있는 그룹 규칙이 없습니다.
+          이 컴포넌트에는 삭제할 수 있는 바리에이션 규칙이 없습니다.
         {/if}
       </Dialog.Description>
     </Dialog.Header>
@@ -346,7 +347,7 @@
             deleteTarget = null
             if (deleted) handleGenerate()
           }
-        }}>그룹과 컴포넌트 삭제</Button
+        }}>바리에이션과 컴포넌트 삭제</Button
       >
     </Dialog.Footer>
   </Dialog.Content>

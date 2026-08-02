@@ -6,10 +6,11 @@ import {CHOSUNG, CHOSUNG_COUNT, JUNGSUNG, JUNGSUNG_COUNT, JONGSUNG, JONGSUNG_COU
 class ProjectState {
   project = $state<FontProject>({
     name: 'My Font',
+    groupModelVersion: 2,
     groups: {
-      chosung: [],
-      jungsung: [],
-      jongsung: [{id: 'no_jongsung', name: '받침 없음', items: [0]}],
+      chosung: [{id: 'default_chosung', name: '기본 초성', conditions: {}}],
+      jungsung: [{id: 'default_jungsung', name: '기본 중성', conditions: {}}],
+      jongsung: [{id: 'default_jongsung', name: '기본 종성', conditions: {}}],
     },
     components: [],
     deletedComponentKeys: [],
@@ -45,74 +46,83 @@ class ProjectState {
     return `${component.type}:${component.typeIndex}:${this.getConditionKey(component.conditions)}`
   }
 
-  private getSplitGroupName(type: ComponentType, items: number[]) {
-    const chars = type === 'chosung' ? CHOSUNG : type === 'jungsung' ? JUNGSUNG : JONGSUNG
-    const labels = items.map((index) => (type === 'jongsung' && index === 0 ? '받침 없음' : chars[index]))
-    const preview = labels.slice(0, 4).join('·')
-    return `${type === 'chosung' ? '초성' : type === 'jungsung' ? '중성' : '종성'} ${preview}${labels.length > 4 ? ` 외 ${labels.length - 4}개` : ''}`
+  private getSplitGroupName(type: ComponentType, conditions: Partial<Record<ComponentType, number[]>>) {
+    const typeLabels: Record<ComponentType, string> = {chosung: '초성', jungsung: '중성', jongsung: '종성'}
+    const chars: Record<ComponentType, string[]> = {chosung: CHOSUNG, jungsung: JUNGSUNG, jongsung: JONGSUNG}
+    const parts: string[] = []
+    for (const conditionType of ['chosung', 'jungsung', 'jongsung'] as ComponentType[]) {
+      if (
+        conditionType === type ||
+        !conditions[conditionType] ||
+        conditions[conditionType]!.length === chars[conditionType].length
+      )
+        continue
+      const labels = conditions[conditionType]!.map((index) =>
+        conditionType === 'jongsung' && index === 0 ? '받침 없음' : chars[conditionType][index],
+      )
+      const preview = labels.slice(0, 3).join('·')
+      parts.push(`${typeLabels[conditionType]} ${preview}${labels.length > 3 ? ` 외 ${labels.length - 3}개` : ''}`)
+    }
+    return `${typeLabels[type]} ${parts.join(' · ')}`
   }
 
   splitComponent(id: string, selections: Partial<Record<ComponentType, number[]>>) {
     const source = this.project.components.find((component) => component.id === id)
     if (!source) return null
 
-    const nextConditions = {...source.conditions}
-    const splitGroupIds: string[] = []
-    const splitOperationId = crypto.randomUUID()
+    const sourceGroupId = Object.keys(source.conditions || {}).find(
+      (groupId) => source.conditions[groupId] && this.project.groups[source.type].some((group) => group.id === groupId),
+    )
+    const sourceGroup = this.project.groups[source.type].find((group) => group.id === sourceGroupId)
+    if (!sourceGroup) return null
 
+    const nextGroupConditions = Object.fromEntries(
+      Object.entries(sourceGroup.conditions).map(([type, items]) => [type, [...items]]),
+    ) as Partial<Record<ComponentType, number[]>>
+    let hasNarrowerCondition = false
     for (const type of ['chosung', 'jungsung', 'jongsung'] as ComponentType[]) {
-      if (type === source.type) continue
-      const items = [...new Set(selections[type] || [])].sort((a, b) => a - b)
-      if (items.length === 0) continue
+      if (type === source.type || !selections[type]?.length) continue
+      nextGroupConditions[type] = [...selections[type]!]
+      hasNarrowerCondition = true
+    }
+    if (!hasNarrowerCondition) return null
 
-      let group = this.project.groups[type].find(
-        (candidate) =>
-          candidate.appliesTo?.length === 1 &&
-          candidate.appliesTo[0] === source.type &&
-          candidate.items.length === items.length &&
-          candidate.items.every((item, index) => item === items[index]),
+    const splitOperationId = crypto.randomUUID()
+    const newGroup: JamoGroup = {
+      id: crypto.randomUUID(),
+      name: this.getSplitGroupName(source.type, nextGroupConditions),
+      conditions: nextGroupConditions,
+      splitOperationId,
+    }
+    this.project.groups[source.type].push(newGroup)
+    this.syncComponents()
+
+    const typeInfo = {
+      chosung: {start: 0, count: CHOSUNG_COUNT},
+      jungsung: {start: 0, count: JUNGSUNG_COUNT},
+      jongsung: {start: 1, count: JONGSUNG_COUNT},
+    }[source.type]
+    for (let typeIndex = typeInfo.start; typeIndex < typeInfo.count; typeIndex++) {
+      const sourceComponent = this.project.components.find(
+        (component) =>
+          component.type === source.type && component.typeIndex === typeIndex && component.conditions[sourceGroup.id],
       )
-
-      if (!group) {
-        group = {
-          id: crypto.randomUUID(),
-          name: this.getSplitGroupName(type, items),
-          items,
-          appliesTo: [source.type],
-          splitOperationId,
-        }
-        this.project.groups[type].push(group)
+      const targetComponent = this.project.components.find(
+        (component) =>
+          component.type === source.type && component.typeIndex === typeIndex && component.conditions[newGroup.id],
+      )
+      if (sourceComponent && targetComponent) {
+        targetComponent.bitmap = sourceComponent.bitmap.map((row) => [...row])
       }
-
-      nextConditions[group.id] = true
-      splitGroupIds.push(group.id)
     }
 
-    if (splitGroupIds.length === 0) return null
-
-    this.syncComponents(true)
-
-    const exactKey = this.getComponentKey({
-      type: source.type,
-      typeIndex: source.typeIndex,
-      conditions: nextConditions,
-    })
-    const exactMatch = this.project.components.find((component) => this.getComponentKey(component) === exactKey)
-    if (exactMatch) return exactMatch
-
     return (
-      this.project.components
-        .filter(
-          (component) =>
-            component.type === source.type &&
-            component.typeIndex === source.typeIndex &&
-            splitGroupIds.every((groupId) => component.conditions[groupId]),
-        )
-        .sort(
-          (a, b) =>
-            this.getConditionDistance(a.conditions, nextConditions) -
-            this.getConditionDistance(b.conditions, nextConditions),
-        )[0] || null
+      this.project.components.find(
+        (component) =>
+          component.type === source.type &&
+          component.typeIndex === source.typeIndex &&
+          component.conditions[newGroup.id],
+      ) || null
     )
   }
 
@@ -120,47 +130,16 @@ class ProjectState {
     const component = this.project.components.find((candidate) => candidate.id === id)
     if (!component) return null
 
-    const typePriority: Record<ComponentType, number> = {jongsung: 1, jungsung: 2, chosung: 3}
-    const activeGroups = (['chosung', 'jungsung', 'jongsung'] as ComponentType[])
-      .flatMap((sourceType) =>
-        this.project.groups[sourceType].map((group) => ({
-          sourceType,
-          group,
-        })),
-      )
+    const activeGroup = this.project.groups[component.type].find((group) => component.conditions[group.id])
+    if (!activeGroup) return {component, groups: [], affectedComponentCount: 0}
+
+    const groups = this.project.groups[component.type]
       .filter(
-        ({sourceType, group}) =>
-          group.id !== 'no_jongsung' &&
-          component.conditions[group.id] &&
-          sourceType !== component.type &&
-          (!group.appliesTo || group.appliesTo.includes(component.type)),
+        (group) =>
+          group.id === activeGroup.id ||
+          (activeGroup.splitOperationId && group.splitOperationId === activeGroup.splitOperationId),
       )
-      .sort((a, b) => {
-        const priorityDifference = typePriority[a.sourceType] - typePriority[b.sourceType]
-        if (priorityDifference !== 0) return priorityDifference
-        if (a.group.items.length !== b.group.items.length) return b.group.items.length - a.group.items.length
-        const aMin = a.group.items.length > 0 ? Math.min(...a.group.items) : Number.MAX_SAFE_INTEGER
-        const bMin = b.group.items.length > 0 ? Math.min(...b.group.items) : Number.MAX_SAFE_INTEGER
-        if (aMin !== bMin) return aMin - bMin
-        return a.group.name.localeCompare(b.group.name, 'ko')
-      })
-
-    const deepestGroup = activeGroups.at(-1)
-    if (!deepestGroup) return {component, groups: [], affectedComponentCount: 0}
-
-    const splitOperationId = deepestGroup.group.splitOperationId
-    const groups = splitOperationId
-      ? (['chosung', 'jungsung', 'jongsung'] as ComponentType[]).flatMap((sourceType) =>
-          this.project.groups[sourceType]
-            .filter(
-              (group) =>
-                group.splitOperationId === splitOperationId &&
-                sourceType !== component.type &&
-                (!group.appliesTo || group.appliesTo.includes(component.type)),
-            )
-            .map((group) => ({sourceType, group})),
-        )
-      : [deepestGroup]
+      .map((group) => ({sourceType: component.type, group}))
     const groupIds = new Set(groups.map(({group}) => group.id))
     const affectedComponentCount = this.project.components.filter(
       (candidate) =>
@@ -175,21 +154,9 @@ class ProjectState {
     if (!plan || plan.groups.length === 0) return null
 
     const targetType = plan.component.type
-    const allTypes = ['chosung', 'jungsung', 'jongsung'] as ComponentType[]
     for (const {sourceType, group} of plan.groups) {
-      const possibleTargets = allTypes.filter((type) => type !== sourceType)
-      const currentTargets = group.appliesTo || possibleTargets
-      const remainingTargets = currentTargets.filter((type) => type !== targetType)
-
-      if (remainingTargets.length === 0) {
-        this.project.groups[sourceType] = this.project.groups[sourceType].filter(
-          (candidate) => candidate.id !== group.id,
-        )
-      } else {
-        this.project.groups[sourceType] = this.project.groups[sourceType].map((candidate) =>
-          candidate.id === group.id ? {...candidate, appliesTo: remainingTargets} : candidate,
-        )
-      }
+      if (sourceType !== targetType) continue
+      this.project.groups[sourceType] = this.project.groups[sourceType].filter((candidate) => candidate.id !== group.id)
     }
 
     const removedGroupIds = new Set(plan.groups.map(({group}) => group.id))
@@ -208,66 +175,6 @@ class ProjectState {
     this.syncComponents()
   }
 
-  private getGroupStatesForType(type: ComponentType, groups: JamoGroup[], count: number, startIndex: number = 0) {
-    const states: Record<string, boolean>[] = []
-    const seen = new Set<string>()
-
-    for (let i = startIndex; i < count; i++) {
-      const state: Record<string, boolean> = {}
-      // To ensure consistent property order in JSON stringify, sort keys
-      const sortedGroups = [...groups].sort((a, b) => a.id.localeCompare(b.id))
-      for (const g of sortedGroups) {
-        if (g.items.includes(i)) {
-          state[g.id] = true
-        }
-      }
-      const key = JSON.stringify(state)
-      if (!seen.has(key)) {
-        seen.add(key)
-        states.push(state)
-      }
-    }
-    return states
-  }
-
-  private getCombinations(types: ComponentType[], targetType: ComponentType) {
-    const typeInfo = {
-      chosung: {count: CHOSUNG_COUNT, startIndex: 0},
-      jungsung: {count: JUNGSUNG_COUNT, startIndex: 0},
-      jongsung: {count: JONGSUNG_COUNT, startIndex: 0}, // jongsung 0 is valid ('no jongsung')
-    }
-
-    let result: Record<string, boolean>[] = [{}]
-
-    for (const type of types) {
-      const info = typeInfo[type]
-      const applicableGroups = this.project.groups[type].filter((g) => !g.appliesTo || g.appliesTo.includes(targetType))
-      const validStates = this.getGroupStatesForType(type, applicableGroups, info.count, info.startIndex)
-
-      const nextResult: Record<string, boolean>[] = []
-      for (const res of result) {
-        for (const state of validStates) {
-          nextResult.push({...res, ...state})
-        }
-      }
-      result = nextResult
-    }
-
-    const filtered = result.filter((c) => Object.keys(c).length > 0)
-    return filtered
-  }
-
-  private getConditionDistance(c1: Record<string, boolean>, c2: Record<string, boolean>) {
-    let dist = 0
-    for (const k in c1) {
-      if (!c2[k]) dist++
-    }
-    for (const k in c2) {
-      if (!c1[k]) dist++
-    }
-    return dist
-  }
-
   /**
    * conditions 객체에서 `false` 엔트리를 제거하여 정규화합니다.
    */
@@ -280,78 +187,40 @@ class ProjectState {
     }
   }
 
-  syncComponents(copyNewBitmaps = false) {
+  syncComponents() {
     // Normalize existing components' conditions
     for (const c of this.project.components) {
       this.normalizeConditions(c)
     }
 
-    // Completely strip out `{}` from components if the project has grown to have other valid conditions.
-    // If a type has groups defined, it shouldn't hold onto empty conditions.
-
     const deletedKeys = new Set(this.project.deletedComponentKeys || [])
     const newComponents: PixelComponent[] = []
-    const typeInfo: Record<ComponentType, {count: number; start: number; otherTypes: ComponentType[]}> = {
-      chosung: {count: CHOSUNG_COUNT, start: 0, otherTypes: ['jungsung', 'jongsung']},
-      jungsung: {count: JUNGSUNG_COUNT, start: 0, otherTypes: ['chosung', 'jongsung']},
-      jongsung: {count: JONGSUNG_COUNT, start: 1, otherTypes: ['chosung', 'jungsung']},
+    const typeInfo: Record<ComponentType, {count: number; start: number}> = {
+      chosung: {count: CHOSUNG_COUNT, start: 0},
+      jungsung: {count: JUNGSUNG_COUNT, start: 0},
+      jongsung: {count: JONGSUNG_COUNT, start: 1},
     }
 
     const typeTypes: ComponentType[] = ['chosung', 'jungsung', 'jongsung']
 
     for (const type of typeTypes) {
       const info = typeInfo[type]
-      const validConditions = this.getCombinations(info.otherTypes, type)
+      const validConditions = this.project.groups[type].map((group) => ({[group.id]: true}))
 
       for (let i = info.start; i < info.count; i++) {
         const existingForJamo = this.project.components.filter((c) => c.type === type && c.typeIndex === i)
 
-        const pairs: {cond: Record<string, boolean>; comp: PixelComponent; dist: number}[] = []
-
-        for (const cond of validConditions) {
-          for (const comp of existingForJamo) {
-            pairs.push({
-              cond,
-              comp,
-              dist: this.getConditionDistance(cond, comp.conditions),
-            })
-          }
-        }
-
-        pairs.sort((a, b) => a.dist - b.dist)
-
-        const assignedConds = new Set<Record<string, boolean>>()
-        const assignedComps = new Set<PixelComponent>()
-        const condToComp = new Map<Record<string, boolean>, PixelComponent>()
-
-        for (const pair of pairs) {
-          if (!assignedConds.has(pair.cond) && !assignedComps.has(pair.comp)) {
-            assignedConds.add(pair.cond)
-            assignedComps.add(pair.comp)
-            condToComp.set(pair.cond, pair.comp)
-          }
-        }
-
         for (const cond of validConditions) {
           const componentKey = this.getComponentKey({type, typeIndex: i, conditions: cond})
           if (deletedKeys.has(componentKey)) continue
-          const matchedComp = condToComp.get(cond)
+          const matchedComp = existingForJamo.find((component) => this.getComponentKey(component) === componentKey)
 
           if (matchedComp) {
             newComponents.push({...matchedComp, conditions: cond})
           } else {
-            const nearestComponent = copyNewBitmaps
-              ? existingForJamo.reduce<PixelComponent | null>((nearest, candidate) => {
-                  if (!nearest) return candidate
-                  return this.getConditionDistance(candidate.conditions, cond) <
-                    this.getConditionDistance(nearest.conditions, cond)
-                    ? candidate
-                    : nearest
-                }, null)
-              : null
             newComponents.push({
               id: crypto.randomUUID(),
-              bitmap: nearestComponent ? nearestComponent.bitmap.map((row) => [...row]) : createEmptyBitmap(),
+              bitmap: createEmptyBitmap(),
               type,
               typeIndex: i,
               conditions: cond,
@@ -371,11 +240,8 @@ class ProjectState {
     if (!data.groups) {
       data.groups = {chosung: [], jungsung: [], jongsung: []}
     }
+    data.groupModelVersion = 2
     data.deletedComponentKeys ||= []
-    // Ensure "no_jongsung" group exists
-    if (!data.groups.jongsung.find((g) => g.id === 'no_jongsung')) {
-      data.groups.jongsung.push({id: 'no_jongsung', name: '받침 없음', items: [0]})
-    }
     // Update old components: normalize conditions
     for (const c of data.components) {
       this.normalizeConditions(c)

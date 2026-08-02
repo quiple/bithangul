@@ -2,7 +2,7 @@
   import type {PixelComponent, ComponentType} from '$lib/types'
 
   import {getBorderColor, flattenBitmap} from '$lib/bitmap'
-  import {checkConditionMatch} from '$lib/conditions'
+  import {checkConditionMatch, getConditionSpecificity} from '$lib/conditions'
   import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT} from '$lib/hangul'
   import {projectState} from '$lib/state.svelte'
 
@@ -44,7 +44,7 @@
     let bestSpecificity = -1
     for (const candidate of componentLookup.get(`${type}:${typeIndex}`) || []) {
       if (!matchCondition(cho, jung, jong, candidate.conditions || {})) continue
-      const specificity = Object.values(candidate.conditions || {}).filter(Boolean).length
+      const specificity = getConditionSpecificity(candidate.conditions || {}, projectState.project.groups)
       if (specificity > bestSpecificity) {
         best = candidate
         bestSpecificity = specificity

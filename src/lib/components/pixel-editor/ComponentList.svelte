@@ -60,19 +60,20 @@
   let groupMeta = $derived.by(() => {
     const map = new Map<string, {name: string; priority: number; itemCount: number; minItem: number}>()
     const add = (arr: any[], prio: number) => {
-      for (const g of arr)
+      for (const g of arr) {
+        const conditionLists = Object.values(g.conditions || {}) as number[][]
         map.set(g.id, {
           name: g.name,
           priority: prio,
-          itemCount: g.items.length,
-          minItem: g.items.length > 0 ? Math.min(...g.items) : 999,
+          itemCount: conditionLists.reduce((count, items) => count * Math.max(1, items.length), 1),
+          minItem: 0,
         })
+      }
     }
     add(projectState.project.groups.jongsung, 1)
     add(projectState.project.groups.jungsung, 2)
     add(projectState.project.groups.chosung, 3)
 
-    map.set('no_jongsung', {name: '받침 없음', priority: 1, itemCount: 1, minItem: -1})
     map.set('base', {name: '기본 결합', priority: 1, itemCount: 999, minItem: -1})
     map.set('none', {name: '없음', priority: 1, itemCount: 999, minItem: -1})
     return map
@@ -121,7 +122,7 @@
         if (comp.conditions[k]) uniqueIds.add(k)
       }
     }
-    const sortedIds = Array.from(uniqueIds).filter((id) => id !== 'no_jongsung')
+    const sortedIds = Array.from(uniqueIds)
     sortedIds.sort((a, b) => getGroupName(a).localeCompare(getGroupName(b), 'ko'))
 
     let colorIndex = 0
@@ -129,7 +130,6 @@
       map.set(id, GROUP_COLORS[colorIndex % GROUP_COLORS.length])
       colorIndex++
     }
-    map.set('no_jongsung', '#94a3b8')
     return map
   })
 
@@ -224,8 +224,6 @@
       pNodes.sort((a, b) => {
         if (a.id === 'base') return -1
         if (b.id === 'base') return 1
-        if (a.id === 'no_jongsung') return -1
-        if (b.id === 'no_jongsung') return 1
         const mA = getGroupMinItem(a.id)
         const mB = getGroupMinItem(b.id)
         if (mA !== mB) return mA - mB
@@ -327,7 +325,7 @@
       {label}
     </h3>
     <Button variant="outline" size="sm" class="h-6 px-2 text-xs" onclick={() => onOpenGroupManager(type)}>
-      <Settings class="size-3" /> 그룹 관리
+      <Settings class="size-3" /> 바리에이션 관리
     </Button>
   </div>
 {/snippet}

@@ -3,8 +3,8 @@ export type ComponentType = 'chosung' | 'jungsung' | 'jongsung'
 export interface JamoGroup {
   id: string
   name: string
-  items: number[]
-  appliesTo?: ComponentType[] // Which component types this group affects. If undefined, applies to all other types.
+  /** 자형이 사용되는 초·중·종성 조합. 그룹이 속한 컴포넌트 타입은 생략합니다. */
+  conditions: Partial<Record<ComponentType, number[]>>
   splitOperationId?: string // Groups created together by a component split share this id.
 }
 
@@ -24,6 +24,7 @@ export interface PixelComponent {
 
 export interface FontProject {
   name: string
+  groupModelVersion?: 2
   groups: GroupsStructure
   components: PixelComponent[]
   deletedComponentKeys?: string[]

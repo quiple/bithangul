@@ -2,12 +2,11 @@
   import type {ComponentType, JamoGroup} from '$lib/types'
 
   import {Button} from '$lib/components/ui/button'
-  import {Checkbox} from '$lib/components/ui/checkbox/index.js'
   import * as Dialog from '$lib/components/ui/dialog/index.js'
   import {Input} from '$lib/components/ui/input/index.js'
   import {Toggle} from '$lib/components/ui/toggle/index.js'
   import {CHOSUNG, JUNGSUNG, JONGSUNG} from '$lib/hangul'
-  import {Trash, Plus, SquareDashed} from '@lucide/svelte'
+  import {Plus, Trash} from '@lucide/svelte'
 
   interface Props {
     open: boolean
@@ -19,71 +18,43 @@
 
   let {open, type, initialGroups, onOpenChange, onSave}: Props = $props()
 
+  const TYPES: ComponentType[] = ['chosung', 'jungsung', 'jongsung']
+  const TYPE_LABEL: Record<ComponentType, string> = {chosung: '초성', jungsung: '중성', jongsung: '종성'}
+  const ITEMS: Record<ComponentType, string[]> = {chosung: CHOSUNG, jungsung: JUNGSUNG, jongsung: JONGSUNG}
+
   let draftGroups = $state<JamoGroup[]>([])
-  let hiddenGroups = $state<JamoGroup[]>([])
   let errorMsg = $state<string | null>(null)
 
-  function getSortScore(group: JamoGroup): number {
-    if (!type || !group.appliesTo) return 0
-    const targets = TARGET_TYPES_MAP[type]
-    if (!targets || targets.length < 2) return 0
-    const hasFirst = group.appliesTo.includes(targets[0].value)
-    const hasSecond = group.appliesTo.includes(targets[1].value)
+  function getConditionTypes(targetType: ComponentType | null = type) {
+    return targetType ? TYPES.filter((conditionType) => conditionType !== targetType) : []
+  }
 
-    if (hasFirst && !hasSecond) return 1
-    if (hasFirst && hasSecond) return 2
-    if (!hasFirst && hasSecond) return 3
-    return 4
+  function getAllItems(conditionType: ComponentType) {
+    return ITEMS[conditionType].map((_, index) => index)
   }
 
   $effect(() => {
-    if (open) {
-      draftGroups = initialGroups
-        .filter((g) => g.id !== 'no_jongsung')
-        .map((g) => ({
-          ...g,
-          items: [...g.items],
-          appliesTo: g.appliesTo ? [...g.appliesTo] : type ? TARGET_TYPES_MAP[type].map((t) => t.value) : [],
-        }))
-        .sort((a, b) => getSortScore(a) - getSortScore(b))
-      hiddenGroups = initialGroups.filter((g) => g.id === 'no_jongsung').map((g) => ({...g, items: [...g.items]}))
-      errorMsg = null
-    }
+    if (!open || !type) return
+    draftGroups = initialGroups.map((group) => ({
+      ...group,
+      conditions: Object.fromEntries(
+        getConditionTypes(type).map((conditionType) => [
+          conditionType,
+          [...(group.conditions[conditionType] || getAllItems(conditionType))],
+        ]),
+      ),
+    }))
+    errorMsg = null
   })
 
-  const TITLE_MAP: Record<ComponentType, string> = {
-    chosung: '초성 그룹 관리',
-    jungsung: '중성 그룹 관리',
-    jongsung: '종성 그룹 관리',
-  }
-
-  const ITEMS_MAP = {
-    chosung: CHOSUNG,
-    jungsung: JUNGSUNG,
-    jongsung: JONGSUNG,
-  }
-
-  const TARGET_TYPES_MAP: Record<ComponentType, {value: ComponentType; label: string}[]> = {
-    chosung: [
-      {value: 'jungsung', label: '중성에 적용'},
-      {value: 'jongsung', label: '종성에 적용'},
-    ],
-    jungsung: [
-      {value: 'chosung', label: '초성에 적용'},
-      {value: 'jongsung', label: '종성에 적용'},
-    ],
-    jongsung: [
-      {value: 'chosung', label: '초성에 적용'},
-      {value: 'jungsung', label: '중성에 적용'},
-    ],
-  }
-
   function addGroup() {
+    if (!type) return
     draftGroups.push({
       id: crypto.randomUUID(),
-      name: `그룹 ${draftGroups.length + 1}`,
-      items: [],
-      appliesTo: type ? TARGET_TYPES_MAP[type].map((t) => t.value) : [],
+      name: `${TYPE_LABEL[type]} 바리에이션 ${draftGroups.length + 1}`,
+      conditions: Object.fromEntries(
+        getConditionTypes(type).map((conditionType) => [conditionType, getAllItems(conditionType)]),
+      ),
     })
   }
 
@@ -91,136 +62,126 @@
     draftGroups.splice(index, 1)
   }
 
-  function toggleItem(groupIndex: number, itemIndex: number) {
-    const list = draftGroups[groupIndex].items
-    if (list.includes(itemIndex)) {
-      draftGroups[groupIndex].items = list.filter((i) => i !== itemIndex)
-    } else {
-      draftGroups[groupIndex].items = [...list, itemIndex].sort((a, b) => a - b)
-    }
+  function toggleItem(groupIndex: number, conditionType: ComponentType, itemIndex: number) {
+    const current = draftGroups[groupIndex].conditions[conditionType] || []
+    draftGroups[groupIndex].conditions[conditionType] = current.includes(itemIndex)
+      ? current.filter((index) => index !== itemIndex)
+      : [...current, itemIndex].sort((a, b) => a - b)
+    errorMsg = null
   }
 
-  function toggleAllItems(groupIndex: number) {
-    if (!type) return
-    const totalItems = type === 'jongsung' ? ITEMS_MAP[type].length - 1 : ITEMS_MAP[type].length
-    if (draftGroups[groupIndex].items.length === totalItems) {
-      draftGroups[groupIndex].items = []
-    } else {
-      const allItems = ITEMS_MAP[type].map((_, i) => i)
-      draftGroups[groupIndex].items = type === 'jongsung' ? allItems.slice(1) : allItems
-    }
+  function selectAll(groupIndex: number, conditionType: ComponentType) {
+    draftGroups[groupIndex].conditions[conditionType] = getAllItems(conditionType)
+    errorMsg = null
+  }
+
+  function clearSelection(groupIndex: number, conditionType: ComponentType) {
+    draftGroups[groupIndex].conditions[conditionType] = []
+    errorMsg = null
   }
 
   function validate() {
-    // Check for duplicates
+    if (!type) return '관리할 컴포넌트 종류를 선택해 주세요.'
     const seen = new Set<string>()
-    for (const g of draftGroups) {
-      if (g.items.length === 0) {
-        return '빈 그룹은 허용되지 않습니다.'
+    for (const group of draftGroups) {
+      if (!group.name.trim()) return '바리에이션 이름을 입력해 주세요.'
+      for (const conditionType of getConditionTypes()) {
+        if ((group.conditions[conditionType] || []).length === 0) {
+          return `${TYPE_LABEL[conditionType]} 조건을 최소 하나 이상 선택해 주세요.`
+        }
       }
-      if (!g.name.trim()) {
-        return '그룹 이름을 입력해주세요.'
-      }
-      if (!g.appliesTo || g.appliesTo.length === 0) {
-        return '적용할 자모 대상을 최소 하나 이상 선택해야 합니다.'
-      }
-      const sorted = [...g.items].sort((a, b) => a - b).join(',')
-      const sortedAppliesTo = g.appliesTo ? [...g.appliesTo].sort().join(',') : ''
-      const key = `${sorted}|${sortedAppliesTo}`
-      if (seen.has(key)) {
-        return '완전히 같은 설정(자모 구성 및 적용 대상)을 가진 그룹이 이미 존재합니다.'
-      }
+      const key = getConditionTypes()
+        .map(
+          (conditionType) => `${conditionType}:${[...(group.conditions[conditionType] || [])].sort((a, b) => a - b)}`,
+        )
+        .join('|')
+      if (seen.has(key)) return '완전히 같은 조합 조건을 가진 바리에이션이 이미 존재합니다.'
       seen.add(key)
     }
     return null
   }
 
   function handleSave() {
-    const err = validate()
-    if (err) {
-      errorMsg = err
+    const error = validate()
+    if (error) {
+      errorMsg = error
       return
     }
-    draftGroups.sort((a, b) => getSortScore(a) - getSortScore(b))
-    onSave([...hiddenGroups, ...draftGroups])
+    onSave(draftGroups.map((group) => ({...group, conditions: structuredClone(group.conditions)})))
+  }
+
+  function getItemLabel(conditionType: ComponentType, index: number) {
+    return conditionType === 'jongsung' && index === 0 ? '없음' : ITEMS[conditionType][index]
   }
 </script>
 
 <Dialog.Root {open} {onOpenChange}>
-  <Dialog.Content class="flex max-h-[90vh] flex-col sm:max-w-3xl">
+  <Dialog.Content class="flex max-h-[92vh] flex-col sm:max-w-4xl">
     <Dialog.Header>
-      <Dialog.Title>{type ? TITLE_MAP[type] : '그룹 관리'}</Dialog.Title>
-      <Dialog.Description>바리에이션을 생성할 자모들을 묶어서 그룹화합니다.</Dialog.Description>
+      <Dialog.Title>{type ? `${TYPE_LABEL[type]} 바리에이션 관리` : '바리에이션 관리'}</Dialog.Title>
+      <Dialog.Description>
+        {type
+          ? `${TYPE_LABEL[type]} 자형이 사용될 다른 자모 조합을 바리에이션별로 설정합니다.`
+          : '컴포넌트 바리에이션을 관리합니다.'}
+      </Dialog.Description>
     </Dialog.Header>
 
-    <div class="min-h-0 flex-1 space-y-4 overflow-y-auto">
-      {#each draftGroups as group, gIdx (group.id)}
-        <div class="space-y-3 rounded-lg border bg-card p-4">
-          <div class="flex flex-wrap items-center gap-3">
-            <Input bind:value={group.name} placeholder="그룹 별칭 (예: 이중모음)" class="max-w-60 shrink-0" />
+    <div class="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+      {#each draftGroups as group, groupIndex (group.id)}
+        <section class="space-y-4 rounded-lg border bg-card p-4">
+          <div class="flex items-center gap-3">
+            <Input bind:value={group.name} placeholder="바리에이션 이름" class="max-w-80" />
+            <div class="flex-1"></div>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              class="shrink-0 text-destructive"
+              onclick={() => removeGroup(groupIndex)}
+              aria-label={`${group.name} 삭제`}
+            >
+              <Trash class="size-4" />
+            </Button>
+          </div>
 
-            {#if type}
-              <div class="flex items-center gap-1">
-                <span class="text-sm font-medium whitespace-nowrap text-muted-foreground">적용 대상:</span>
-                <div class="flex">
-                  {#each TARGET_TYPES_MAP[type] as target}
-                    <label class="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-sm hover:bg-muted">
-                      <Checkbox
-                        checked={group.appliesTo?.includes(target.value)}
-                        onCheckedChange={(checked) => {
-                          const current = group.appliesTo || TARGET_TYPES_MAP[type!].map((t) => t.value)
-                          if (checked) {
-                            group.appliesTo = [...current, target.value]
-                          } else {
-                            group.appliesTo = current.filter((t) => t !== target.value)
-                          }
-                        }}
-                      />
-                      {target.label}
-                    </label>
-                  {/each}
+          {#each getConditionTypes() as conditionType}
+            <div class="space-y-2 rounded-md bg-muted/40 p-3">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <h3 class="text-sm font-semibold">{TYPE_LABEL[conditionType]} 조건</h3>
+                  <p class="text-xs text-muted-foreground">
+                    {(group.conditions[conditionType] || []).length}/{ITEMS[conditionType].length}개 선택
+                  </p>
+                </div>
+                <div class="flex gap-1">
+                  <Button variant="ghost" size="sm" onclick={() => selectAll(groupIndex, conditionType)}>모두</Button>
+                  <Button variant="ghost" size="sm" onclick={() => clearSelection(groupIndex, conditionType)}
+                    >해제</Button
+                  >
                 </div>
               </div>
-            {/if}
 
-            <div class="min-w-4 flex-1"></div>
-            <div class="-mt-4 -mr-2 flex shrink-0 items-center">
-              <Button variant="ghost" size="icon-sm" onclick={() => toggleAllItems(gIdx)} class="whitespace-nowrap">
-                <SquareDashed />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onclick={() => removeGroup(gIdx)}
-                class="shrink-0 text-destructive"
-              >
-                <Trash class="size-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-4 gap-1 sm:grid-cols-14">
-            {#if type}
-              {#each ITEMS_MAP[type] as char, i}
-                {#if type !== 'jongsung' || i !== 0}
+              <div class="grid grid-cols-5 gap-1 sm:grid-cols-10 lg:grid-cols-14">
+                {#each ITEMS[conditionType] as _, itemIndex}
                   <Toggle
                     variant="outline"
-                    class="bg-background text-lg transition data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:font-semibold data-[state=on]:text-primary-foreground"
-                    pressed={group.items.includes(i)}
-                    onPressedChange={() => toggleItem(gIdx, i)}
+                    class="bg-background text-base transition data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:font-semibold data-[state=on]:text-primary-foreground"
+                    pressed={(group.conditions[conditionType] || []).includes(itemIndex)}
+                    onPressedChange={() => toggleItem(groupIndex, conditionType, itemIndex)}
                   >
-                    {char}
+                    <span class:text-xs={conditionType === 'jongsung' && itemIndex === 0}>
+                      {getItemLabel(conditionType, itemIndex)}
+                    </span>
                   </Toggle>
-                {/if}
-              {/each}
-            {/if}
-          </div>
-        </div>
+                {/each}
+              </div>
+            </div>
+          {/each}
+        </section>
       {/each}
 
       <Button variant="outline" class="w-full border-dashed py-8 text-muted-foreground" onclick={addGroup}>
         <Plus class="size-4" />
-        새 그룹 추가
+        새 {type ? TYPE_LABEL[type] : ''} 바리에이션 추가
       </Button>
 
       {#if errorMsg}
