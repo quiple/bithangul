@@ -319,7 +319,7 @@
     <Dialog.Header>
       <Dialog.Title>컴포넌트를 삭제할까요?</Dialog.Title>
       <Dialog.Description>
-        이 컴포넌트의 자형이 해당 조합에서 제거됩니다. 필요한 경우 삭제하기 전에 프로젝트를 저장해 주세요.
+        같은 조합 조건을 가진 컴포넌트가 모든 행에서 제거됩니다. 필요한 경우 삭제하기 전에 프로젝트를 저장해 주세요.
       </Dialog.Description>
     </Dialog.Header>
     <Dialog.Footer>
@@ -332,7 +332,7 @@
             deleteTarget = null
             handleGenerate()
           }
-        }}>삭제</Button
+        }}>모든 행에서 삭제</Button
       >
     </Dialog.Footer>
   </Dialog.Content>

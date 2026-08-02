@@ -34,11 +34,15 @@ class ProjectState {
     }
   }
 
-  private getComponentKey(component: Pick<PixelComponent, 'type' | 'typeIndex' | 'conditions'>) {
-    const conditionIds = Object.keys(component.conditions || {})
-      .filter((id) => component.conditions[id])
+  private getConditionKey(conditions: Record<string, boolean>) {
+    return Object.keys(conditions || {})
+      .filter((id) => conditions[id])
       .sort()
-    return `${component.type}:${component.typeIndex}:${conditionIds.join(',')}`
+      .join(',')
+  }
+
+  private getComponentKey(component: Pick<PixelComponent, 'type' | 'typeIndex' | 'conditions'>) {
+    return `${component.type}:${component.typeIndex}:${this.getConditionKey(component.conditions)}`
   }
 
   private getSplitGroupName(type: ComponentType, items: number[]) {
@@ -114,13 +118,28 @@ class ProjectState {
     const component = this.project.components.find((candidate) => candidate.id === id)
     if (!component) return
 
-    const key = this.getComponentKey(component)
-    if (!this.project.deletedComponentKeys?.includes(key)) {
-      this.project.deletedComponentKeys = [...(this.project.deletedComponentKeys || []), key]
+    const targetConditionKey = this.getConditionKey(component.conditions)
+    const typeRange = {
+      chosung: {start: 0, count: CHOSUNG_COUNT},
+      jungsung: {start: 0, count: JUNGSUNG_COUNT},
+      jongsung: {start: 1, count: JONGSUNG_COUNT},
     }
+    const deletedKeys = new Set(this.project.deletedComponentKeys || [])
+    for (let typeIndex = typeRange[component.type].start; typeIndex < typeRange[component.type].count; typeIndex++) {
+      deletedKeys.add(this.getComponentKey({type: component.type, typeIndex, conditions: component.conditions}))
+    }
+    this.project.deletedComponentKeys = [...deletedKeys]
 
-    this.project.components = this.project.components.filter((candidate) => candidate.id !== id)
-    if (this.selectedComponentId === id) this.selectedComponentId = null
+    const deletedIds = new Set(
+      this.project.components
+        .filter(
+          (candidate) =>
+            candidate.type === component.type && this.getConditionKey(candidate.conditions) === targetConditionKey,
+        )
+        .map((candidate) => candidate.id),
+    )
+    this.project.components = this.project.components.filter((candidate) => !deletedIds.has(candidate.id))
+    if (this.selectedComponentId && deletedIds.has(this.selectedComponentId)) this.selectedComponentId = null
   }
 
   // --- Group Management ---
