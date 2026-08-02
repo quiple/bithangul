@@ -52,11 +52,14 @@
   const HEADING_HEIGHT = HEADING_CONTENT_HEIGHT + SECTION_GAP
   const COMPONENT_ROW_HEIGHT = 64
   const OVERSCAN_PX = COMPONENT_ROW_HEIGHT * 4
+  const THREE_COLUMN_MIN_WIDTH = 640
 
   let scrollContainer: HTMLDivElement | undefined = $state()
   let viewportHeight = $state(0)
+  let viewportWidth = $state(0)
   let pendingScrollTop = scrollTop
   let scrollFrame = 0
+  let columnCount = $derived(viewportWidth >= THREE_COLUMN_MIN_WIDTH ? 3 : 2)
 
   let activeGroups = $derived(projectState.project.groups[activeTab])
 
@@ -98,8 +101,8 @@
       })
       top += HEADING_HEIGHT
 
-      for (let index = 0; index < items.length; index += 2) {
-        const rowComponents = items.slice(index, index + 2)
+      for (let index = 0; index < items.length; index += columnCount) {
+        const rowComponents = items.slice(index, index + columnCount)
         rows.push({
           kind: 'components',
           key: `components:${activeTab}:${rowComponents.map((component) => component.id).join(':')}`,
@@ -220,6 +223,7 @@
     class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
     bind:this={scrollContainer}
     bind:clientHeight={viewportHeight}
+    bind:clientWidth={viewportWidth}
     onscroll={handleScroll}
   >
     <div class="relative mx-2" style={`height: ${listLayout.totalHeight}px`}>
@@ -231,7 +235,7 @@
               <span class="text-xs text-muted-foreground">{row.count}개</span>
             </div>
           {:else}
-            <div class="grid grid-cols-2 gap-2 pb-2">
+            <div class="grid gap-2 pb-2" style={`grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));`}>
               {#each row.components as component (component.id)}
                 {@render componentItem(component)}
               {/each}
