@@ -6,17 +6,17 @@
  * 16x16 2차원 비트맵 배열을 16-element Uint16Array로 플래튼합니다.
  * 각 행의 16비트를 하나의 uint16 값으로 팩킹합니다.
  */
+function packBitmapRow(row: number[] | undefined) {
+  let value = 0
+  for (let column = 0; column < 16; column++) {
+    if (row?.[column]) value |= 1 << (15 - column)
+  }
+  return value
+}
+
 export function flattenBitmap(bitmap: number[][]): Uint16Array {
   const arr = new Uint16Array(16)
-  for (let r = 0; r < 16; r++) {
-    let val = 0
-    for (let c = 0; c < 16; c++) {
-      if (bitmap[r][c]) {
-        val |= 1 << (15 - c)
-      }
-    }
-    arr[r] = val
-  }
+  for (let row = 0; row < 16; row++) arr[row] = packBitmapRow(bitmap[row])
   return arr
 }
 
@@ -25,14 +25,12 @@ export function flattenBitmap(bitmap: number[][]): Uint16Array {
  */
 export function bitmapToHex(bitmap: number[][]): string {
   let hex = ''
-  for (let r = 0; r < 16; r++) {
-    let val = 0
-    for (let col = 0; col < 16; col++) {
-      if (bitmap[r][col]) val |= 1 << (15 - col)
-    }
-    hex += val.toString(16).padStart(4, '0')
-  }
+  for (let row = 0; row < 16; row++) hex += packBitmapRow(bitmap[row]).toString(16).padStart(4, '0')
   return hex
+}
+
+export function cloneBitmap(bitmap: number[][]) {
+  return bitmap.map((row) => [...row])
 }
 
 /**

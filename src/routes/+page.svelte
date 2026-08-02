@@ -13,6 +13,7 @@
   import {Spinner} from '$lib/components/ui/spinner/index.js'
   import * as Tooltip from '$lib/components/ui/tooltip/index.js'
   import {downloadText} from '$lib/export'
+  import {COMPONENT_TYPE_LABELS} from '$lib/hangul'
   import {serializeProject, deserializeProject} from '$lib/serialization'
   import {projectState} from '$lib/state.svelte'
   import ExportWorker from '$lib/workers/export.worker?worker'
@@ -22,6 +23,9 @@
 
   let generatorWorker: Worker
   let exportWorker: Worker
+  let generatorBusy = false
+  let generationPending = false
+  let generationFrame = 0
   let generatedData = $state<ArrayBuffer | null>(null)
   let isGenerating = $state(false)
   let isExportingBDF = $state(false)
@@ -42,12 +46,6 @@
   let deleteTarget = $state<PixelComponent | null>(null)
   let deletePlan = $derived(deleteTarget ? projectState.getComponentDeletionPlan(deleteTarget.id) : null)
 
-  const COMPONENT_TYPE_LABEL: Record<ComponentType, string> = {
-    chosung: '초성',
-    jungsung: '중성',
-    jongsung: '종성',
-  }
-
   const EXAMPLES: {name: string; loader: () => Promise<FontProject>}[] = [
     {
       name: '둥근모꼴 (한글도깨비 8x4x4벌식)',
@@ -55,15 +53,17 @@
     },
   ]
 
+  function applyProject(data: unknown, clone = false) {
+    const project = deserializeProject(clone ? structuredClone(data) : data)
+    if (!project.components) throw new Error('컴포넌트 데이터가 없습니다.')
+    projectState.loadProject(project)
+    generatedData = null
+    handleGenerate()
+  }
+
   async function loadExample(loader: () => Promise<FontProject>) {
     try {
-      let data = await loader()
-      data = deserializeProject(data)
-      if (data.components) {
-        projectState.loadProject(data)
-        generatedData = null
-        handleGenerate()
-      }
+      applyProject(await loader(), true)
     } catch (err) {
       console.error('예제 불러오기 실패:', err)
       alert('예제를 불러오는 데 실패했습니다.')
@@ -79,6 +79,11 @@
 
     generatorWorker = new GeneratorWorker()
     generatorWorker.onmessage = (e) => {
+      generatorBusy = false
+      if (generationPending) {
+        scheduleGeneration()
+        return
+      }
       generatedData = e.data.buffer
       isGenerating = false
     }
@@ -97,6 +102,7 @@
     }
 
     return () => {
+      if (generationFrame) cancelAnimationFrame(generationFrame)
       generatorWorker.terminate()
       exportWorker.terminate()
     }
@@ -104,20 +110,25 @@
 
   function handleGenerate() {
     isGenerating = true
-    const snapshot = $state.snapshot(projectState.project)
-    generatorWorker.postMessage(snapshot)
+    generationPending = true
+    scheduleGeneration()
+  }
+
+  function scheduleGeneration() {
+    if (generatorBusy || generationFrame || !generationPending) return
+    generationFrame = requestAnimationFrame(() => {
+      generationFrame = 0
+      if (generatorBusy || !generationPending) return
+      generationPending = false
+      generatorBusy = true
+      generatorWorker.postMessage($state.snapshot(projectState.project))
+    })
   }
 
   function handleSaveProject() {
-    const serialized = serializeProject($state.snapshot(projectState.project))
+    const serialized = serializeProject(projectState.project)
     const data = JSON.stringify(serialized)
-    const blob = new Blob([data], {type: 'application/json'})
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${projectState.project.name || 'font-project'}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadText(data, `${projectState.project.name || 'font-project'}.json`, 'application/json')
   }
 
   function handleLoadProject() {
@@ -130,35 +141,25 @@
       if (!file) return
       const text = await file.text()
       try {
-        let data = JSON.parse(text)
-        data = deserializeProject(data)
-        if (data.components) {
-          projectState.loadProject(data)
-          generatedData = null
-          handleGenerate()
-        }
+        applyProject(JSON.parse(text))
       } catch (err) {
         console.error(err)
-        alert('Failed to load project')
+        alert('프로젝트를 불러오지 못했습니다.')
       }
     }
     input.click()
   }
 
-  function handleExportBDF() {
-    if (!generatedData || isExportingBDF) return
-    isExportingBDF = true
-    const bufferCopy = generatedData.slice(0)
-    exportWorker.postMessage({type: 'bdf', buffer: bufferCopy, fontName: projectState.project.name || 'bithangul'}, [
-      bufferCopy,
-    ])
-  }
+  function handleExport(type: 'bdf' | 'hex') {
+    if (!generatedData || isExportingBDF || isExportingHEX) return
+    if (type === 'bdf') isExportingBDF = true
+    else isExportingHEX = true
 
-  function handleExportHEX() {
-    if (!generatedData || isExportingHEX) return
-    isExportingHEX = true
     const bufferCopy = generatedData.slice(0)
-    exportWorker.postMessage({type: 'hex', buffer: bufferCopy}, [bufferCopy])
+    exportWorker.postMessage(
+      {type, buffer: bufferCopy, fontName: type === 'bdf' ? projectState.project.name || 'bithangul' : undefined},
+      [bufferCopy],
+    )
   }
 </script>
 
@@ -190,8 +191,8 @@
             <Tooltip.Root>
               <Tooltip.Trigger
                 class={buttonVariants({variant: 'outline', size: 'sm'})}
-                onclick={handleExportBDF}
-                disabled={!generatedData || isExportingBDF || isExportingHEX}
+                onclick={() => handleExport('bdf')}
+                disabled={!generatedData || isGenerating || isExportingBDF || isExportingHEX}
               >
                 {#if isExportingBDF}<Spinner />{:else}<FileCode />{/if}
                 {isExportingBDF ? '내보내는 중…' : 'BDF로 내보내기'}
@@ -206,8 +207,8 @@
             <Tooltip.Root>
               <Tooltip.Trigger
                 class={buttonVariants({variant: 'outline', size: 'sm'})}
-                onclick={handleExportHEX}
-                disabled={!generatedData || isExportingBDF || isExportingHEX}
+                onclick={() => handleExport('hex')}
+                disabled={!generatedData || isGenerating || isExportingBDF || isExportingHEX}
               >
                 {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
                 {isExportingHEX ? '내보내는 중…' : 'HEX로 내보내기'}
@@ -226,12 +227,8 @@
     <Resizable.Pane defaultSize={35} minSize={20} maxSize={60} class="flex flex-col bg-sidebar">
       {#if projectState.selectedComponentId && projectState.selectedComponent}
         {@const sel = projectState.selectedComponent}
-        {@const siblings = projectState.project.components.filter(
-          (c) => c.id !== sel.id && c.type === sel.type && c.typeIndex === sel.typeIndex,
-        )}
         <ComponentEditor
           component={sel}
-          siblingComponents={siblings}
           onSave={(updated) => {
             projectState.updateComponent(updated.id, updated)
             projectState.selectComponent(null)
@@ -327,7 +324,7 @@
       <Dialog.Title>바리에이션을 삭제할까요?</Dialog.Title>
       <Dialog.Description>
         {#if deletePlan && deletePlan.groups.length > 0}
-          {COMPONENT_TYPE_LABEL[deletePlan.component.type]} 바리에이션 관리에서 ‘{deletePlan.groups
+          {COMPONENT_TYPE_LABELS[deletePlan.component.type]} 바리에이션 관리에서 ‘{deletePlan.groups
             .map(({group}) => group.name)
             .join(', ')}’ 규칙을 제거합니다. 이 규칙에서 파생된 모든 행의
           {deletePlan.affectedComponentCount}개 컴포넌트가 함께 정리됩니다.

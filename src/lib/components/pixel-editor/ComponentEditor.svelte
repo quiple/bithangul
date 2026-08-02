@@ -3,7 +3,7 @@
 
   import {Button} from '$lib/components/ui/button'
   import * as ButtonGroup from '$lib/components/ui/button-group/index.js'
-  import {CHOSUNG, JUNGSUNG, JONGSUNG} from '$lib/hangul'
+  import {COMPONENT_TYPE_LABELS, getJamoLabel} from '$lib/hangul'
   import {projectState} from '$lib/state.svelte'
   import {ChevronLeft} from '@lucide/svelte'
   import {untrack} from 'svelte'
@@ -13,13 +13,11 @@
 
   interface Props {
     component: PixelComponent
-    /** 같은 자모 타입+인덱스를 공유하는 다른 바리에이션 컴포넌트들 (현재 컴포넌트 제외) */
-    siblingComponents: PixelComponent[]
     onSave: (c: PixelComponent) => void
     onCancel: () => void
   }
 
-  let {component, siblingComponents, onSave, onCancel}: Props = $props()
+  let {component, onSave, onCancel}: Props = $props()
 
   // untrack으로 감싸서 초기값만 읽고 반응성 추적 방지 (Svelte 5 lint 해결)
   let localComponent = $state<PixelComponent>(untrack(() => structuredClone($state.snapshot(component))))
@@ -40,16 +38,12 @@
     const ObjectValues = Object.entries(localComponent.conditions || {})
     const names: string[] = []
 
-    const allGroups = [
-      ...projectState.project.groups.chosung,
-      ...projectState.project.groups.jungsung,
-      ...projectState.project.groups.jongsung,
-    ]
+    const groupNames = new Map(projectState.project.groups[localComponent.type].map((group) => [group.id, group.name]))
 
     for (const [groupId, isActive] of ObjectValues) {
       if (isActive) {
-        const group = allGroups.find((g) => g.id === groupId)
-        if (group) names.push(group.name)
+        const name = groupNames.get(groupId)
+        if (name) names.push(name)
       }
     }
     return names
@@ -62,11 +56,8 @@
       <Button variant="ghost" size="icon-sm" onclick={onCancel}><ChevronLeft class="size-6" /></Button>
       <h2 class="flex items-center truncate font-bold">
         컴포넌트 편집 <span class="ml-2 rounded bg-ring px-1 py-0.5 text-sm text-primary-foreground"
-          >{localComponent.type === 'chosung'
-            ? `초성 ${CHOSUNG[localComponent.typeIndex]}`
-            : localComponent.type === 'jungsung'
-              ? `중성 ${JUNGSUNG[localComponent.typeIndex]}`
-              : `종성 ${JONGSUNG[localComponent.typeIndex]}`}</span
+          >{COMPONENT_TYPE_LABELS[localComponent.type]}
+          {getJamoLabel(localComponent.type, localComponent.typeIndex)}</span
         >
       </h2>
     </div>

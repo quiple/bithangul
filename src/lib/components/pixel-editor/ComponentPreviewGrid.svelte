@@ -2,8 +2,8 @@
   import type {PixelComponent, ComponentType} from '$lib/types'
 
   import {getBorderColor, flattenBitmap} from '$lib/bitmap'
-  import {checkConditionMatch, getConditionSpecificity} from '$lib/conditions'
-  import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT} from '$lib/hangul'
+  import {checkConditionMatch, createVariationGroupLookup, getConditionSpecificity} from '$lib/conditions'
+  import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT, SYLLABLES_PER_CHOSUNG} from '$lib/hangul'
   import {projectState} from '$lib/state.svelte'
 
   interface Props {
@@ -20,20 +20,24 @@
   let canvas: HTMLCanvasElement = $state(undefined!)
   let containerWidth = $state(0)
 
-  function matchCondition(cho: number, jung: number, jong: number, conditions: Record<string, boolean>) {
-    return checkConditionMatch(cho, jung, jong, conditions, projectState.project.groups)
+  interface MatchedGlyph {
+    index: number
+    components: PixelComponent[]
   }
 
-  let previewComponents = $derived(
-    projectState.project.components.map((candidate) => (candidate.id === component.id ? component : candidate)),
-  )
+  const bitmapCache = new Map<string, {bitmap: number[][]; flattened: Uint16Array}>()
+
+  let groupLookup = $derived(createVariationGroupLookup(projectState.project.groups))
 
   let componentLookup = $derived.by(() => {
-    const lookup = new Map<string, PixelComponent[]>()
-    for (const candidate of previewComponents) {
+    const lookup = new Map<string, Array<{component: PixelComponent; specificity: number}>>()
+    for (const candidate of projectState.project.components) {
       const key = `${candidate.type}:${candidate.typeIndex}`
       const list = lookup.get(key) || []
-      list.push(candidate)
+      list.push({
+        component: candidate,
+        specificity: getConditionSpecificity(candidate.conditions || {}, projectState.project.groups, groupLookup),
+      })
       lookup.set(key, list)
     }
     return lookup
@@ -42,70 +46,80 @@
   function getBestMatch(type: ComponentType, typeIndex: number, cho: number, jung: number, jong: number) {
     let best: PixelComponent | undefined
     let bestSpecificity = -1
-    for (const candidate of componentLookup.get(`${type}:${typeIndex}`) || []) {
-      if (!matchCondition(cho, jung, jong, candidate.conditions || {})) continue
-      const specificity = getConditionSpecificity(candidate.conditions || {}, projectState.project.groups)
-      if (specificity > bestSpecificity) {
-        best = candidate
-        bestSpecificity = specificity
+    for (const entry of componentLookup.get(`${type}:${typeIndex}`) || []) {
+      if (
+        !checkConditionMatch(
+          cho,
+          jung,
+          jong,
+          entry.component.conditions || {},
+          projectState.project.groups,
+          groupLookup,
+        )
+      )
+        continue
+      if (entry.specificity > bestSpecificity) {
+        best = entry.component
+        bestSpecificity = entry.specificity
       }
     }
     return best
   }
 
-  // Only show syllables where this variation wins over broader fallback variations.
-  let affectedIndices = $derived.by(() => {
-    const indices: number[] = []
+  function getFlattenedBitmap(candidate: PixelComponent) {
+    const bitmap = candidate.id === component.id ? component.bitmap : candidate.bitmap
+    const cached = bitmapCache.get(candidate.id)
+    if (cached?.bitmap === bitmap) return cached.flattened
+    const flattened = flattenBitmap(bitmap)
+    bitmapCache.set(candidate.id, {bitmap, flattened})
+    return flattened
+  }
+
+  // 조건 판정은 편집 중인 비트맵과 무관하므로 음절별 승자를 한 번만 계산합니다.
+  let matchedGlyphs = $derived.by(() => {
+    const glyphs: MatchedGlyph[] = []
     for (let cho = 0; cho < CHOSUNG_COUNT; cho++) {
       if (component.type === 'chosung' && component.typeIndex !== cho) continue
       for (let jung = 0; jung < JUNGSUNG_COUNT; jung++) {
         if (component.type === 'jungsung' && component.typeIndex !== jung) continue
         for (let jong = 0; jong < JONGSUNG_COUNT; jong++) {
           if (component.type === 'jongsung' && component.typeIndex !== jong) continue
-          if (getBestMatch(component.type, component.typeIndex, cho, jung, jong)?.id === component.id) {
-            indices.push(cho * 588 + jung * 28 + jong)
-          }
+          if (getBestMatch(component.type, component.typeIndex, cho, jung, jong)?.id !== component.id) continue
+
+          const components = [
+            getBestMatch('chosung', cho, cho, jung, jong),
+            getBestMatch('jungsung', jung, cho, jung, jong),
+          ]
+          if (jong > 0) components.push(getBestMatch('jongsung', jong, cho, jung, jong))
+          glyphs.push({
+            index: cho * SYLLABLES_PER_CHOSUNG + jung * JONGSUNG_COUNT + jong,
+            components: components.filter((candidate): candidate is PixelComponent => Boolean(candidate)),
+          })
         }
       }
     }
-    return indices
+    return glyphs
   })
+
+  let affectedIndices = $derived(matchedGlyphs.map((glyph) => glyph.index))
 
   // Recompose affected characters
   let previewData = $derived.by(() => {
     if (affectedIndices.length === 0) return null
 
-    const buffer = new ArrayBuffer(affectedIndices.length * 32)
+    const buffer = new ArrayBuffer(matchedGlyphs.length * 32)
     const view = new DataView(buffer)
     const result = new Uint16Array(16)
 
-    for (let i = 0; i < affectedIndices.length; i++) {
-      const charIdx = affectedIndices[i]
-      const cho = Math.floor(charIdx / 588)
-      const jung = Math.floor((charIdx % 588) / 28)
-      const jong = charIdx % 28
-
-      for (let r = 0; r < 16; r++) result[r] = 0
-
-      // Find the correctly matching components for this exact syllable
-      const applyComponent = (type: ComponentType, idx: number) => {
-        const matched = getBestMatch(type, idx, cho, jung, jong)
-        if (matched) {
-          const bmp = flattenBitmap(matched.bitmap)
-          for (let r = 0; r < 16; r++) {
-            result[r] |= bmp[r]
-          }
-        }
+    for (let i = 0; i < matchedGlyphs.length; i++) {
+      result.fill(0)
+      for (const matched of matchedGlyphs[i].components) {
+        const bitmap = getFlattenedBitmap(matched)
+        for (let row = 0; row < 16; row++) result[row] |= bitmap[row]
       }
-
-      applyComponent('chosung', cho)
-      applyComponent('jungsung', jung)
-      if (jong > 0) applyComponent('jongsung', jong)
 
       const offset = i * 32
-      for (let r = 0; r < 16; r++) {
-        view.setUint16(offset + r * 2, result[r], false)
-      }
+      for (let row = 0; row < 16; row++) view.setUint16(offset + row * 2, result[row], false)
     }
 
     return buffer

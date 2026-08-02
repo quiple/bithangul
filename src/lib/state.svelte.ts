@@ -1,7 +1,8 @@
 import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '$lib/types'
 
-import {createEmptyBitmap} from '$lib/bitmap'
-import {CHOSUNG, CHOSUNG_COUNT, JUNGSUNG, JUNGSUNG_COUNT, JONGSUNG, JONGSUNG_COUNT} from '$lib/hangul'
+import {cloneBitmap, createEmptyBitmap} from '$lib/bitmap'
+import {getActiveVariationId, getComponentKey} from '$lib/component-utils'
+import {COMPONENT_INDICES, COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, getJamoLabel} from '$lib/hangul'
 
 class ProjectState {
   project = $state<FontProject>({
@@ -18,10 +19,13 @@ class ProjectState {
 
   selectedComponentId = $state<string | null>(null)
 
-  constructor() {}
+  private componentById = new Map<string, PixelComponent>()
+  private componentIndexById = new Map<string, number>()
+  private componentRevision = $state(0)
 
   get selectedComponent() {
-    return this.project.components.find((c) => c.id === this.selectedComponentId)
+    void this.componentRevision
+    return this.selectedComponentId ? this.componentById.get(this.selectedComponentId) : undefined
   }
 
   selectComponent(id: string | null) {
@@ -29,50 +33,44 @@ class ProjectState {
   }
 
   updateComponent(id: string, updated: PixelComponent) {
-    const index = this.project.components.findIndex((c) => c.id === id)
-    if (index !== -1) {
-      this.project.components[index] = updated
+    const index = this.componentIndexById.get(id)
+    if (index === undefined) return
+
+    const previous = this.project.components[index]
+    this.project.components[index] = updated
+    const next = this.project.components[index]
+    this.componentById.set(id, next)
+
+    if (previous.type === next.type && previous.typeIndex === next.typeIndex) {
+      this.componentRevision++
+    } else {
+      this.rebuildComponentIndex()
     }
-  }
-
-  private getConditionKey(conditions: Record<string, boolean>) {
-    return Object.keys(conditions || {})
-      .filter((id) => conditions[id])
-      .sort()
-      .join(',')
-  }
-
-  private getComponentKey(component: Pick<PixelComponent, 'type' | 'typeIndex' | 'conditions'>) {
-    return `${component.type}:${component.typeIndex}:${this.getConditionKey(component.conditions)}`
   }
 
   private getSplitGroupName(type: ComponentType, conditions: Partial<Record<ComponentType, number[]>>) {
-    const typeLabels: Record<ComponentType, string> = {chosung: '초성', jungsung: '중성', jongsung: '종성'}
-    const chars: Record<ComponentType, string[]> = {chosung: CHOSUNG, jungsung: JUNGSUNG, jongsung: JONGSUNG}
     const parts: string[] = []
-    for (const conditionType of ['chosung', 'jungsung', 'jongsung'] as ComponentType[]) {
+    for (const conditionType of COMPONENT_TYPES) {
       if (
         conditionType === type ||
         !conditions[conditionType] ||
-        conditions[conditionType]!.length === chars[conditionType].length
+        conditions[conditionType]!.length === JAMO_BY_TYPE[conditionType].length
       )
         continue
-      const labels = conditions[conditionType]!.map((index) =>
-        conditionType === 'jongsung' && index === 0 ? '받침 없음' : chars[conditionType][index],
-      )
+      const labels = conditions[conditionType]!.map((index) => getJamoLabel(conditionType, index, '받침 없음'))
       const preview = labels.slice(0, 3).join('·')
-      parts.push(`${typeLabels[conditionType]} ${preview}${labels.length > 3 ? ` 외 ${labels.length - 3}개` : ''}`)
+      parts.push(
+        `${COMPONENT_TYPE_LABELS[conditionType]} ${preview}${labels.length > 3 ? ` 외 ${labels.length - 3}개` : ''}`,
+      )
     }
-    return `${typeLabels[type]} ${parts.join(' · ')}`
+    return `${COMPONENT_TYPE_LABELS[type]} ${parts.join(' · ')}`
   }
 
   splitComponent(id: string, selections: Partial<Record<ComponentType, number[]>>) {
-    const source = this.project.components.find((component) => component.id === id)
+    const source = this.componentById.get(id)
     if (!source) return null
 
-    const sourceGroupId = Object.keys(source.conditions || {}).find(
-      (groupId) => source.conditions[groupId] && this.project.groups[source.type].some((group) => group.id === groupId),
-    )
+    const sourceGroupId = getActiveVariationId(source)
     const sourceGroup = this.project.groups[source.type].find((group) => group.id === sourceGroupId)
     if (!sourceGroup) return null
 
@@ -80,12 +78,19 @@ class ProjectState {
       Object.entries(sourceGroup.conditions).map(([type, items]) => [type, [...items]]),
     ) as Partial<Record<ComponentType, number[]>>
     let hasNarrowerCondition = false
-    for (const type of ['chosung', 'jungsung', 'jongsung'] as ComponentType[]) {
+    for (const type of COMPONENT_TYPES) {
       if (type === source.type || !selections[type]?.length) continue
       nextGroupConditions[type] = [...selections[type]!]
       hasNarrowerCondition = true
     }
     if (!hasNarrowerCondition) return null
+
+    const sourceBitmaps = new Map<number, number[][]>()
+    for (const component of this.project.components) {
+      if (component.type === source.type && component.conditions[sourceGroup.id]) {
+        sourceBitmaps.set(component.typeIndex, component.bitmap)
+      }
+    }
 
     const splitOperationId = crypto.randomUUID()
     const newGroup: JamoGroup = {
@@ -97,37 +102,20 @@ class ProjectState {
     this.project.groups[source.type].push(newGroup)
     this.syncComponents()
 
-    const typeInfo = {
-      chosung: {start: 0, count: CHOSUNG_COUNT},
-      jungsung: {start: 0, count: JUNGSUNG_COUNT},
-      jongsung: {start: 1, count: JONGSUNG_COUNT},
-    }[source.type]
-    for (let typeIndex = typeInfo.start; typeIndex < typeInfo.count; typeIndex++) {
-      const sourceComponent = this.project.components.find(
-        (component) =>
-          component.type === source.type && component.typeIndex === typeIndex && component.conditions[sourceGroup.id],
-      )
-      const targetComponent = this.project.components.find(
-        (component) =>
-          component.type === source.type && component.typeIndex === typeIndex && component.conditions[newGroup.id],
-      )
-      if (sourceComponent && targetComponent) {
-        targetComponent.bitmap = sourceComponent.bitmap.map((row) => [...row])
-      }
+    let selectedComponent: PixelComponent | null = null
+    for (const targetComponent of this.project.components) {
+      if (targetComponent.type !== source.type || !targetComponent.conditions[newGroup.id]) continue
+      const sourceBitmap = sourceBitmaps.get(targetComponent.typeIndex)
+      if (sourceBitmap) targetComponent.bitmap = cloneBitmap(sourceBitmap)
+      if (targetComponent.typeIndex === source.typeIndex) selectedComponent = targetComponent
     }
+    this.rebuildComponentIndex()
 
-    return (
-      this.project.components.find(
-        (component) =>
-          component.type === source.type &&
-          component.typeIndex === source.typeIndex &&
-          component.conditions[newGroup.id],
-      ) || null
-    )
+    return selectedComponent
   }
 
   getComponentDeletionPlan(id: string) {
-    const component = this.project.components.find((candidate) => candidate.id === id)
+    const component = this.componentById.get(id)
     if (!component) return null
 
     const activeGroup = this.project.groups[component.type].find((group) => component.conditions[group.id])
@@ -143,7 +131,7 @@ class ProjectState {
     const groupIds = new Set(groups.map(({group}) => group.id))
     const affectedComponentCount = this.project.components.filter(
       (candidate) =>
-        candidate.type === component.type && [...groupIds].some((groupId) => candidate.conditions[groupId]),
+        candidate.type === component.type && Object.keys(candidate.conditions).some((groupId) => groupIds.has(groupId)),
     ).length
 
     return {component, groups, affectedComponentCount}
@@ -187,6 +175,19 @@ class ProjectState {
     }
   }
 
+  private rebuildComponentIndex() {
+    const componentById = new Map<string, PixelComponent>()
+    const componentIndexById = new Map<string, number>()
+    for (let index = 0; index < this.project.components.length; index++) {
+      const component = this.project.components[index]
+      componentById.set(component.id, component)
+      componentIndexById.set(component.id, index)
+    }
+    this.componentById = componentById
+    this.componentIndexById = componentIndexById
+    this.componentRevision++
+  }
+
   syncComponents() {
     // Normalize existing components' conditions
     for (const c of this.project.components) {
@@ -195,35 +196,29 @@ class ProjectState {
 
     const deletedKeys = new Set(this.project.deletedComponentKeys || [])
     const newComponents: PixelComponent[] = []
-    const typeInfo: Record<ComponentType, {count: number; start: number}> = {
-      chosung: {count: CHOSUNG_COUNT, start: 0},
-      jungsung: {count: JUNGSUNG_COUNT, start: 0},
-      jongsung: {count: JONGSUNG_COUNT, start: 1},
+    const existingByKey = new Map<string, PixelComponent>()
+    for (const component of this.project.components) {
+      const key = getComponentKey(component)
+      if (!existingByKey.has(key)) existingByKey.set(key, component)
     }
 
-    const typeTypes: ComponentType[] = ['chosung', 'jungsung', 'jongsung']
-
-    for (const type of typeTypes) {
-      const info = typeInfo[type]
-      const validConditions = this.project.groups[type].map((group) => ({[group.id]: true}))
-
-      for (let i = info.start; i < info.count; i++) {
-        const existingForJamo = this.project.components.filter((c) => c.type === type && c.typeIndex === i)
-
-        for (const cond of validConditions) {
-          const componentKey = this.getComponentKey({type, typeIndex: i, conditions: cond})
+    for (const type of COMPONENT_TYPES) {
+      for (const typeIndex of COMPONENT_INDICES[type]) {
+        for (const group of this.project.groups[type]) {
+          const conditions = {[group.id]: true}
+          const componentKey = getComponentKey({type, typeIndex, conditions})
           if (deletedKeys.has(componentKey)) continue
-          const matchedComp = existingForJamo.find((component) => this.getComponentKey(component) === componentKey)
+          const matchedComp = existingByKey.get(componentKey)
 
           if (matchedComp) {
-            newComponents.push({...matchedComp, conditions: cond})
+            newComponents.push({...matchedComp, conditions})
           } else {
             newComponents.push({
               id: crypto.randomUUID(),
               bitmap: createEmptyBitmap(),
               type,
-              typeIndex: i,
-              conditions: cond,
+              typeIndex,
+              conditions,
             })
           }
         }
@@ -231,7 +226,8 @@ class ProjectState {
     }
 
     this.project.components = newComponents
-    if (this.selectedComponentId && !this.project.components.find((c) => c.id === this.selectedComponentId)) {
+    this.rebuildComponentIndex()
+    if (this.selectedComponentId && !this.componentById.has(this.selectedComponentId)) {
       this.selectedComponentId = null
     }
   }

@@ -3,6 +3,8 @@
  * 11,172자 × 16행의 대용량 문자열 생성을 백그라운드에서 수행합니다.
  */
 
+import {HANGUL_START_CODE_POINT, HANGUL_SYLLABLE_COUNT} from '../hangul'
+
 interface ExportMessage {
   type: 'bdf' | 'hex'
   buffer: ArrayBuffer
@@ -29,14 +31,11 @@ function toHex4(val: number): string {
 }
 
 function exportBDF(buffer: ArrayBuffer, fontName: string): string {
-  const TOTAL = 11172
-  const START = 0xac00
   const view = new DataView(buffer)
   const safeName = fontName.replace(/[^a-zA-Z0-9가-힣_-]/g, '_').toLowerCase()
 
-  // 전체 줄 수 추정: 헤더 ~12줄 + 글리프당 ~24줄 + 마무리 1줄
-  const estimatedLines = 12 + TOTAL * 24 + 1
-  const lines: string[] = Array.from({length: estimatedLines})
+  const lineCount = 12 + HANGUL_SYLLABLE_COUNT * 23
+  const lines: string[] = Array.from({length: lineCount})
   let lineIdx = 0
 
   // ── 파일 헤더 ──
@@ -50,10 +49,10 @@ function exportBDF(buffer: ArrayBuffer, fontName: string): string {
   lines[lineIdx++] = 'DEFAULT_CHAR 0'
   lines[lineIdx++] = 'CHARSET_REGISTRY "ISO10646"'
   lines[lineIdx++] = 'ENDPROPERTIES'
-  lines[lineIdx++] = `CHARS ${TOTAL}`
+  lines[lineIdx++] = `CHARS ${HANGUL_SYLLABLE_COUNT}`
 
-  for (let i = 0; i < TOTAL; i++) {
-    const codePoint = START + i
+  for (let i = 0; i < HANGUL_SYLLABLE_COUNT; i++) {
+    const codePoint = HANGUL_START_CODE_POINT + i
     const offset = i * 32
 
     lines[lineIdx++] = `STARTCHAR U+${toHex4(codePoint)}`
@@ -72,19 +71,16 @@ function exportBDF(buffer: ArrayBuffer, fontName: string): string {
   }
 
   lines[lineIdx++] = 'ENDFONT'
-  // 실제 사용된 만큼만 join
-  return lines.slice(0, lineIdx).join('\n')
+  return lines.join('\n')
 }
 
 function exportHEX(buffer: ArrayBuffer): string {
-  const TOTAL = 11172
-  const START = 0xac00
   const view = new DataView(buffer)
 
-  const lines: string[] = Array.from({length: TOTAL})
+  const lines: string[] = Array.from({length: HANGUL_SYLLABLE_COUNT})
 
-  for (let i = 0; i < TOTAL; i++) {
-    const codePoint = START + i
+  for (let i = 0; i < HANGUL_SYLLABLE_COUNT; i++) {
+    const codePoint = HANGUL_START_CODE_POINT + i
     const offset = i * 32
 
     let hexBitmap = ''

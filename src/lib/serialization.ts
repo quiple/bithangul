@@ -5,18 +5,13 @@
 import type {ComponentType, FontProject, GroupsStructure, JamoGroup} from '$lib/types'
 
 import {bitmapToHex, hexToBitmap} from '$lib/bitmap'
-import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT} from '$lib/hangul'
-
-const TYPES: ComponentType[] = ['chosung', 'jungsung', 'jongsung']
-const TYPE_COUNTS: Record<ComponentType, number> = {
-  chosung: CHOSUNG_COUNT,
-  jungsung: JUNGSUNG_COUNT,
-  jongsung: JONGSUNG_COUNT,
-}
-const TYPE_LABELS: Record<ComponentType, string> = {chosung: '초성', jungsung: '중성', jongsung: '종성'}
+import {getConditionKey} from '$lib/component-utils'
+import {COMPONENT_INDICES, COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES} from '$lib/hangul'
 
 function sameItems(first: number[], second: number[]) {
-  return first.length === second.length && first.every((item, index) => item === second[index])
+  if (first.length !== second.length) return false
+  const secondItems = new Set(second)
+  return first.every((item) => secondItems.has(item))
 }
 
 function mergeVariationNames(first: string, second: string) {
@@ -32,9 +27,32 @@ function mergeVariationNames(first: string, second: string) {
 }
 
 function mergeDuplicateVariations(data: any, groups: GroupsStructure) {
-  for (const targetType of TYPES) {
-    const conditionTypes = TYPES.filter((type) => type !== targetType)
-    const expectedRows = targetType === 'jongsung' ? JONGSUNG_COUNT - 1 : TYPE_COUNTS[targetType]
+  const removedGroupIds = new Set<string>()
+
+  for (const targetType of COMPONENT_TYPES) {
+    const conditionTypes = COMPONENT_TYPES.filter((type) => type !== targetType)
+    const expectedRows = COMPONENT_INDICES[targetType].length
+    const componentsByGroup = new Map<string, any[]>()
+    for (const group of groups[targetType]) componentsByGroup.set(group.id, [])
+    for (const component of data.components || []) {
+      if (component.type !== targetType) continue
+      for (const groupId of Object.keys(component.conditions || {})) {
+        if (component.conditions[groupId]) componentsByGroup.get(groupId)?.push(component)
+      }
+    }
+
+    const bitmapSignatures = new Map<string, string>()
+    for (const [groupId, components] of componentsByGroup) {
+      if (components.length !== expectedRows) continue
+      bitmapSignatures.set(
+        groupId,
+        [...components]
+          .sort((first, second) => first.typeIndex - second.typeIndex)
+          .map((component) => `${component.typeIndex}:${bitmapToHex(component.bitmap)}`)
+          .join('|'),
+      )
+    }
+
     let merged = true
 
     while (merged) {
@@ -48,51 +66,36 @@ function mergeDuplicateVariations(data: any, groups: GroupsStructure) {
           const differingTypes = conditionTypes.filter(
             (type) =>
               !sameItems(
-                first.conditions[type] || Array.from({length: TYPE_COUNTS[type]}, (_, index) => index),
-                second.conditions[type] || Array.from({length: TYPE_COUNTS[type]}, (_, index) => index),
+                first.conditions[type] || [...JAMO_INDICES[type]],
+                second.conditions[type] || [...JAMO_INDICES[type]],
               ),
           )
           if (differingTypes.length !== 1) continue
 
-          const firstComponents = (data.components || []).filter(
-            (component: any) => component.type === targetType && component.conditions[first.id],
-          )
-          const secondComponents = (data.components || []).filter(
-            (component: any) => component.type === targetType && component.conditions[second.id],
-          )
-          if (firstComponents.length !== expectedRows || secondComponents.length !== expectedRows) continue
-
-          const secondByRow = new Map(secondComponents.map((component: any) => [component.typeIndex, component]))
-          const hasSameBitmaps = firstComponents.every((component: any) => {
-            const other = secondByRow.get(component.typeIndex) as any
-            return other && JSON.stringify(component.bitmap) === JSON.stringify(other.bitmap)
-          })
-          if (!hasSameBitmaps) continue
+          const firstSignature = bitmapSignatures.get(first.id)
+          if (!firstSignature || firstSignature !== bitmapSignatures.get(second.id)) continue
 
           const differingType = differingTypes[0]
-          const firstItems =
-            first.conditions[differingType] || Array.from({length: TYPE_COUNTS[differingType]}, (_, index) => index)
-          const secondItems =
-            second.conditions[differingType] || Array.from({length: TYPE_COUNTS[differingType]}, (_, index) => index)
+          const firstItems = first.conditions[differingType] || JAMO_INDICES[differingType]
+          const secondItems = second.conditions[differingType] || JAMO_INDICES[differingType]
           first.conditions[differingType] = [...new Set([...firstItems, ...secondItems])].sort((a, b) => a - b)
           first.name = mergeVariationNames(first.name, second.name)
-          groups[targetType] = targetGroups.filter((group) => group.id !== second.id)
-          data.components = data.components.filter(
-            (component: any) => !(component.type === targetType && component.conditions[second.id]),
-          )
+          targetGroups.splice(secondIndex, 1)
+          componentsByGroup.delete(second.id)
+          bitmapSignatures.delete(second.id)
+          removedGroupIds.add(second.id)
           merged = true
           break pairLoop
         }
       }
     }
   }
-}
 
-function getLegacyConditionKey(conditions: Record<string, boolean>) {
-  return Object.keys(conditions || {})
-    .filter((groupId) => conditions[groupId])
-    .sort()
-    .join(',')
+  if (removedGroupIds.size > 0) {
+    data.components = (data.components || []).filter(
+      (component: any) => !Object.keys(component.conditions || {}).some((groupId) => removedGroupIds.has(groupId)),
+    )
+  }
 }
 
 /** 기존 ‘조건 자모 그룹’ 프로젝트를 ‘컴포넌트 바리에이션 그룹’ 구조로 변환합니다. */
@@ -104,16 +107,18 @@ function migrateLegacyGroupModel(data: any) {
     Array<{id: string; name: string; items: number[]}>
   >
   const legacyGroupLookup = new Map<string, {type: ComponentType; name: string; items: number[]}>()
-  for (const type of TYPES) {
+  for (const type of COMPONENT_TYPES) {
     for (const group of legacyGroups[type] || []) legacyGroupLookup.set(group.id, {type, ...group})
   }
 
   const groups: GroupsStructure = {chosung: [], jungsung: [], jongsung: []}
-  const groupIdsByCondition = new Map<ComponentType, Map<string, string>>(TYPES.map((type) => [type, new Map()]))
+  const groupIdsByCondition = new Map<ComponentType, Map<string, string>>(
+    COMPONENT_TYPES.map((type) => [type, new Map()]),
+  )
 
   for (const component of data.components || []) {
     const targetType = component.type as ComponentType
-    const conditionKey = getLegacyConditionKey(component.conditions || {})
+    const conditionKey = getConditionKey(component.conditions || {})
     const existingGroupId = groupIdsByCondition.get(targetType)!.get(conditionKey)
     if (existingGroupId) {
       component.conditions = {[existingGroupId]: true}
@@ -124,21 +129,21 @@ function migrateLegacyGroupModel(data: any) {
       .filter((groupId) => component.conditions[groupId])
       .map((groupId) => legacyGroupLookup.get(groupId))
       .filter((group): group is NonNullable<typeof group> => Boolean(group))
+    const activeGroupsByType = new Map<ComponentType, typeof activeLegacyGroups>(
+      COMPONENT_TYPES.map((type) => [type, activeLegacyGroups.filter((group) => group.type === type)]),
+    )
     const conditions: JamoGroup['conditions'] = {}
-    for (const conditionType of TYPES) {
+    for (const conditionType of COMPONENT_TYPES) {
       if (conditionType === targetType) continue
-      conditions[conditionType] = Array.from({length: TYPE_COUNTS[conditionType]}, (_, index) => index).filter(
-        (index) =>
-          activeLegacyGroups
-            .filter((group) => group.type === conditionType)
-            .every((group) => group.items.includes(index)),
+      conditions[conditionType] = JAMO_INDICES[conditionType].filter((index: number) =>
+        activeGroupsByType.get(conditionType)!.every((group) => group.items.includes(index)),
       )
     }
 
     const groupId = `variation_${targetType}_${groups[targetType].length + 1}`
     groups[targetType].push({
       id: groupId,
-      name: activeLegacyGroups.map((group) => group.name).join(' · ') || `기본 ${TYPE_LABELS[targetType]}`,
+      name: activeLegacyGroups.map((group) => group.name).join(' · ') || `기본 ${COMPONENT_TYPE_LABELS[targetType]}`,
       conditions,
     })
     groupIdsByCondition.get(targetType)!.set(conditionKey, groupId)
@@ -155,13 +160,15 @@ function migrateLegacyGroupModel(data: any) {
  * 2D 배열 bitmap을 hex 문자열로 압축합니다.
  */
 export function serializeProject(proj: FontProject): any {
-  const clone = structuredClone(proj) as any
-  for (const c of clone.components) {
-    if (Array.isArray(c.bitmap)) {
-      c.bitmap = bitmapToHex(c.bitmap)
-    }
+  const {components, ...metadata} = proj
+  return {
+    ...structuredClone(metadata),
+    components: components.map((component) => ({
+      ...component,
+      conditions: {...component.conditions},
+      bitmap: bitmapToHex(component.bitmap),
+    })),
   }
-  return clone
 }
 
 /**
@@ -180,7 +187,7 @@ export function deserializeProject(data: any): FontProject {
         if (!data.groups) data.groups = {chosung: [], jungsung: [], jongsung: []}
         c.conditions = {}
         const targets = (c as any).targets
-        for (const tType of ['chosung', 'jungsung', 'jongsung'] as const) {
+        for (const tType of COMPONENT_TYPES) {
           if (tType === c.type) continue
           if (targets[tType] && targets[tType].length > 0) {
             const itemsArr = [...targets[tType]].sort((a: number, b: number) => a - b)

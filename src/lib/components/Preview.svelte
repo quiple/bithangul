@@ -1,6 +1,13 @@
 <script lang="ts">
   import {getBorderColor} from '$lib/bitmap'
-  import {composeHangul} from '$lib/hangul'
+  import {
+    HANGUL_SYLLABLE_COUNT,
+    JUNGSUNG_COUNT,
+    JONGSUNG_COUNT,
+    SYLLABLES_PER_CHOSUNG,
+    composeHangul,
+  } from '$lib/hangul'
+  import {onDestroy} from 'svelte'
 
   let {
     generatedData = null,
@@ -9,8 +16,8 @@
   } = $props()
 
   // 11,172자를 28열(종성 수)로 나누면 399행
-  const COLS = 28
-  const TOTAL_ITEMS = 11172
+  const COLS = JONGSUNG_COUNT
+  const TOTAL_ITEMS = HANGUL_SYLLABLE_COUNT
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS) // 399
 
   // canvas 내부 해상도 (고정, 고해상도)
@@ -28,6 +35,10 @@
   let containerHeight = $state(600)
   let containerWidth = $state(800)
   let container: HTMLDivElement = $state(undefined!)
+  let scrollFrame = 0
+  let pendingScrollTop = 0
+
+  let generatedView = $derived(generatedData ? new DataView(generatedData) : null)
 
   // 패널 너비에서 레이블 너비를 빼고, 28셀에 맞게 CSS 셀 크기 계산
   let cssCanvasWidth = $derived(containerWidth - LABEL_W)
@@ -41,20 +52,29 @@
   let visibleRows = $derived(Array.from({length: endRow - startRow}, (_, i) => startRow + i))
 
   function onScroll(e: UIEvent) {
-    scrollTop = (e.target as HTMLElement).scrollTop
+    pendingScrollTop = (e.target as HTMLElement).scrollTop
+    if (scrollFrame) return
+    scrollFrame = requestAnimationFrame(() => {
+      scrollTop = pendingScrollTop
+      scrollFrame = 0
+    })
   }
+
+  onDestroy(() => {
+    if (scrollFrame) cancelAnimationFrame(scrollFrame)
+  })
 
   // 행 인덱스 → 해당 행의 첫 글자 (초성+중성 조합 대표)
   function rowLabel(rowIdx: number): string {
     const firstItemIdx = rowIdx * COLS
     if (firstItemIdx >= TOTAL_ITEMS) return ''
-    const cho = Math.floor(firstItemIdx / (21 * 28))
-    const jung = Math.floor((firstItemIdx % (21 * 28)) / 28)
+    const cho = Math.floor(firstItemIdx / SYLLABLES_PER_CHOSUNG)
+    const jung = Math.floor((firstItemIdx % SYLLABLES_PER_CHOSUNG) / JONGSUNG_COUNT)
     return composeHangul(cho, jung, 0)
   }
 
   // ── 행 단위 canvas 렌더링 (내부 해상도 고정) ──
-  function drawRowCanvas(canvas: HTMLCanvasElement, rowIdx: number, data: ArrayBuffer | null) {
+  function drawRowCanvas(canvas: HTMLCanvasElement, rowIdx: number, view: DataView | null) {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -74,9 +94,7 @@
     // 가로 격자선 (하단)
     ctx.fillRect(0, INTERNAL_GLYPH, CANVAS_W, INTERNAL_BORDER)
 
-    if (!data) return
-
-    const view = new DataView(data)
+    if (!view) return
     const firstIdx = rowIdx * COLS
     const pixelScale = 2 // 16px 글리프 → 32px 내부 렌더링
 
@@ -87,7 +105,7 @@
       if (itemIdx >= TOTAL_ITEMS) break
 
       const offset = itemIdx * 32
-      if (offset + 32 > data.byteLength) break
+      if (offset + 32 > view.byteLength) break
 
       // 셀 내부 시작 좌표 (격자선 이후)
       const cellX = col * INTERNAL_CELL + INTERNAL_BORDER
@@ -105,11 +123,11 @@
   }
 
   // canvas에 대한 action: rowIdx 또는 data가 바뀌면 다시 그림
-  function rowCanvasAction(canvas: HTMLCanvasElement, params: {rowIdx: number; data: ArrayBuffer | null}) {
-    drawRowCanvas(canvas, params.rowIdx, params.data)
+  function rowCanvasAction(canvas: HTMLCanvasElement, params: {rowIdx: number; view: DataView | null}) {
+    drawRowCanvas(canvas, params.rowIdx, params.view)
     return {
-      update(newParams: {rowIdx: number; data: ArrayBuffer | null}) {
-        drawRowCanvas(canvas, newParams.rowIdx, newParams.data)
+      update(newParams: {rowIdx: number; view: DataView | null}) {
+        drawRowCanvas(canvas, newParams.rowIdx, newParams.view)
       },
       destroy() {
         if (canvas) {
@@ -147,7 +165,7 @@
 
           <!-- 행 전체를 하나의 canvas로 렌더링, CSS로 패널 너비에 맞게 스케일링 -->
           <canvas
-            use:rowCanvasAction={{rowIdx, data: generatedData}}
+            use:rowCanvasAction={{rowIdx, view: generatedView}}
             width={CANVAS_W}
             height={CANVAS_H}
             style="width: {cssCanvasWidth}px; height: {cssRowHeight}px; --border-color: var(--border, #e5e5e5);"

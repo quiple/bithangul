@@ -4,8 +4,7 @@
   import {Button} from '$lib/components/ui/button'
   import * as Dialog from '$lib/components/ui/dialog/index.js'
   import {Toggle} from '$lib/components/ui/toggle/index.js'
-  import {checkConditionMatch} from '$lib/conditions'
-  import {CHOSUNG, JUNGSUNG, JONGSUNG} from '$lib/hangul'
+  import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES, getJamoLabel} from '$lib/hangul'
   import {projectState} from '$lib/state.svelte'
 
   interface Props {
@@ -16,18 +15,6 @@
   }
 
   let {open, component, onOpenChange, onSplit}: Props = $props()
-
-  const TYPES: ComponentType[] = ['chosung', 'jungsung', 'jongsung']
-  const TYPE_LABEL: Record<ComponentType, string> = {
-    chosung: '초성',
-    jungsung: '중성',
-    jongsung: '종성',
-  }
-  const ITEMS: Record<ComponentType, string[]> = {
-    chosung: CHOSUNG,
-    jungsung: JUNGSUNG,
-    jongsung: JONGSUNG,
-  }
 
   let selectedItems = $state<Record<ComponentType, number[]>>({chosung: [], jungsung: [], jongsung: []})
   let initializedComponentId = $state<string | null>(null)
@@ -44,37 +31,23 @@
     }
   })
 
-  let availableTypes = $derived(TYPES.filter((type) => type !== component?.type))
+  let availableTypes = $derived(COMPONENT_TYPES.filter((type) => type !== component?.type))
 
   let eligibleItems = $derived.by(() => {
     const result: Record<ComponentType, number[]> = {chosung: [], jungsung: [], jongsung: []}
     if (!component) return result
 
-    const found: Record<ComponentType, Set<number>> = {
-      chosung: new Set(),
-      jungsung: new Set(),
-      jongsung: new Set(),
+    const group = projectState.project.groups[component.type].find((candidate) => component.conditions[candidate.id])
+    if (!group) return result
+    for (const type of COMPONENT_TYPES) {
+      result[type] =
+        type === component.type ? [component.typeIndex] : [...(group.conditions[type] || JAMO_INDICES[type])]
     }
-    for (let cho = 0; cho < CHOSUNG.length; cho++) {
-      if (component.type === 'chosung' && component.typeIndex !== cho) continue
-      for (let jung = 0; jung < JUNGSUNG.length; jung++) {
-        if (component.type === 'jungsung' && component.typeIndex !== jung) continue
-        for (let jong = 0; jong < JONGSUNG.length; jong++) {
-          if (component.type === 'jongsung' && component.typeIndex !== jong) continue
-          if (!checkConditionMatch(cho, jung, jong, component.conditions || {}, projectState.project.groups)) continue
-          found.chosung.add(cho)
-          found.jungsung.add(jung)
-          found.jongsung.add(jong)
-        }
-      }
-    }
-
-    for (const type of TYPES) result[type] = [...found[type]].sort((a, b) => a - b)
     return result
   })
 
   function getItemLabel(type: ComponentType, index: number) {
-    return type === 'jongsung' && index === 0 ? '없음' : ITEMS[type][index]
+    return getJamoLabel(type, index, '없음')
   }
 
   function toggleItem(type: ComponentType, index: number) {
@@ -116,7 +89,7 @@
 
   let componentLabel = $derived.by(() => {
     if (!component) return ''
-    return `${TYPE_LABEL[component.type]} ${getItemLabel(component.type, component.typeIndex)}`
+    return `${COMPONENT_TYPE_LABELS[component.type]} ${getItemLabel(component.type, component.typeIndex)}`
   })
 </script>
 
@@ -139,7 +112,7 @@
         <section class="space-y-3 rounded-lg border bg-card p-4">
           <div class="flex items-center justify-between gap-2">
             <div>
-              <h3 class="font-semibold">{TYPE_LABEL[type]} 조합</h3>
+              <h3 class="font-semibold">{COMPONENT_TYPE_LABELS[type]} 조합</h3>
               <p class="text-xs text-muted-foreground">
                 {selectedItems[type].length}/{eligibleItems[type].length}개 선택
               </p>
