@@ -39,6 +39,6 @@
   bind:this={canvas}
   width={BITMAP_SIZE}
   height={BITMAP_SIZE}
-  style={`width: ${size}px; height: ${size}px; image-rendering: pixelated;`}
+  style={`width: ${size}px; height: ${size}px;`}
   class="block bg-background {className}"
 ></canvas>
