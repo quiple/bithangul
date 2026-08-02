@@ -47,7 +47,9 @@
     onOpenGroupManager,
   }: Props = $props()
 
-  const HEADING_HEIGHT = 38
+  const HEADING_CONTENT_HEIGHT = 38
+  const SECTION_GAP = 8
+  const HEADING_HEIGHT = HEADING_CONTENT_HEIGHT + SECTION_GAP
   const COMPONENT_ROW_HEIGHT = 64
   const OVERSCAN_PX = COMPONENT_ROW_HEIGHT * 4
 
@@ -224,7 +226,7 @@
       {#each visibleRows as row (row.key)}
         <div class="absolute inset-x-0 top-0" style={`height: ${row.height}px; transform: translateY(${row.top}px)`}>
           {#if row.kind === 'heading'}
-            <div class="flex h-full items-center gap-2 border-b">
+            <div class="flex items-center gap-2 border-b" style={`height: ${HEADING_CONTENT_HEIGHT}px`}>
               <h4 class="text-base font-bold">{JAMO_BY_TYPE[activeTab][row.typeIndex]}</h4>
               <span class="text-xs text-muted-foreground">{row.count}개</span>
             </div>
