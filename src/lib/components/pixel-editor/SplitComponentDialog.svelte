@@ -3,20 +3,23 @@
 
   import {Button} from '$lib/components/ui/button'
   import * as Dialog from '$lib/components/ui/dialog/index.js'
+  import {Input} from '$lib/components/ui/input/index.js'
   import {Toggle} from '$lib/components/ui/toggle/index.js'
   import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES, getJamoLabel} from '$lib/hangul'
   import {projectState} from '$lib/state.svelte'
+  import {getVariationGroupName} from '$lib/variation-utils'
 
   interface Props {
     open: boolean
     component: PixelComponent | null
     onOpenChange: (open: boolean) => void
-    onSplit: (selections: Partial<Record<ComponentType, number[]>>) => void
+    onSplit: (selections: Partial<Record<ComponentType, number[]>>, customName?: string) => void
   }
 
   let {open, component, onOpenChange, onSplit}: Props = $props()
 
   let selectedItems = $state<Record<ComponentType, number[]>>({chosung: [], jungsung: [], jongsung: []})
+  let customName = $state('')
   let initializedComponentId = $state<string | null>(null)
   let errorMessage = $state<string | null>(null)
 
@@ -26,6 +29,7 @@
       initializedComponentId = null
     } else if (componentId !== initializedComponentId) {
       selectedItems = {chosung: [], jungsung: [], jongsung: []}
+      customName = ''
       errorMessage = null
       initializedComponentId = componentId
     }
@@ -77,13 +81,26 @@
     return selections
   }
 
+  let suggestedName = $derived.by(() => {
+    if (!component) return ''
+    const conditions = Object.fromEntries(
+      availableTypes.map((type) => {
+        const selected = selectedItems[type]
+        const items =
+          selected.length > 0 && selected.length < eligibleItems[type].length ? selected : eligibleItems[type]
+        return [type, [...items]]
+      }),
+    ) as Partial<Record<ComponentType, number[]>>
+    return getVariationGroupName(component.type, conditions)
+  })
+
   function handleSplit() {
     const selections = getNormalizedSelections()
     if (Object.keys(selections).length === 0) {
       errorMessage = '현재 적용 범위보다 좁은 조합을 하나 이상 선택해 주세요.'
       return
     }
-    onSplit(selections)
+    onSplit(selections, customName.trim() || undefined)
     onOpenChange(false)
   }
 
@@ -107,6 +124,12 @@
         선택한 조합은 새 바리에이션으로 옮겨지고 원본 바리에이션의 적용 범위에서는 제외됩니다. 새로 만들어지는 모든
         컴포넌트는 각 행의 기존 자형을 복사합니다.
       </p>
+
+      <div class="space-y-2">
+        <label for="split-variation-name" class="text-sm font-medium">바리에이션 이름</label>
+        <Input id="split-variation-name" bind:value={customName} placeholder={suggestedName} autocomplete="off" />
+        <p class="text-xs text-muted-foreground">비워두면 선택한 조합에 맞는 이름을 자동으로 사용합니다.</p>
+      </div>
 
       {#each availableTypes as type}
         <section class="space-y-3 rounded-lg border bg-card p-4">

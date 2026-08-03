@@ -308,9 +308,9 @@
     splitDialogOpen = open
     if (!open) splitTarget = null
   }}
-  onSplit={(selections) => {
+  onSplit={(selections, customName) => {
     if (!splitTarget) return
-    const newComponent = projectState.splitComponent(splitTarget.id, selections)
+    const newComponent = projectState.splitComponent(splitTarget.id, selections, customName)
     if (newComponent) {
       handleGenerate()
       projectState.selectComponent(newComponent.id)

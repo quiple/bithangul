@@ -2,14 +2,8 @@ import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '$lib/t
 
 import {cloneBitmap, createEmptyBitmap} from '$lib/bitmap'
 import {getActiveVariationId, getComponentKey} from '$lib/component-utils'
-import {
-  COMPONENT_INDICES,
-  COMPONENT_TYPES,
-  COMPONENT_TYPE_LABELS,
-  JAMO_BY_TYPE,
-  JAMO_INDICES,
-  getJamoLabel,
-} from '$lib/hangul'
+import {COMPONENT_INDICES, COMPONENT_TYPES, JAMO_INDICES} from '$lib/hangul'
+import {getVariationGroupName} from '$lib/variation-utils'
 
 class ProjectState {
   project = $state<FontProject>({
@@ -55,25 +49,7 @@ class ProjectState {
     }
   }
 
-  private getSplitGroupName(type: ComponentType, conditions: Partial<Record<ComponentType, number[]>>) {
-    const parts: string[] = []
-    for (const conditionType of COMPONENT_TYPES) {
-      if (
-        conditionType === type ||
-        !conditions[conditionType] ||
-        conditions[conditionType]!.length === JAMO_BY_TYPE[conditionType].length
-      )
-        continue
-      const labels = conditions[conditionType]!.map((index) => getJamoLabel(conditionType, index, '받침 없음'))
-      const preview = labels.slice(0, 3).join('·')
-      parts.push(
-        `${COMPONENT_TYPE_LABELS[conditionType]} ${preview}${labels.length > 3 ? ` 외 ${labels.length - 3}개` : ''}`,
-      )
-    }
-    return `${COMPONENT_TYPE_LABELS[type]} ${parts.join(' · ')}`
-  }
-
-  splitComponent(id: string, selections: Partial<Record<ComponentType, number[]>>) {
+  splitComponent(id: string, selections: Partial<Record<ComponentType, number[]>>, customName?: string) {
     const source = this.componentById.get(id)
     if (!source) return null
 
@@ -136,7 +112,7 @@ class ProjectState {
     const splitOperationId = crypto.randomUUID()
     const newGroup: JamoGroup = {
       id: crypto.randomUUID(),
-      name: this.getSplitGroupName(source.type, nextGroupConditions),
+      name: customName?.trim() || getVariationGroupName(source.type, nextGroupConditions),
       conditions: nextGroupConditions,
       splitOperationId,
     }
@@ -144,7 +120,7 @@ class ProjectState {
 
     const additionalRemainderGroups = remainderConditions.slice(1).map((conditions) => ({
       id: crypto.randomUUID(),
-      name: this.getSplitGroupName(source.type, conditions),
+      name: getVariationGroupName(source.type, conditions),
       conditions,
     }))
     const sourceGroupIndex = groups.indexOf(sourceGroup)
