@@ -104,8 +104,8 @@
 
     <div class="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
       <p class="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-        선택한 조합은 해당 컴포넌트 종류의 바리에이션 관리에 하나의 규칙으로 추가됩니다. 새로 만들어지는 모든 컴포넌트는
-        각 행의 기존 자형을 복사합니다.
+        선택한 조합은 새 바리에이션으로 옮겨지고 원본 바리에이션의 적용 범위에서는 제외됩니다. 새로 만들어지는 모든
+        컴포넌트는 각 행의 기존 자형을 복사합니다.
       </p>
 
       {#each availableTypes as type}
