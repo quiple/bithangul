@@ -2,7 +2,14 @@ import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '$lib/t
 
 import {cloneBitmap, createEmptyBitmap} from '$lib/bitmap'
 import {getActiveVariationId, getComponentKey} from '$lib/component-utils'
-import {COMPONENT_INDICES, COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, getJamoLabel} from '$lib/hangul'
+import {
+  COMPONENT_INDICES,
+  COMPONENT_TYPES,
+  COMPONENT_TYPE_LABELS,
+  JAMO_BY_TYPE,
+  JAMO_INDICES,
+  getJamoLabel,
+} from '$lib/hangul'
 
 class ProjectState {
   project = $state<FontProject>({
@@ -71,19 +78,53 @@ class ProjectState {
     if (!source) return null
 
     const sourceGroupId = getActiveVariationId(source)
-    const sourceGroup = this.project.groups[source.type].find((group) => group.id === sourceGroupId)
+    const groups = this.project.groups[source.type]
+    const sourceGroup = groups.find((group) => group.id === sourceGroupId)
     if (!sourceGroup) return null
 
-    const nextGroupConditions = Object.fromEntries(
-      Object.entries(sourceGroup.conditions).map(([type, items]) => [type, [...items]]),
-    ) as Partial<Record<ComponentType, number[]>>
-    let hasNarrowerCondition = false
-    for (const type of COMPONENT_TYPES) {
-      if (type === source.type || !selections[type]?.length) continue
-      nextGroupConditions[type] = [...selections[type]!]
-      hasNarrowerCondition = true
+    const conditionTypes = COMPONENT_TYPES.filter((type) => type !== source.type)
+    const sourceDomains: Partial<Record<ComponentType, number[]>> = {}
+    const selectedDomains: Partial<Record<ComponentType, number[]>> = {}
+    const narrowedTypes: ComponentType[] = []
+
+    for (const type of conditionTypes) {
+      const sourceDomain = [...(sourceGroup.conditions[type] || JAMO_INDICES[type])]
+      const sourceItems = new Set(sourceDomain)
+      const selected = [...new Set(selections[type] || [])].filter((item) => sourceItems.has(item))
+
+      sourceDomains[type] = sourceDomain
+      if (selected.length > 0 && selected.length < sourceDomain.length) {
+        selectedDomains[type] = selected
+        narrowedTypes.push(type)
+      } else {
+        selectedDomains[type] = [...sourceDomain]
+      }
     }
-    if (!hasNarrowerCondition) return null
+    if (narrowedTypes.length === 0) return null
+
+    const nextGroupConditions = Object.fromEntries(
+      conditionTypes.map((type) => [type, [...selectedDomains[type]!]]),
+    ) as Partial<Record<ComponentType, number[]>>
+
+    // A rectangular combination split can require multiple rectangular remainder groups.
+    // Example: (all initial × all final) - (ㄱ × no-final)
+    // = (not-ㄱ × all final) + (ㄱ × with-final).
+    const narrowedTypeOrder = new Map(narrowedTypes.map((type, index) => [type, index]))
+    const remainderConditions = narrowedTypes.map((narrowedType, narrowedIndex) => {
+      const excludedItems = new Set(selectedDomains[narrowedType]!)
+      return Object.fromEntries(
+        conditionTypes.map((type) => {
+          const typeOrder = narrowedTypeOrder.get(type)
+          if (type === narrowedType) {
+            return [type, sourceDomains[type]!.filter((item) => !excludedItems.has(item))]
+          }
+          if (typeOrder !== undefined && typeOrder < narrowedIndex) {
+            return [type, [...selectedDomains[type]!]]
+          }
+          return [type, [...sourceDomains[type]!]]
+        }),
+      ) as Partial<Record<ComponentType, number[]>>
+    })
 
     const sourceBitmaps = new Map<number, number[][]>()
     for (const component of this.project.components) {
@@ -99,15 +140,30 @@ class ProjectState {
       conditions: nextGroupConditions,
       splitOperationId,
     }
-    this.project.groups[source.type].push(newGroup)
+    sourceGroup.conditions = remainderConditions[0]
+
+    const additionalRemainderGroups = remainderConditions.slice(1).map((conditions) => ({
+      id: crypto.randomUUID(),
+      name: this.getSplitGroupName(source.type, conditions),
+      conditions,
+    }))
+    const sourceGroupIndex = groups.indexOf(sourceGroup)
+    groups.splice(sourceGroupIndex + 1, 0, ...additionalRemainderGroups, newGroup)
     this.syncComponents()
 
+    const copiedGroupIds = new Set([...additionalRemainderGroups.map((group) => group.id), newGroup.id])
     let selectedComponent: PixelComponent | null = null
     for (const targetComponent of this.project.components) {
-      if (targetComponent.type !== source.type || !targetComponent.conditions[newGroup.id]) continue
+      if (
+        targetComponent.type !== source.type ||
+        !Object.keys(targetComponent.conditions).some((groupId) => copiedGroupIds.has(groupId))
+      )
+        continue
       const sourceBitmap = sourceBitmaps.get(targetComponent.typeIndex)
       if (sourceBitmap) targetComponent.bitmap = cloneBitmap(sourceBitmap)
-      if (targetComponent.typeIndex === source.typeIndex) selectedComponent = targetComponent
+      if (targetComponent.conditions[newGroup.id] && targetComponent.typeIndex === source.typeIndex) {
+        selectedComponent = targetComponent
+      }
     }
     this.rebuildComponentIndex()
 
