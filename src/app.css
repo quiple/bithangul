@@ -121,4 +121,7 @@
   body {
     @apply bg-background text-foreground;
   }
+  canvas {
+    image-rendering: crisp-edges;
+  }
 }
