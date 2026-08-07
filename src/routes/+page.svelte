@@ -31,8 +31,12 @@
   let isExportingBDF = $state(false)
   let isExportingHEX = $state(false)
 
-  /** 컴포넌트 목록 스크롤 위치 보존 */
-  let componentListScrollTop = $state(0)
+  /** 초성·중성·종성 컴포넌트 목록의 스크롤 위치를 각각 보존 */
+  let componentListScrollPositions = $state<Record<ComponentType, number>>({
+    chosung: 0,
+    jungsung: 0,
+    jongsung: 0,
+  })
   let componentListActiveTab = $state<ComponentType>('chosung')
   let exampleDialogOpen = $state(false)
 
@@ -241,8 +245,11 @@
       {:else}
         <ComponentList
           components={projectState.project.components}
-          bind:scrollTop={componentListScrollTop}
+          scrollPositions={componentListScrollPositions}
           bind:activeTab={componentListActiveTab}
+          onScrollPositionChange={(type, position) => {
+            componentListScrollPositions = {...componentListScrollPositions, [type]: position}
+          }}
           onSelect={(id) => {
             projectState.selectComponent(id)
           }}

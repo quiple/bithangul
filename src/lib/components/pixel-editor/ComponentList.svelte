@@ -13,8 +13,9 @@
 
   interface Props {
     components: PixelComponent[]
-    scrollTop?: number
+    scrollPositions?: Record<ComponentType, number>
     activeTab?: ComponentType
+    onScrollPositionChange: (type: ComponentType, position: number) => void
     onSelect: (id: string) => void
     onSplit: (component: PixelComponent) => void
     onDelete: (component: PixelComponent) => void
@@ -39,8 +40,9 @@
 
   let {
     components,
-    scrollTop = $bindable(0),
+    scrollPositions = {chosung: 0, jungsung: 0, jongsung: 0},
     activeTab = $bindable('chosung'),
+    onScrollPositionChange,
     onSelect,
     onSplit,
     onDelete,
@@ -57,7 +59,8 @@
   let scrollContainer: HTMLDivElement | undefined = $state()
   let viewportHeight = $state(0)
   let viewportWidth = $state(0)
-  let pendingScrollTop = scrollTop
+  let currentScrollTop = $state(0)
+  let pendingScrollTop = 0
   let scrollFrame = 0
   let columnCount = $derived(viewportWidth >= THREE_COLUMN_MIN_WIDTH ? 3 : 2)
 
@@ -119,8 +122,8 @@
 
   let visibleRows = $derived.by(() => {
     const rows = listLayout.rows
-    const visibleStart = Math.max(0, scrollTop - OVERSCAN_PX)
-    const visibleEnd = scrollTop + viewportHeight + OVERSCAN_PX
+    const visibleStart = Math.max(0, currentScrollTop - OVERSCAN_PX)
+    const visibleEnd = currentScrollTop + viewportHeight + OVERSCAN_PX
 
     let low = 0
     let high = rows.length
@@ -136,21 +139,56 @@
     return rows.slice(startIndex, low)
   })
 
-  onMount(async () => {
-    await tick()
-    if (scrollContainer && scrollTop > 0) scrollContainer.scrollTop = scrollTop
+  onMount(() => {
+    void restoreScrollPosition(activeTab)
   })
 
   onDestroy(() => {
     if (scrollFrame) cancelAnimationFrame(scrollFrame)
-    scrollTop = pendingScrollTop
+    saveScrollPosition(activeTab, scrollContainer?.scrollTop ?? pendingScrollTop)
   })
 
+  function saveScrollPosition(type: ComponentType, position: number) {
+    onScrollPositionChange(type, position)
+  }
+
+  async function restoreScrollPosition(type: ComponentType) {
+    const targetPosition = scrollPositions[type] ?? 0
+    pendingScrollTop = targetPosition
+    currentScrollTop = targetPosition
+
+    await tick()
+    if (!scrollContainer) return
+
+    scrollContainer.scrollTop = targetPosition
+    const restoredPosition = scrollContainer.scrollTop
+    pendingScrollTop = restoredPosition
+    currentScrollTop = restoredPosition
+
+    if (restoredPosition !== targetPosition) saveScrollPosition(type, restoredPosition)
+  }
+
+  function handleTabChange(value: string) {
+    const nextTab = value as ComponentType
+    if (nextTab === activeTab) return
+
+    if (scrollFrame) {
+      cancelAnimationFrame(scrollFrame)
+      scrollFrame = 0
+    }
+
+    saveScrollPosition(activeTab, scrollContainer?.scrollTop ?? pendingScrollTop)
+    activeTab = nextTab
+    void restoreScrollPosition(nextTab)
+  }
+
   function handleScroll(event: Event) {
+    const scrolledTab = activeTab
     pendingScrollTop = (event.currentTarget as HTMLDivElement).scrollTop
     if (scrollFrame) return
     scrollFrame = requestAnimationFrame(() => {
-      scrollTop = pendingScrollTop
+      currentScrollTop = pendingScrollTop
+      saveScrollPosition(scrolledTab, pendingScrollTop)
       scrollFrame = 0
     })
   }
@@ -197,7 +235,7 @@
   </ContextMenu.Root>
 {/snippet}
 
-<Tabs.Root bind:value={activeTab as any} class="flex h-full min-h-0 flex-col gap-0">
+<Tabs.Root value={activeTab} onValueChange={handleTabChange} class="flex h-full min-h-0 flex-col gap-0">
   <div class="flex shrink-0 items-center justify-between gap-2 border-b py-1 pr-1 pl-4">
     <h2 class="hidden truncate font-bold sm:block">컴포넌트</h2>
     <Tabs.List class="grid max-w-75 flex-1 grid-cols-3">
