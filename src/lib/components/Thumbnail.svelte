@@ -4,8 +4,7 @@
   let {bitmap, size = 32, class: className = ''}: {bitmap?: number[][]; size?: number; class?: string} = $props()
 
   const BITMAP_SIZE = 16
-  const PIXEL_SCALE = 3
-  const CANVAS_SIZE = BITMAP_SIZE * PIXEL_SCALE
+  const CANVAS_SIZE = BITMAP_SIZE
   let canvas: HTMLCanvasElement = $state(undefined!)
 
   onDestroy(() => {
@@ -31,7 +30,7 @@
     for (let r = 0; r < rows; r++) {
       const row = bitmap[r]
       for (let c = 0; c < cols; c++) {
-        if (row[c]) ctx.fillRect(c * PIXEL_SCALE, r * PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE)
+        if (row[c]) ctx.fillRect(c, r, 1, 1)
       }
     }
   })
