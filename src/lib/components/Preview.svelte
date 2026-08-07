@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {getBorderColor} from '$lib/bitmap'
   import {
     HANGUL_SYLLABLE_COUNT,
     JUNGSUNG_COUNT,
@@ -22,10 +21,8 @@
 
   // 원본 비트맵과 같은 최소 해상도로 그리고 CSS에서 표시 크기만 확대합니다.
   const INTERNAL_GLYPH = 16
-  const INTERNAL_BORDER = 1
-  const INTERNAL_CELL = INTERNAL_GLYPH + INTERNAL_BORDER
-  const CANVAS_W = COLS * INTERNAL_CELL + INTERNAL_BORDER
-  const CANVAS_H = INTERNAL_CELL
+  const CANVAS_W = COLS * INTERNAL_GLYPH
+  const CANVAS_H = INTERNAL_GLYPH
 
   // 행 레이블 너비 (CSS w-6 = 24px)
   const LABEL_W = 24
@@ -82,17 +79,6 @@
     ctx.fillStyle = '#fff'
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
-    // 격자선 그리기
-    const borderColor = getBorderColor(canvas)
-    ctx.fillStyle = borderColor
-
-    // 세로 격자선 (셀 사이)
-    for (let col = 0; col <= COLS; col++) {
-      ctx.fillRect(col * INTERNAL_CELL, 0, INTERNAL_BORDER, CANVAS_H)
-    }
-    // 가로 격자선 (하단)
-    ctx.fillRect(0, INTERNAL_GLYPH, CANVAS_W, INTERNAL_BORDER)
-
     if (!view) return
     const firstIdx = rowIdx * COLS
     ctx.fillStyle = '#000'
@@ -104,8 +90,7 @@
       const offset = itemIdx * 32
       if (offset + 32 > view.byteLength) break
 
-      // 셀 내부 시작 좌표 (격자선 이후)
-      const cellX = col * INTERNAL_CELL + INTERNAL_BORDER
+      const cellX = col * INTERNAL_GLYPH
 
       for (let r = 0; r < 16; r++) {
         const rowVal = view.getUint16(offset + r * 2, false)
@@ -160,14 +145,21 @@
             {rowLabel(rowIdx)}
           </div>
 
-          <!-- 행 전체를 하나의 canvas로 렌더링, CSS로 패널 너비에 맞게 스케일링 -->
-          <canvas
-            use:rowCanvasAction={{rowIdx, view: generatedView}}
-            width={CANVAS_W}
-            height={CANVAS_H}
-            style="width: {cssCanvasWidth}px; height: {cssRowHeight}px; --border-color: var(--border, #e5e5e5);"
-            class="block"
-          ></canvas>
+          <!-- 글리프는 최소 해상도 canvas에, 1px 격자선은 CSS 오버레이에 렌더링 -->
+          <div class="relative shrink-0" style="width: {cssCanvasWidth}px; height: {cssRowHeight}px;">
+            <canvas
+              use:rowCanvasAction={{rowIdx, view: generatedView}}
+              width={CANVAS_W}
+              height={CANVAS_H}
+              class="block h-full w-full"
+            ></canvas>
+            <div
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-0 border-border"
+              class:border-b={rowIdx < TOTAL_ROWS - 1}
+              style="background-image: repeating-linear-gradient(to right, var(--border) 0 1px, transparent 1px {cssCellSize}px);"
+            ></div>
+          </div>
         </div>
       {/each}
     </div>
