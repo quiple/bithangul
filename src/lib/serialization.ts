@@ -5,7 +5,7 @@
 import type {ComponentType, FontProject, GroupsStructure, JamoGroup} from '$lib/types'
 
 import {bitmapToHex, hexToBitmap} from '$lib/bitmap'
-import {getConditionKey} from '$lib/component-utils'
+import {getConditionKey, sortComponents, sortGroups} from '$lib/component-utils'
 import {COMPONENT_INDICES, COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES} from '$lib/hangul'
 
 function sameItems(first: number[], second: number[]) {
@@ -160,13 +160,16 @@ function migrateLegacyGroupModel(data: any) {
  * 2D 배열 bitmap을 hex 문자열로 압축합니다.
  */
 export function serializeProject(proj: FontProject): any {
+  const sortedGroups = sortGroups(proj.groups)
+  const sortedComponents = sortComponents(proj.components, sortedGroups)
+
   return {
     name: proj.name,
     groupModelVersion: proj.groupModelVersion,
     groups: Object.fromEntries(
       COMPONENT_TYPES.map((type) => [
         type,
-        proj.groups[type].map((group) => ({
+        sortedGroups[type].map((group) => ({
           id: group.id,
           name: group.name,
           splitOperationId: group.splitOperationId,
@@ -179,7 +182,7 @@ export function serializeProject(proj: FontProject): any {
         })),
       ]),
     ),
-    components: proj.components.map((component) => ({
+    components: sortedComponents.map((component) => ({
       id: component.id,
       type: component.type,
       typeIndex: component.typeIndex,
@@ -235,5 +238,7 @@ export function deserializeProject(data: any): FontProject {
   }
   migrateLegacyGroupModel(data)
   mergeDuplicateVariations(data, data.groups)
+  data.groups = sortGroups(data.groups)
+  data.components = sortComponents(data.components || [], data.groups)
   return data as FontProject
 }

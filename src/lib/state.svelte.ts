@@ -1,7 +1,7 @@
 import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '$lib/types'
 
 import {cloneBitmap, createEmptyBitmap} from '$lib/bitmap'
-import {getActiveVariationId, getComponentKey} from '$lib/component-utils'
+import {getActiveVariationId, getComponentKey, sortGroups, sortVariationGroups} from '$lib/component-utils'
 import {COMPONENT_INDICES, COMPONENT_TYPES, JAMO_INDICES} from '$lib/hangul'
 import {getVariationGroupName} from '$lib/variation-utils'
 
@@ -125,6 +125,7 @@ class ProjectState {
     }))
     const sourceGroupIndex = groups.indexOf(sourceGroup)
     groups.splice(sourceGroupIndex + 1, 0, ...additionalRemainderGroups, newGroup)
+    this.project.groups[source.type] = sortVariationGroups(source.type, groups)
     this.syncComponents()
 
     const copiedGroupIds = new Set([...additionalRemainderGroups.map((group) => group.id), newGroup.id])
@@ -191,7 +192,7 @@ class ProjectState {
   // --- Group Management ---
 
   updateGroups(type: ComponentType, newGroups: JamoGroup[]) {
-    this.project.groups[type] = newGroups
+    this.project.groups[type] = sortVariationGroups(type, newGroups)
     this.syncComponents()
   }
 
@@ -221,6 +222,8 @@ class ProjectState {
   }
 
   syncComponents() {
+    this.project.groups = sortGroups(this.project.groups)
+
     // Normalize existing components' conditions
     for (const c of this.project.components) {
       this.normalizeConditions(c)
