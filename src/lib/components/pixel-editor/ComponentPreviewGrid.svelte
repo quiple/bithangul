@@ -12,10 +12,11 @@
 
   let {component}: Props = $props()
 
-  const INTERNAL_GLYPH = 32
+  const INTERNAL_GLYPH = 16
   const INTERNAL_BORDER = 1
-  const INTERNAL_CELL = INTERNAL_GLYPH + INTERNAL_BORDER // 33
-  const PIXEL_SCALE = 2 // 16px glyph -> 32px rendering
+  const INTERNAL_CELL = INTERNAL_GLYPH + INTERNAL_BORDER
+  const DISPLAY_GLYPH = 32
+  const DISPLAY_CELL = DISPLAY_GLYPH + INTERNAL_BORDER
 
   let canvas: HTMLCanvasElement = $state(undefined!)
   let containerWidth = $state(0)
@@ -126,11 +127,13 @@
   })
 
   // Calculate layout based on container width
-  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_CELL / 2) / INTERNAL_CELL)))
+  let cols = $derived(Math.max(1, Math.floor((containerWidth - DISPLAY_CELL / 2) / DISPLAY_CELL)))
   let rows = $derived(Math.ceil(affectedIndices.length / cols))
 
   let canvasWidth = $derived(cols * INTERNAL_CELL + INTERNAL_BORDER)
   let canvasHeight = $derived(Math.max(INTERNAL_CELL + INTERNAL_BORDER, rows * INTERNAL_CELL + INTERNAL_BORDER))
+  let canvasDisplayWidth = $derived(cols * DISPLAY_CELL + INTERNAL_BORDER)
+  let canvasDisplayHeight = $derived(Math.max(DISPLAY_CELL + INTERNAL_BORDER, rows * DISPLAY_CELL + INTERNAL_BORDER))
 
   function draw() {
     if (!canvas || !previewData) return
@@ -173,7 +176,7 @@
         if (rowVal === 0) continue
         for (let c = 0; c < 16; c++) {
           if ((rowVal >> (15 - c)) & 1) {
-            ctx.fillRect(cellX + c * PIXEL_SCALE, cellY + r * PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE)
+            ctx.fillRect(cellX + c, cellY + r, 1, 1)
           }
         }
       }
@@ -207,7 +210,7 @@
         width={canvasWidth}
         height={canvasHeight}
         class="-m-px block"
-        style="width: {canvasWidth}px; height: {canvasHeight}px; --border-color: var(--border, #e5e5e5);"
+        style="width: {canvasDisplayWidth}px; height: {canvasDisplayHeight}px; --border-color: var(--border, #e5e5e5);"
       ></canvas>
     </div>
   {:else}
