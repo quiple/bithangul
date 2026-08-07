@@ -20,13 +20,12 @@
   const TOTAL_ITEMS = HANGUL_SYLLABLE_COUNT
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS) // 399
 
-  // canvas 내부 해상도 (고정, 고해상도)
-  // 각 셀: 32px 글리프 + 1px 격자선 = 33px
-  const INTERNAL_GLYPH = 32
+  // 원본 비트맵과 같은 최소 해상도로 그리고 CSS에서 표시 크기만 확대합니다.
+  const INTERNAL_GLYPH = 16
   const INTERNAL_BORDER = 1
-  const INTERNAL_CELL = INTERNAL_GLYPH + INTERNAL_BORDER // 33
-  const CANVAS_W = COLS * INTERNAL_CELL + INTERNAL_BORDER // 925
-  const CANVAS_H = INTERNAL_CELL + INTERNAL_BORDER // 34
+  const INTERNAL_CELL = INTERNAL_GLYPH + INTERNAL_BORDER
+  const CANVAS_W = COLS * INTERNAL_CELL + INTERNAL_BORDER
+  const CANVAS_H = INTERNAL_CELL
 
   // 행 레이블 너비 (CSS w-6 = 24px)
   const LABEL_W = 24
@@ -96,8 +95,6 @@
 
     if (!view) return
     const firstIdx = rowIdx * COLS
-    const pixelScale = 2 // 16px 글리프 → 32px 내부 렌더링
-
     ctx.fillStyle = '#000'
 
     for (let col = 0; col < COLS; col++) {
@@ -115,7 +112,7 @@
         if (rowVal === 0) continue
         for (let c = 0; c < 16; c++) {
           if ((rowVal >> (15 - c)) & 1) {
-            ctx.fillRect(cellX + c * pixelScale, r * pixelScale, pixelScale, pixelScale)
+            ctx.fillRect(cellX + c, r, 1, 1)
           }
         }
       }
