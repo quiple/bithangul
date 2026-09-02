@@ -11,6 +11,3 @@ binding = "ASSETS"
 
 [observability]
 enabled = true
-
-[limits]
-cpu_ms = 30000
