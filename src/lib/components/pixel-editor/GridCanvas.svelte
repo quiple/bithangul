@@ -1,6 +1,8 @@
 <script lang="ts">
   import {untrack} from 'svelte'
 
+  import {FONT_ASCENT} from '#lib/font-metrics.js'
+
   let {
     bitmap,
     onUpdate,
@@ -68,29 +70,43 @@
   }
 </script>
 
-<div
-  bind:this={containerEl}
-  class="grid aspect-square w-full max-w-100 cursor-crosshair touch-none gap-px border bg-border select-none"
-  style="grid-template-columns: repeat({COLS}, 1fr); grid-template-rows: repeat({ROWS}, 1fr);"
-  onpointerdown={handlePointerDown}
-  onpointermove={handlePointerMove}
-  onpointerup={handlePointerUp}
-  onpointercancel={handlePointerUp}
-  oncontextmenu={(e) => e.preventDefault()}
-  role="grid"
-  tabindex="-1"
->
-  {#each localBitmap as row, r}
-    {#each row as cell, c}
-      {@const thickR = (r + 1) % 8 === 0 && r + 1 < ROWS}
-      {@const thickC = (c + 1) % 8 === 0 && c + 1 < COLS}
-      <div
-        class="size-full {cell ? 'bg-primary' : 'bg-background'} {thickC ? 'border-r-2 border-r-border' : ''} {thickR
-          ? 'border-b-2 border-b-border'
-          : ''}"
-        role="gridcell"
-        aria-label="Pixel {r},{c}"
-      ></div>
+<div class="w-full max-w-100">
+  <div
+    bind:this={containerEl}
+    class="relative grid aspect-square w-full cursor-crosshair touch-none gap-px border bg-border select-none"
+    style="grid-template-columns: repeat({COLS}, 1fr); grid-template-rows: repeat({ROWS}, 1fr);"
+    onpointerdown={handlePointerDown}
+    onpointermove={handlePointerMove}
+    onpointerup={handlePointerUp}
+    onpointercancel={handlePointerUp}
+    oncontextmenu={(e) => e.preventDefault()}
+    role="grid"
+    tabindex="-1"
+    aria-label="픽셀 편집 그리드. 베이스라인은 위에서 {FONT_ASCENT}행 아래에 있습니다."
+  >
+    {#each localBitmap as row, r}
+      {#each row as cell, c}
+        {@const thickR = (r + 1) % 8 === 0 && r + 1 < ROWS}
+        {@const thickC = (c + 1) % 8 === 0 && c + 1 < COLS}
+        <div
+          class="size-full {cell ? 'bg-primary' : 'bg-background'} {thickC ? 'border-r-2 border-r-border' : ''} {thickR
+            ? 'border-b-2 border-b-border'
+            : ''}"
+          role="gridcell"
+          aria-label="Pixel {r},{c}"
+        ></div>
+      {/each}
     {/each}
-  {/each}
+    {#if ROWS > FONT_ASCENT}
+      <div
+        class="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-dashed border-sky-500"
+        style="grid-row: {FONT_ASCENT} / {FONT_ASCENT + 1}; bottom: -1.5px;"
+        aria-hidden="true"
+      ></div>
+    {/if}
+  </div>
+  <p class="mt-2 flex items-center justify-end gap-2 text-xs text-muted-foreground">
+    <span class="w-5 border-t-2 border-dashed border-sky-500" aria-hidden="true"></span>
+    베이스라인 · 위에서 {FONT_ASCENT}px
+  </p>
 </div>

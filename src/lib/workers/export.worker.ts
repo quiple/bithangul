@@ -3,6 +3,7 @@
  * 11,172자 × 16행의 대용량 문자열 생성을 백그라운드에서 수행합니다.
  */
 
+import {FONT_ASCENT, FONT_DESCENT} from '../font-metrics'
 import {HANGUL_START_CODE_POINT, HANGUL_SYLLABLE_COUNT} from '../hangul'
 
 interface ExportMessage {
@@ -42,10 +43,10 @@ function exportBDF(buffer: ArrayBuffer, fontName: string): string {
   lines[lineIdx++] = 'STARTFONT 2.1'
   lines[lineIdx++] = `FONT -misc-${safeName}-medium-r-normal--16-160-75-75-c-160-iso10646-1`
   lines[lineIdx++] = 'SIZE 16 75 75'
-  lines[lineIdx++] = 'FONTBOUNDINGBOX 16 16 0 -2'
+  lines[lineIdx++] = `FONTBOUNDINGBOX 16 16 0 -${FONT_DESCENT}`
   lines[lineIdx++] = 'STARTPROPERTIES 4'
-  lines[lineIdx++] = 'FONT_ASCENT 14'
-  lines[lineIdx++] = 'FONT_DESCENT 2'
+  lines[lineIdx++] = `FONT_ASCENT ${FONT_ASCENT}`
+  lines[lineIdx++] = `FONT_DESCENT ${FONT_DESCENT}`
   lines[lineIdx++] = 'DEFAULT_CHAR 0'
   lines[lineIdx++] = 'CHARSET_REGISTRY "ISO10646"'
   lines[lineIdx++] = 'ENDPROPERTIES'
@@ -59,7 +60,7 @@ function exportBDF(buffer: ArrayBuffer, fontName: string): string {
     lines[lineIdx++] = `ENCODING ${codePoint}`
     lines[lineIdx++] = 'SWIDTH 1000 0'
     lines[lineIdx++] = 'DWIDTH 16 0'
-    lines[lineIdx++] = 'BBX 16 16 0 -2'
+    lines[lineIdx++] = `BBX 16 16 0 -${FONT_DESCENT}`
     lines[lineIdx++] = 'BITMAP'
 
     for (let r = 0; r < 16; r++) {
