@@ -162,7 +162,12 @@
 
     const bufferCopy = generatedData.slice(0)
     exportWorker.postMessage(
-      {type, buffer: bufferCopy, fontName: type === 'bdf' ? projectState.project.name || 'bithangul' : undefined},
+      {
+        type,
+        buffer: bufferCopy,
+        fontName: type === 'bdf' ? projectState.project.name || 'bithangul' : undefined,
+        baseline: projectState.project.baseline,
+      },
       [bufferCopy],
     )
   }
@@ -234,7 +239,8 @@
         {@const sel = projectState.selectedComponent}
         <ComponentEditor
           component={sel}
-          onSave={(updated) => {
+          onSave={(updated, baseline) => {
+            projectState.project.baseline = baseline
             projectState.updateComponent(updated.id, updated)
             projectState.selectComponent(null)
             handleGenerate()

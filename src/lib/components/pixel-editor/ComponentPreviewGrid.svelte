@@ -127,7 +127,7 @@
   })
 
   // Calculate layout based on container width
-  let cols = $derived(Math.max(1, Math.floor((containerWidth - DISPLAY_CELL / 2) / DISPLAY_CELL)))
+  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_BORDER) / DISPLAY_CELL)))
   let rows = $derived(Math.ceil(affectedIndices.length / cols))
 
   let canvasWidth = $derived(cols * INTERNAL_CELL + INTERNAL_BORDER)
@@ -200,16 +200,19 @@
   })
 </script>
 
-<div class="flex flex-col gap-2" bind:clientWidth={containerWidth}>
-  <h3 class="truncate pl-2 font-medium">미리보기 ({affectedIndices.length}자)</h3>
+<div class="flex min-h-32 min-w-0 flex-1 flex-col gap-2">
+  <h3 class="shrink-0 truncate pl-2 font-medium">미리보기 ({affectedIndices.length}자)</h3>
 
   {#if previewData}
-    <div class="h-[calc(100vh-37.75rem)] overflow-hidden rounded border bg-white" style="overflow-y: auto;">
+    <div
+      class="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto rounded border bg-white"
+      bind:clientWidth={containerWidth}
+    >
       <canvas
         bind:this={canvas}
         width={canvasWidth}
         height={canvasHeight}
-        class="-m-px block"
+        class="block"
         style="width: {canvasDisplayWidth}px; height: {canvasDisplayHeight}px; --border-color: var(--border, #e5e5e5);"
       ></canvas>
     </div>

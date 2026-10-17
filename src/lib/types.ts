@@ -24,6 +24,7 @@ export interface PixelComponent {
 
 export interface FontProject {
   name: string
+  baseline?: number
   groupModelVersion?: 2
   groups: GroupsStructure
   components: PixelComponent[]
