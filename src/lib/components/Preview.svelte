@@ -1,6 +1,7 @@
 <script lang="ts">
   import {onDestroy} from 'svelte'
 
+  import {bytesPerRow, packedPixel} from '#lib/bitmap.js'
   import {
     HANGUL_SYLLABLE_COUNT,
     JUNGSUNG_COUNT,
@@ -11,8 +12,12 @@
 
   let {
     generatedData = null,
+    width = 16,
+    height = 16,
   }: {
     generatedData: ArrayBuffer | null
+    width?: number
+    height?: number
   } = $props()
 
   // 11,172자를 28열(종성 수)로 나누면 399행
@@ -21,9 +26,9 @@
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS) // 399
 
   // 원본 비트맵과 같은 최소 해상도로 그리고 CSS에서 표시 크기만 확대합니다.
-  const INTERNAL_GLYPH = 16
-  const CANVAS_W = COLS * INTERNAL_GLYPH
-  const CANVAS_H = INTERNAL_GLYPH
+  const CANVAS_W = $derived(COLS * width)
+  const CANVAS_H = $derived(height)
+  const stride = $derived(bytesPerRow(width) * height)
 
   // 행 레이블 너비 (CSS w-6 = 24px)
   const LABEL_W = 24
@@ -35,12 +40,12 @@
   let scrollFrame = 0
   let pendingScrollTop = 0
 
-  let generatedView = $derived(generatedData ? new DataView(generatedData) : null)
+  let generatedView = $derived(generatedData ? new Uint8Array(generatedData) : null)
 
   // 패널 너비에서 레이블 너비를 빼고, 28셀에 맞게 CSS 셀 크기 계산
   let cssCanvasWidth = $derived(containerWidth - LABEL_W)
   let cssCellSize = $derived(cssCanvasWidth / COLS)
-  let cssRowHeight = $derived(cssCellSize)
+  let cssRowHeight = $derived((cssCellSize * height) / width)
 
   // 가상 스크롤: 보이는 행만 렌더링
   let startRow = $derived(Math.max(0, Math.floor(scrollTop / cssRowHeight) - 2))
@@ -71,7 +76,7 @@
   }
 
   // ── 행 단위 canvas 렌더링 (내부 해상도 고정) ──
-  function drawRowCanvas(canvas: HTMLCanvasElement, rowIdx: number, view: DataView | null) {
+  function drawRowCanvas(canvas: HTMLCanvasElement, rowIdx: number, view: Uint8Array | null) {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -88,16 +93,14 @@
       const itemIdx = firstIdx + col
       if (itemIdx >= TOTAL_ITEMS) break
 
-      const offset = itemIdx * 32
-      if (offset + 32 > view.byteLength) break
+      const offset = itemIdx * stride
+      if (offset + stride > view.byteLength) break
 
-      const cellX = col * INTERNAL_GLYPH
+      const cellX = col * width
 
-      for (let r = 0; r < 16; r++) {
-        const rowVal = view.getUint16(offset + r * 2, false)
-        if (rowVal === 0) continue
-        for (let c = 0; c < 16; c++) {
-          if ((rowVal >> (15 - c)) & 1) {
+      for (let r = 0; r < height; r++) {
+        for (let c = 0; c < width; c++) {
+          if (packedPixel(view, width, r, c, offset)) {
             ctx.fillRect(cellX + c, r, 1, 1)
           }
         }
@@ -106,10 +109,13 @@
   }
 
   // canvas에 대한 action: rowIdx 또는 data가 바뀌면 다시 그림
-  function rowCanvasAction(canvas: HTMLCanvasElement, params: {rowIdx: number; view: DataView | null}) {
+  function rowCanvasAction(
+    canvas: HTMLCanvasElement,
+    params: {rowIdx: number; view: Uint8Array | null; width: number; height: number},
+  ) {
     drawRowCanvas(canvas, params.rowIdx, params.view)
     return {
-      update(newParams: {rowIdx: number; view: DataView | null}) {
+      update(newParams: {rowIdx: number; view: Uint8Array | null; width: number; height: number}) {
         drawRowCanvas(canvas, newParams.rowIdx, newParams.view)
       },
       destroy() {
@@ -149,7 +155,7 @@
           <!-- 글리프는 최소 해상도 canvas에, 1px 격자선은 CSS 오버레이에 렌더링 -->
           <div class="relative shrink-0" style="width: {cssCanvasWidth}px; height: {cssRowHeight}px;">
             <canvas
-              use:rowCanvasAction={{rowIdx, view: generatedView}}
+              use:rowCanvasAction={{rowIdx, view: generatedView, width, height}}
               width={CANVAS_W}
               height={CANVAS_H}
               class="block h-full w-full"

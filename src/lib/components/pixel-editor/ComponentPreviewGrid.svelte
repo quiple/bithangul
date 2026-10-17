@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {PixelComponent, ComponentType} from '#lib/types.js'
 
-  import {getBorderColor, flattenBitmap} from '#lib/bitmap.js'
+  import {getBorderColor, flattenBitmap, bytesPerRow, packedPixel} from '#lib/bitmap.js'
   import {checkConditionMatch, createVariationGroupLookup, getConditionSpecificity} from '#lib/conditions.js'
   import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT, SYLLABLES_PER_CHOSUNG} from '#lib/hangul.js'
   import {projectState} from '#lib/state.svelte.js'
@@ -12,11 +12,14 @@
 
   let {component}: Props = $props()
 
-  const INTERNAL_GLYPH = 16
+  const width = $derived(component.bitmap[0]?.length ?? 16)
+  const height = $derived(component.bitmap.length)
+  const stride = $derived(bytesPerRow(width) * height)
   const INTERNAL_BORDER = 1
-  const INTERNAL_CELL = INTERNAL_GLYPH + INTERNAL_BORDER
-  const DISPLAY_GLYPH = 32
-  const DISPLAY_CELL = DISPLAY_GLYPH + INTERNAL_BORDER
+  const internalCellWidth = $derived(width + INTERNAL_BORDER)
+  const internalCellHeight = $derived(height + INTERNAL_BORDER)
+  const displayCellWidth = $derived(width * 2 + INTERNAL_BORDER)
+  const displayCellHeight = $derived(height * 2 + INTERNAL_BORDER)
 
   let canvas: HTMLCanvasElement = $state(undefined!)
   let containerWidth = $state(0)
@@ -26,7 +29,7 @@
     components: PixelComponent[]
   }
 
-  const bitmapCache = new Map<string, {bitmap: number[][]; flattened: Uint16Array}>()
+  const bitmapCache = new Map<string, {bitmap: number[][]; flattened: Uint8Array}>()
 
   let groupLookup = $derived(createVariationGroupLookup(projectState.project.groups))
 
@@ -108,32 +111,35 @@
   let previewData = $derived.by(() => {
     if (affectedIndices.length === 0) return null
 
-    const buffer = new ArrayBuffer(matchedGlyphs.length * 32)
-    const view = new DataView(buffer)
-    const result = new Uint16Array(16)
+    const buffer = new ArrayBuffer(matchedGlyphs.length * stride)
+    const view = new Uint8Array(buffer)
+    const result = new Uint8Array(stride)
 
     for (let i = 0; i < matchedGlyphs.length; i++) {
       result.fill(0)
       for (const matched of matchedGlyphs[i].components) {
         const bitmap = getFlattenedBitmap(matched)
-        for (let row = 0; row < 16; row++) result[row] |= bitmap[row]
+        for (let row = 0; row < stride; row++) result[row] |= bitmap[row]
       }
 
-      const offset = i * 32
-      for (let row = 0; row < 16; row++) view.setUint16(offset + row * 2, result[row], false)
+      view.set(result, i * stride)
     }
 
     return buffer
   })
 
   // Calculate layout based on container width
-  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_BORDER) / DISPLAY_CELL)))
+  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_BORDER) / displayCellWidth)))
   let rows = $derived(Math.ceil(affectedIndices.length / cols))
 
-  let canvasWidth = $derived(cols * INTERNAL_CELL + INTERNAL_BORDER)
-  let canvasHeight = $derived(Math.max(INTERNAL_CELL + INTERNAL_BORDER, rows * INTERNAL_CELL + INTERNAL_BORDER))
-  let canvasDisplayWidth = $derived(cols * DISPLAY_CELL + INTERNAL_BORDER)
-  let canvasDisplayHeight = $derived(Math.max(DISPLAY_CELL + INTERNAL_BORDER, rows * DISPLAY_CELL + INTERNAL_BORDER))
+  let canvasWidth = $derived(cols * internalCellWidth + INTERNAL_BORDER)
+  let canvasHeight = $derived(
+    Math.max(internalCellHeight + INTERNAL_BORDER, rows * internalCellHeight + INTERNAL_BORDER),
+  )
+  let canvasDisplayWidth = $derived(cols * displayCellWidth + INTERNAL_BORDER)
+  let canvasDisplayHeight = $derived(
+    Math.max(displayCellHeight + INTERNAL_BORDER, rows * displayCellHeight + INTERNAL_BORDER),
+  )
 
   function draw() {
     if (!canvas || !previewData) return
@@ -150,32 +156,30 @@
 
     // Draw vertical lines
     for (let c = 0; c <= cols; c++) {
-      ctx.fillRect(c * INTERNAL_CELL, 0, INTERNAL_BORDER, canvas.height)
+      ctx.fillRect(c * internalCellWidth, 0, INTERNAL_BORDER, canvas.height)
     }
     // Draw horizontal lines
     for (let r = 0; r <= rows; r++) {
-      ctx.fillRect(0, r * INTERNAL_CELL, canvas.width, INTERNAL_BORDER)
+      ctx.fillRect(0, r * internalCellHeight, canvas.width, INTERNAL_BORDER)
     }
 
     // Draw glyphs
-    const view = new DataView(previewData)
+    const view = new Uint8Array(previewData)
     ctx.fillStyle = '#000'
 
     for (let i = 0; i < affectedIndices.length; i++) {
-      const offset = i * 32
-      if (offset + 32 > previewData.byteLength) continue
+      const offset = i * stride
+      if (offset + stride > previewData.byteLength) continue
 
       const col = i % cols
       const row = Math.floor(i / cols)
 
-      const cellX = col * INTERNAL_CELL + INTERNAL_BORDER
-      const cellY = row * INTERNAL_CELL + INTERNAL_BORDER
+      const cellX = col * internalCellWidth + INTERNAL_BORDER
+      const cellY = row * internalCellHeight + INTERNAL_BORDER
 
-      for (let r = 0; r < 16; r++) {
-        const rowVal = view.getUint16(offset + r * 2, false)
-        if (rowVal === 0) continue
-        for (let c = 0; c < 16; c++) {
-          if ((rowVal >> (15 - c)) & 1) {
+      for (let r = 0; r < height; r++) {
+        for (let c = 0; c < width; c++) {
+          if (packedPixel(view, width, r, c, offset)) {
             ctx.fillRect(cellX + c, cellY + r, 1, 1)
           }
         }

@@ -6,7 +6,7 @@ import type {ComponentType, FontProject, GroupsStructure, JamoGroup} from '#lib/
 
 import {bitmapToHex, hexToBitmap} from '#lib/bitmap.js'
 import {getConditionKey, sortComponents, sortGroups} from '#lib/component-utils.js'
-import {normalizeBaseline} from '#lib/font-metrics.js'
+import {getFontSettings} from '#lib/font-settings.js'
 import {COMPONENT_INDICES, COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES} from '#lib/hangul.js'
 
 function sameItems(first: number[], second: number[]) {
@@ -166,7 +166,10 @@ export function serializeProject(proj: FontProject): any {
 
   return {
     name: proj.name,
-    baseline: normalizeBaseline(proj.baseline),
+    baseline: getFontSettings(proj).baseline,
+    width: getFontSettings(proj).width,
+    height: getFontSettings(proj).height,
+    fontInfo: proj.fontInfo ? {...proj.fontInfo} : undefined,
     groupModelVersion: proj.groupModelVersion,
     groups: Object.fromEntries(
       COMPONENT_TYPES.map((type) => [
@@ -200,11 +203,14 @@ export function serializeProject(proj: FontProject): any {
  * hex 문자열 bitmap을 2D 배열로 복원하고, 레거시 targets 형식을 conditions로 마이그레이션합니다.
  */
 export function deserializeProject(data: any): FontProject {
-  data.baseline = normalizeBaseline(data.baseline)
+  const settings = getFontSettings(data)
+  data.width = settings.width
+  data.height = settings.height
+  data.baseline = settings.baseline
   if (data.components) {
     for (const c of data.components) {
       if (typeof c.bitmap === 'string') {
-        c.bitmap = hexToBitmap(c.bitmap)
+        c.bitmap = hexToBitmap(c.bitmap, settings.width, settings.height)
       }
 
       // Legacy 'targets' migration to 'conditions' & 'groups'

@@ -1,64 +1,47 @@
-/**
- * 비트맵 관련 공통 유틸리티 함수들
- */
+/** Rows are byte-aligned, most significant bit first (also used by BDF). */
+export function bytesPerRow(width: number) {
+  return Math.ceil(width / 8)
+}
 
-/**
- * 16x16 2차원 비트맵 배열을 16-element Uint16Array로 플래튼합니다.
- * 각 행의 16비트를 하나의 uint16 값으로 팩킹합니다.
- */
-function packBitmapRow(row: number[] | undefined) {
-  let value = 0
-  for (let column = 0; column < 16; column++) {
-    if (row?.[column]) value |= 1 << (15 - column)
+export function flattenBitmap(bitmap: number[][], width = bitmap[0]?.length ?? 16, height = bitmap.length): Uint8Array {
+  const stride = bytesPerRow(width)
+  const packed = new Uint8Array(stride * height)
+  for (let r = 0; r < height; r++) {
+    for (let c = 0; c < width; c++) {
+      if (bitmap[r]?.[c]) packed[r * stride + (c >> 3)] |= 0x80 >> (c & 7)
+    }
   }
-  return value
+  return packed
 }
 
-export function flattenBitmap(bitmap: number[][]): Uint16Array {
-  const arr = new Uint16Array(16)
-  for (let row = 0; row < 16; row++) arr[row] = packBitmapRow(bitmap[row])
-  return arr
+export function packedPixel(data: Uint8Array, width: number, row: number, column: number, offset = 0) {
+  return (data[offset + row * bytesPerRow(width) + (column >> 3)] & (0x80 >> (column & 7))) !== 0
 }
 
-/**
- * 16x16 비트맵을 64자의 hex 문자열로 직렬화합니다.
- */
 export function bitmapToHex(bitmap: number[][]): string {
-  let hex = ''
-  for (let row = 0; row < 16; row++) hex += packBitmapRow(bitmap[row]).toString(16).padStart(4, '0')
-  return hex
+  return Array.from(flattenBitmap(bitmap), (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 export function cloneBitmap(bitmap: number[][]) {
   return bitmap.map((row) => [...row])
 }
 
-/**
- * 64자의 hex 문자열을 16x16 비트맵 2차원 배열로 역직렬화합니다.
- */
-export function hexToBitmap(hex: string): number[][] {
-  const bitmap: number[][] = []
-  for (let r = 0; r < 16; r++) {
-    const val = parseInt(hex.substring(r * 4, r * 4 + 4), 16)
-    const row: number[] = []
-    for (let col = 0; col < 16; col++) {
-      row.push((val >> (15 - col)) & 1)
-    }
-    bitmap.push(row)
-  }
-  return bitmap
+export function hexToBitmap(hex: string, width = 16, height = 16): number[][] {
+  const expected = bytesPerRow(width) * height * 2
+  if (hex.length !== expected || !/^[0-9a-f]+$/i.test(hex))
+    throw new Error('픽셀 크기와 비트맵 데이터가 일치하지 않습니다.')
+  const bytes = Uint8Array.from(hex.match(/../g)!, (byte) => parseInt(byte, 16))
+  return Array.from({length: height}, (_, r) => Array.from({length: width}, (_, c) => +packedPixel(bytes, width, r, c)))
 }
 
-/**
- * 빈 16x16 비트맵을 생성합니다.
- */
-export function createEmptyBitmap(): number[][] {
-  return Array.from({length: 16}, () => Array(16).fill(0))
+export function createEmptyBitmap(width = 16, height = 16): number[][] {
+  return Array.from({length: height}, () => Array(width).fill(0))
 }
 
-/**
- * Canvas에서 CSS 변수로부터 border 색상을 읽어옵니다.
- */
+export function resizeBitmap(bitmap: number[][], width: number, height: number): number[][] {
+  return Array.from({length: height}, (_, r) => Array.from({length: width}, (_, c) => (bitmap[r]?.[c] ? 1 : 0)))
+}
+
 export function getBorderColor(canvas: HTMLCanvasElement): string {
   const style = getComputedStyle(canvas)
   return style.getPropertyValue('--border-color').trim() || '#e5e5e5'

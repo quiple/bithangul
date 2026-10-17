@@ -23,16 +23,20 @@
 
   // untrack으로 감싸서 초기값만 읽고 반응성 추적 방지 (Svelte 5 lint 해결)
   let localComponent = $state<PixelComponent>(untrack(() => structuredClone($state.snapshot(component))))
-  let baseline = $state(untrack(() => normalizeBaseline(projectState.project.baseline)))
+  let baseline = $state(untrack(() => normalizeBaseline(projectState.project.baseline, projectState.project.height)))
 
   $effect(() => {
     // component prop이 바뀌면 로컬 상태 동기화
     const snap = $state.snapshot(component)
     if (snap.id !== localComponent.id) {
       localComponent = structuredClone(snap)
-      baseline = normalizeBaseline(projectState.project.baseline)
+      baseline = normalizeBaseline(projectState.project.baseline, projectState.project.height)
     }
   })
+
+  export function getDraft() {
+    return {component: $state.snapshot(localComponent), baseline}
+  }
 
   function handleSave() {
     onSave($state.snapshot(localComponent), baseline)

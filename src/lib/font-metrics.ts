@@ -2,8 +2,8 @@
 export const FONT_ASCENT = 14
 export const FONT_DESCENT = 2
 
-export function normalizeBaseline(value: unknown): number {
+export function normalizeBaseline(value: unknown, height = 16): number {
   return typeof value === 'number' && Number.isFinite(value)
-    ? Math.max(0, Math.min(16, Math.round(value)))
-    : FONT_ASCENT
+    ? Math.max(0, Math.min(height, Math.round(value)))
+    : Math.min(FONT_ASCENT, height)
 }

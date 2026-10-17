@@ -114,8 +114,8 @@
   <div class="relative mx-auto w-[calc(100%-11rem)] max-w-100">
     <div
       bind:this={containerEl}
-      class="relative grid aspect-square w-full cursor-crosshair touch-none gap-px border bg-border select-none"
-      style="grid-template-columns: repeat({COLS}, 1fr); grid-template-rows: repeat({ROWS}, 1fr);"
+      class="relative grid w-full cursor-crosshair touch-none gap-px border bg-border select-none"
+      style="aspect-ratio: {COLS} / {ROWS}; grid-template-columns: repeat({COLS}, 1fr); grid-template-rows: repeat({ROWS}, 1fr);"
       onpointerdown={handlePointerDown}
       onpointermove={handlePointerMove}
       onpointerup={handlePointerUp}

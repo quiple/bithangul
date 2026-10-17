@@ -1,7 +1,8 @@
 import type {ComponentType, FontProject, JamoGroup} from '../types'
 
-import {flattenBitmap} from '../bitmap'
+import {bytesPerRow, flattenBitmap} from '../bitmap'
 import {getActiveVariationId} from '../component-utils'
+import {getFontSettings} from '../font-settings'
 import {
   CHOSUNG_COUNT,
   COMPONENT_TYPES,
@@ -13,7 +14,7 @@ import {
 } from '../hangul'
 
 interface GenerationResult {
-  // 11,172 chars * 32 bytes (16 rows * 2 bytes)
+  // Byte-aligned packed rows for every Hangul syllable.
   buffer: ArrayBuffer
 }
 
@@ -138,19 +139,20 @@ function createComponentTable(project: FontProject) {
   return table
 }
 
-function applyComponent(result: Uint16Array, bitmap: Uint16Array | undefined) {
+function applyComponent(result: Uint8Array, bitmap: Uint8Array | undefined) {
   if (!bitmap) return
-  for (let row = 0; row < 16; row++) result[row] |= bitmap[row]
+  for (let row = 0; row < result.length; row++) result[row] |= bitmap[row]
 }
 
-function generateFont(project: FontProject): GenerationResult {
-  const BYTES_PER_CHAR = 32
+export function generateFont(project: FontProject): GenerationResult {
+  const {width, height} = getFontSettings(project)
+  const BYTES_PER_CHAR = bytesPerRow(width) * height
   const buffer = new ArrayBuffer(HANGUL_SYLLABLE_COUNT * BYTES_PER_CHAR)
-  const view = new DataView(buffer)
-  const bitmaps = project.components.map((component) => flattenBitmap(component.bitmap))
+  const view = new Uint8Array(buffer)
+  const bitmaps = project.components.map((component) => flattenBitmap(component.bitmap, width, height))
   const componentTable = createComponentTable(project)
   const bestVariation = createBestVariationTables(project)
-  const result = new Uint16Array(16)
+  const result = new Uint8Array(BYTES_PER_CHAR)
 
   for (let index = 0; index < HANGUL_SYLLABLE_COUNT; index++) {
     const cho = (index / SYLLABLES_PER_CHOSUNG) | 0
@@ -170,7 +172,7 @@ function generateFont(project: FontProject): GenerationResult {
     }
 
     const offset = index * BYTES_PER_CHAR
-    for (let row = 0; row < 16; row++) view.setUint16(offset + row * 2, result[row], false)
+    view.set(result, offset)
   }
 
   return {buffer}

@@ -1,99 +1,15 @@
-/**
- * BDF / HEX 내보내기를 메인 스레드 블로킹 없이 처리하는 Web Worker.
- * 11,172자 × 16행의 대용량 문자열 생성을 백그라운드에서 수행합니다.
- */
+import type {FontExportType} from '../font-export'
+import type {FontSettings} from '../font-settings'
 
-import {normalizeBaseline} from '../font-metrics'
-import {HANGUL_START_CODE_POINT, HANGUL_SYLLABLE_COUNT} from '../hangul'
+import {exportBDF, exportHEX, exportGlyphs} from '../font-export'
 
-interface ExportMessage {
-  type: 'bdf' | 'hex'
-  buffer: ArrayBuffer
-  fontName?: string
-  baseline?: number
-}
-
-self.onmessage = (e: MessageEvent<ExportMessage>) => {
-  const {type, buffer, fontName, baseline} = e.data
-
-  let result: string
-  if (type === 'bdf') {
-    result = exportBDF(buffer, fontName || 'bithangul', normalizeBaseline(baseline))
-  } else {
-    result = exportHEX(buffer)
+self.onmessage = (e: MessageEvent<{type: FontExportType; buffer: ArrayBuffer; settings: FontSettings}>) => {
+  const {type, buffer, settings} = e.data
+  try {
+    const exporters = {bdf: exportBDF, hex: exportHEX, glyphs: exportGlyphs}
+    const result = exporters[type](buffer, settings)
+    ;(self as unknown as Worker).postMessage({type, result})
+  } catch (error) {
+    ;(self as unknown as Worker).postMessage({type, error: error instanceof Error ? error.message : String(error)})
   }
-
-  ;(self as unknown as Worker).postMessage({type, result})
-}
-
-// 공통 Hex 변환 유틸리티 (모듈 최상위에 한 번만 정의)
-const HEX = '0123456789ABCDEF'
-function toHex4(val: number): string {
-  return HEX[(val >> 12) & 0xf] + HEX[(val >> 8) & 0xf] + HEX[(val >> 4) & 0xf] + HEX[val & 0xf]
-}
-
-function exportBDF(buffer: ArrayBuffer, fontName: string, ascent: number): string {
-  const descent = 16 - ascent
-  const view = new DataView(buffer)
-  const safeName = fontName.replace(/[^a-zA-Z0-9가-힣_-]/g, '_').toLowerCase()
-
-  const lineCount = 12 + HANGUL_SYLLABLE_COUNT * 23
-  const lines: string[] = Array.from({length: lineCount})
-  let lineIdx = 0
-
-  // ── 파일 헤더 ──
-  lines[lineIdx++] = 'STARTFONT 2.1'
-  lines[lineIdx++] = `FONT -misc-${safeName}-medium-r-normal--16-160-75-75-c-160-iso10646-1`
-  lines[lineIdx++] = 'SIZE 16 75 75'
-  lines[lineIdx++] = `FONTBOUNDINGBOX 16 16 0 ${-descent}`
-  lines[lineIdx++] = 'STARTPROPERTIES 4'
-  lines[lineIdx++] = `FONT_ASCENT ${ascent}`
-  lines[lineIdx++] = `FONT_DESCENT ${descent}`
-  lines[lineIdx++] = 'DEFAULT_CHAR 0'
-  lines[lineIdx++] = 'CHARSET_REGISTRY "ISO10646"'
-  lines[lineIdx++] = 'ENDPROPERTIES'
-  lines[lineIdx++] = `CHARS ${HANGUL_SYLLABLE_COUNT}`
-
-  for (let i = 0; i < HANGUL_SYLLABLE_COUNT; i++) {
-    const codePoint = HANGUL_START_CODE_POINT + i
-    const offset = i * 32
-
-    lines[lineIdx++] = `STARTCHAR U+${toHex4(codePoint)}`
-    lines[lineIdx++] = `ENCODING ${codePoint}`
-    lines[lineIdx++] = 'SWIDTH 1000 0'
-    lines[lineIdx++] = 'DWIDTH 16 0'
-    lines[lineIdx++] = `BBX 16 16 0 ${-descent}`
-    lines[lineIdx++] = 'BITMAP'
-
-    for (let r = 0; r < 16; r++) {
-      const rowVal = view.getUint16(offset + r * 2, false)
-      lines[lineIdx++] = toHex4(rowVal)
-    }
-
-    lines[lineIdx++] = 'ENDCHAR'
-  }
-
-  lines[lineIdx++] = 'ENDFONT'
-  return lines.join('\n')
-}
-
-function exportHEX(buffer: ArrayBuffer): string {
-  const view = new DataView(buffer)
-
-  const lines: string[] = Array.from({length: HANGUL_SYLLABLE_COUNT})
-
-  for (let i = 0; i < HANGUL_SYLLABLE_COUNT; i++) {
-    const codePoint = HANGUL_START_CODE_POINT + i
-    const offset = i * 32
-
-    let hexBitmap = ''
-    for (let r = 0; r < 16; r++) {
-      const rowVal = view.getUint16(offset + r * 2, false)
-      hexBitmap += toHex4(rowVal)
-    }
-
-    lines[i] = `${toHex4(codePoint)}:${hexBitmap}`
-  }
-
-  return lines.join('\n')
 }

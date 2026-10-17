@@ -1,3 +1,5 @@
+import type {FontSettings} from './font-settings'
+
 export type ComponentType = 'chosung' | 'jungsung' | 'jongsung'
 
 export interface JamoGroup {
@@ -16,7 +18,7 @@ export interface GroupsStructure {
 
 export interface PixelComponent {
   id: string
-  bitmap: number[][] // 16x16 binary array (0: off, 1: on)
+  bitmap: number[][] // binary array (0: off, 1: on)
   type: ComponentType
   typeIndex: number
   conditions: Record<string, boolean>
@@ -25,6 +27,9 @@ export interface PixelComponent {
 export interface FontProject {
   name: string
   baseline?: number
+  width?: number
+  height?: number
+  fontInfo?: Partial<Omit<FontSettings, 'name' | 'width' | 'height' | 'baseline'>>
   groupModelVersion?: 2
   groups: GroupsStructure
   components: PixelComponent[]

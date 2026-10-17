@@ -250,7 +250,7 @@ class ProjectState {
           } else {
             newComponents.push({
               id: crypto.randomUUID(),
-              bitmap: createEmptyBitmap(),
+              bitmap: createEmptyBitmap(this.project.width, this.project.height),
               type,
               typeIndex,
               conditions,
