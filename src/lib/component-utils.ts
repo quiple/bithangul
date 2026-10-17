@@ -1,6 +1,6 @@
-import type {ComponentType, GroupsStructure, JamoGroup, PixelComponent} from '$lib/types'
+import type {ComponentType, GroupsStructure, JamoGroup, PixelComponent} from '#lib/types.js'
 
-import {COMPONENT_TYPES, JAMO_INDICES} from '$lib/hangul'
+import {COMPONENT_TYPES, JAMO_INDICES} from '#lib/hangul.js'
 
 /** 컴포넌트 종류별 바리에이션 조건 정렬 우선순위입니다. */
 export const VARIATION_CONDITION_ORDER: Record<ComponentType, readonly ComponentType[]> = {

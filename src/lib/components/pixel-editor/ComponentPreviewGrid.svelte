@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type {PixelComponent, ComponentType} from '$lib/types'
+  import type {PixelComponent, ComponentType} from '#lib/types.js'
 
-  import {getBorderColor, flattenBitmap} from '$lib/bitmap'
-  import {checkConditionMatch, createVariationGroupLookup, getConditionSpecificity} from '$lib/conditions'
-  import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT, SYLLABLES_PER_CHOSUNG} from '$lib/hangul'
-  import {projectState} from '$lib/state.svelte'
+  import {getBorderColor, flattenBitmap} from '#lib/bitmap.js'
+  import {checkConditionMatch, createVariationGroupLookup, getConditionSpecificity} from '#lib/conditions.js'
+  import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT, SYLLABLES_PER_CHOSUNG} from '#lib/hangul.js'
+  import {projectState} from '#lib/state.svelte.js'
 
   interface Props {
     component: PixelComponent

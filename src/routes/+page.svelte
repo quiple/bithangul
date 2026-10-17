@@ -1,25 +1,26 @@
 <script lang="ts">
-  import type {FontProject, ComponentType, PixelComponent} from '$lib/types'
-
-  import ComponentEditor from '$lib/components/pixel-editor/ComponentEditor.svelte'
-  import ComponentList from '$lib/components/pixel-editor/ComponentList.svelte'
-  import GroupManager from '$lib/components/pixel-editor/GroupManager.svelte'
-  import SplitComponentDialog from '$lib/components/pixel-editor/SplitComponentDialog.svelte'
-  import Preview from '$lib/components/Preview.svelte'
-  import {Button, buttonVariants} from '$lib/components/ui/button'
-  import * as ButtonGroup from '$lib/components/ui/button-group/index.js'
-  import * as Dialog from '$lib/components/ui/dialog/index.js'
-  import * as Resizable from '$lib/components/ui/resizable/index.js'
-  import {Spinner} from '$lib/components/ui/spinner/index.js'
-  import * as Tooltip from '$lib/components/ui/tooltip/index.js'
-  import {downloadText} from '$lib/export'
-  import {COMPONENT_TYPE_LABELS} from '$lib/hangul'
-  import {serializeProject, deserializeProject} from '$lib/serialization'
-  import {projectState} from '$lib/state.svelte'
-  import ExportWorker from '$lib/workers/export.worker?worker'
-  import GeneratorWorker from '$lib/workers/generator.worker?worker'
   import {Download, Upload, FileCode, BookOpen} from '@lucide/svelte'
   import {onMount} from 'svelte'
+
+  import type {FontProject, ComponentType, PixelComponent} from '#lib/types.js'
+
+  import ComponentEditor from '#lib/components/pixel-editor/ComponentEditor.svelte'
+  import ComponentList from '#lib/components/pixel-editor/ComponentList.svelte'
+  import GroupManager from '#lib/components/pixel-editor/GroupManager.svelte'
+  import SplitComponentDialog from '#lib/components/pixel-editor/SplitComponentDialog.svelte'
+  import Preview from '#lib/components/Preview.svelte'
+  import * as ButtonGroup from '#lib/components/ui/button-group/index.js'
+  import {Button, buttonVariants} from '#lib/components/ui/button/index.js'
+  import * as Dialog from '#lib/components/ui/dialog/index.js'
+  import * as Resizable from '#lib/components/ui/resizable/index.js'
+  import {Spinner} from '#lib/components/ui/spinner/index.js'
+  import * as Tooltip from '#lib/components/ui/tooltip/index.js'
+  import {downloadText} from '#lib/export.js'
+  import {COMPONENT_TYPE_LABELS} from '#lib/hangul.js'
+  import {serializeProject, deserializeProject} from '#lib/serialization.js'
+  import {projectState} from '#lib/state.svelte.js'
+  import ExportWorker from '#lib/workers/export.worker?worker'
+  import GeneratorWorker from '#lib/workers/generator.worker?worker'
 
   let generatorWorker: Worker
   let exportWorker: Worker
@@ -53,7 +54,7 @@
   const EXAMPLES: {name: string; loader: () => Promise<FontProject>}[] = [
     {
       name: '둥근모꼴 (한글도깨비 8x4x4벌식)',
-      loader: () => import('$lib/assets/Dunggeunmo.json').then((m) => m.default as unknown as FontProject),
+      loader: () => import('#lib/assets/Dunggeunmo.json').then((m) => m.default as unknown as FontProject),
     },
   ]
 

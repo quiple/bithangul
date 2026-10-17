@@ -1,4 +1,4 @@
-import type {ComponentType} from '$lib/types'
+import type {ComponentType} from '#lib/types.js'
 
 export const CHOSUNG_COUNT = 19
 export const JUNGSUNG_COUNT = 21

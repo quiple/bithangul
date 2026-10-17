@@ -2,11 +2,11 @@
  * 프로젝트 직렬화/역직렬화 유틸리티
  * bitmap 데이터를 hex 문자열로 변환하여 JSON 크기를 줄입니다.
  */
-import type {ComponentType, FontProject, GroupsStructure, JamoGroup} from '$lib/types'
+import type {ComponentType, FontProject, GroupsStructure, JamoGroup} from '#lib/types.js'
 
-import {bitmapToHex, hexToBitmap} from '$lib/bitmap'
-import {getConditionKey, sortComponents, sortGroups} from '$lib/component-utils'
-import {COMPONENT_INDICES, COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES} from '$lib/hangul'
+import {bitmapToHex, hexToBitmap} from '#lib/bitmap.js'
+import {getConditionKey, sortComponents, sortGroups} from '#lib/component-utils.js'
+import {COMPONENT_INDICES, COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES} from '#lib/hangul.js'
 
 function sameItems(first: number[], second: number[]) {
   if (first.length !== second.length) return false

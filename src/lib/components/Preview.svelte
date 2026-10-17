@@ -1,12 +1,13 @@
 <script lang="ts">
+  import {onDestroy} from 'svelte'
+
   import {
     HANGUL_SYLLABLE_COUNT,
     JUNGSUNG_COUNT,
     JONGSUNG_COUNT,
     SYLLABLES_PER_CHOSUNG,
     composeHangul,
-  } from '$lib/hangul'
-  import {onDestroy} from 'svelte'
+  } from '#lib/hangul.js'
 
   let {
     generatedData = null,

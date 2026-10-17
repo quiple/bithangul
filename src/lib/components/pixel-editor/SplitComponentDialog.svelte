@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type {ComponentType, PixelComponent} from '$lib/types'
+  import type {ComponentType, PixelComponent} from '#lib/types.js'
 
-  import {Button} from '$lib/components/ui/button'
-  import * as Dialog from '$lib/components/ui/dialog/index.js'
-  import {Input} from '$lib/components/ui/input/index.js'
-  import {Toggle} from '$lib/components/ui/toggle/index.js'
-  import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES, getJamoLabel} from '$lib/hangul'
-  import {projectState} from '$lib/state.svelte'
-  import {getVariationGroupName} from '$lib/variation-utils'
+  import {Button} from '#lib/components/ui/button/index.js'
+  import * as Dialog from '#lib/components/ui/dialog/index.js'
+  import {Input} from '#lib/components/ui/input/index.js'
+  import {Toggle} from '#lib/components/ui/toggle/index.js'
+  import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_INDICES, getJamoLabel} from '#lib/hangul.js'
+  import {projectState} from '#lib/state.svelte.js'
+  import {getVariationGroupName} from '#lib/variation-utils.js'
 
   interface Props {
     open: boolean

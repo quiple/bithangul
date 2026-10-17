@@ -1,12 +1,13 @@
 <script lang="ts">
-  import type {ComponentType, JamoGroup} from '$lib/types'
-
-  import {Button} from '$lib/components/ui/button'
-  import * as Dialog from '$lib/components/ui/dialog/index.js'
-  import {Input} from '$lib/components/ui/input/index.js'
-  import {Toggle} from '$lib/components/ui/toggle/index.js'
-  import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, JAMO_INDICES, getJamoLabel} from '$lib/hangul'
   import {Plus, Trash} from '@lucide/svelte'
+
+  import type {ComponentType, JamoGroup} from '#lib/types.js'
+
+  import {Button} from '#lib/components/ui/button/index.js'
+  import * as Dialog from '#lib/components/ui/dialog/index.js'
+  import {Input} from '#lib/components/ui/input/index.js'
+  import {Toggle} from '#lib/components/ui/toggle/index.js'
+  import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, JAMO_INDICES, getJamoLabel} from '#lib/hangul.js'
 
   interface Props {
     open: boolean

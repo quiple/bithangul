@@ -1,7 +1,7 @@
 <script lang="ts">
   import '#app.css'
-  import appleTouchIcon from '$lib/assets/apple-touch-icon.png'
-  import {projectState} from '$lib/state.svelte'
+  import appleTouchIcon from '#lib/assets/apple-touch-icon.png'
+  import {projectState} from '#lib/state.svelte.js'
 
   let {children} = $props()
 

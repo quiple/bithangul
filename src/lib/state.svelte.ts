@@ -1,9 +1,9 @@
-import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '$lib/types'
+import type {FontProject, PixelComponent, ComponentType, JamoGroup} from '#lib/types.js'
 
-import {cloneBitmap, createEmptyBitmap} from '$lib/bitmap'
-import {getActiveVariationId, getComponentKey, sortGroups, sortVariationGroups} from '$lib/component-utils'
-import {COMPONENT_INDICES, COMPONENT_TYPES, JAMO_INDICES} from '$lib/hangul'
-import {getVariationGroupName} from '$lib/variation-utils'
+import {cloneBitmap, createEmptyBitmap} from '#lib/bitmap.js'
+import {getActiveVariationId, getComponentKey, sortGroups, sortVariationGroups} from '#lib/component-utils.js'
+import {COMPONENT_INDICES, COMPONENT_TYPES, JAMO_INDICES} from '#lib/hangul.js'
+import {getVariationGroupName} from '#lib/variation-utils.js'
 
 class ProjectState {
   project = $state<FontProject>({

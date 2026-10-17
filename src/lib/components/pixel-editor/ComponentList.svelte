@@ -1,15 +1,16 @@
 <script lang="ts">
-  import type {ComponentType, PixelComponent} from '$lib/types'
-
-  import {getActiveVariationId} from '$lib/component-utils'
-  import Thumbnail from '$lib/components/Thumbnail.svelte'
-  import {Button} from '$lib/components/ui/button'
-  import * as ContextMenu from '$lib/components/ui/context-menu/index.js'
-  import * as Tabs from '$lib/components/ui/tabs'
-  import {COMPONENT_INDICES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, getJamoLabel} from '$lib/hangul'
-  import {projectState} from '$lib/state.svelte'
   import {CopyPlus, Settings, Trash2} from '@lucide/svelte'
   import {onDestroy, onMount, tick} from 'svelte'
+
+  import type {ComponentType, PixelComponent} from '#lib/types.js'
+
+  import {getActiveVariationId} from '#lib/component-utils.js'
+  import Thumbnail from '#lib/components/Thumbnail.svelte'
+  import {Button} from '#lib/components/ui/button/index.js'
+  import * as ContextMenu from '#lib/components/ui/context-menu/index.js'
+  import * as Tabs from '#lib/components/ui/tabs/index.js'
+  import {COMPONENT_INDICES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, getJamoLabel} from '#lib/hangul.js'
+  import {projectState} from '#lib/state.svelte.js'
 
   interface Props {
     components: PixelComponent[]

@@ -1,12 +1,13 @@
 <script lang="ts">
-  import type {PixelComponent} from '$lib/types'
-
-  import {Button} from '$lib/components/ui/button'
-  import * as ButtonGroup from '$lib/components/ui/button-group/index.js'
-  import {COMPONENT_TYPE_LABELS, getJamoLabel} from '$lib/hangul'
-  import {projectState} from '$lib/state.svelte'
   import {ChevronLeft} from '@lucide/svelte'
   import {untrack} from 'svelte'
+
+  import type {PixelComponent} from '#lib/types.js'
+
+  import * as ButtonGroup from '#lib/components/ui/button-group/index.js'
+  import {Button} from '#lib/components/ui/button/index.js'
+  import {COMPONENT_TYPE_LABELS, getJamoLabel} from '#lib/hangul.js'
+  import {projectState} from '#lib/state.svelte.js'
 
   import ComponentPreviewGrid from './ComponentPreviewGrid.svelte'
   import GridCanvas from './GridCanvas.svelte'

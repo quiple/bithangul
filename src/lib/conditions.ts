@@ -1,9 +1,9 @@
 /**
  * 조건 매칭 로직: 주어진 초/중/종성 인덱스가 컴포넌트의 conditions에 부합하는지 확인합니다.
  */
-import type {ComponentType, GroupsStructure, JamoGroup} from '$lib/types'
+import type {ComponentType, GroupsStructure, JamoGroup} from '#lib/types.js'
 
-import {COMPONENT_TYPES, HANGUL_SYLLABLE_COUNT, TYPE_COUNTS} from '$lib/hangul'
+import {COMPONENT_TYPES, HANGUL_SYLLABLE_COUNT, TYPE_COUNTS} from '#lib/hangul.js'
 
 export type VariationGroupLookup = ReadonlyMap<string, {type: ComponentType; group: JamoGroup}>
 

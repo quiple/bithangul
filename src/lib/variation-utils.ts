@@ -1,6 +1,6 @@
-import type {ComponentType, JamoGroup} from '$lib/types'
+import type {ComponentType, JamoGroup} from '#lib/types.js'
 
-import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, getJamoLabel} from '$lib/hangul'
+import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, getJamoLabel} from '#lib/hangul.js'
 
 export function getVariationGroupName(type: ComponentType, conditions: JamoGroup['conditions']) {
   const parts: string[] = []
