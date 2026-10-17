@@ -1,0 +1,8 @@
+pre-commit:
+  jobs:
+    - name: lint
+      glob: '*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}'
+      run: nub exec oxlint {staged_files}
+    - name: format
+      run: nub exec oxfmt --write {staged_files}
+      stage_fixed: true
