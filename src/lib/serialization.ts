@@ -15,15 +15,15 @@ function sameItems(first: number[], second: number[]) {
 }
 
 function mergeVariationNames(first: string, second: string) {
-  const firstParts = first.split(' · ')
-  const secondParts = second.split(' · ')
+  const firstParts = first.split(', ')
+  const secondParts = second.split(', ')
   const commonParts = firstParts.filter((part) => secondParts.includes(part))
   const uniqueParts = [
     ...firstParts.filter((part) => !commonParts.includes(part)),
     ...secondParts.filter((part) => !commonParts.includes(part)),
   ]
   if (uniqueParts.length === 0) return first
-  return commonParts.length > 0 ? `${uniqueParts.join('·')} · ${commonParts.join(' · ')}` : `${first} / ${second}`
+  return commonParts.length > 0 ? [...uniqueParts, ...commonParts].join(', ') : `${first} / ${second}`
 }
 
 function mergeDuplicateVariations(data: any, groups: GroupsStructure) {
@@ -143,7 +143,7 @@ function migrateLegacyGroupModel(data: any) {
     const groupId = `variation_${targetType}_${groups[targetType].length + 1}`
     groups[targetType].push({
       id: groupId,
-      name: activeLegacyGroups.map((group) => group.name).join(' · ') || `기본 ${COMPONENT_TYPE_LABELS[targetType]}`,
+      name: activeLegacyGroups.map((group) => group.name).join(', ') || `기본 ${COMPONENT_TYPE_LABELS[targetType]}`,
       conditions,
     })
     groupIdsByCondition.get(targetType)!.set(conditionKey, groupId)
@@ -237,6 +237,15 @@ export function deserializeProject(data: any): FontProject {
     }
   }
   migrateLegacyGroupModel(data)
+  for (const type of COMPONENT_TYPES) {
+    for (const group of data.groups[type]) {
+      group.name =
+        group.name
+          .split(/\s*[·,]\s*/)
+          .filter((part: string) => part && part !== '받침 없음')
+          .join(', ') || `기본 ${COMPONENT_TYPE_LABELS[type]}`
+    }
+  }
   mergeDuplicateVariations(data, data.groups)
   data.groups = sortGroups(data.groups)
   data.components = sortComponents(data.components || [], data.groups)

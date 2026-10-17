@@ -209,7 +209,7 @@
         variant="outline"
         class="h-14 w-full min-w-0 justify-start gap-2 overflow-hidden px-2 text-left"
         onclick={() => onSelect(component.id)}
-        title={`${COMPONENT_TYPE_LABELS[component.type]} ${jamo} · ${variationName}`}
+        title={`${COMPONENT_TYPE_LABELS[component.type]} ${jamo}, ${variationName}`}
       >
         <span class="flex size-10 shrink-0 items-center justify-center overflow-hidden bg-background">
           <Thumbnail bitmap={component.bitmap} size={40} class="transition group-hover:brightness-95" />
