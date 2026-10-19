@@ -5,8 +5,11 @@
   import type {FontProject} from '#lib/types.js'
 
   import {Button} from '#lib/components/ui/button/index.js'
+  import {Checkbox} from '#lib/components/ui/checkbox/index.js'
   import * as Dialog from '#lib/components/ui/dialog/index.js'
+  import * as Field from '#lib/components/ui/field/index.js'
   import {Input} from '#lib/components/ui/input/index.js'
+  import {Textarea} from '#lib/components/ui/textarea/index.js'
   import {getFontSettings, countCroppedPixels, MAX_GRID_SIZE} from '#lib/font-settings.js'
 
   let {
@@ -59,203 +62,215 @@
       <Dialog.Description>폰트 정보, 픽셀 크기와 내보내기 메트릭을 설정합니다.</Dialog.Description>
     </Dialog.Header>
     <form class="flex min-h-0 flex-1 flex-col gap-4" onsubmit={submit}>
-      <div class="min-h-0 space-y-6 overflow-y-auto px-1 pb-1">
-        <fieldset class="space-y-3">
-          <legend class="mb-3 font-semibold">폰트 정보</legend>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div class="space-y-1.5">
-              <label for="font-name" class="text-sm">폰트명 (패밀리)</label><Input
-                id="font-name"
-                name="name"
-                bind:value={draft.name}
-                required
-                maxlength={200}
-              />
-            </div>
-            <div class="space-y-1.5">
-              <label for="font-style" class="text-sm">스타일명</label><Input
-                id="font-style"
-                name="styleName"
-                bind:value={draft.styleName}
-                required
-                maxlength={100}
-              />
-            </div>
-            <div class="space-y-1.5">
-              <label for="font-major" class="text-sm">버전 · 주 번호</label><Input
-                id="font-major"
-                name="versionMajor"
-                type="number"
-                min={0}
-                max={999}
-                step={1}
-                required
-                bind:value={draft.versionMajor}
-              />
-            </div>
-            <div class="space-y-1.5">
-              <label for="font-minor" class="text-sm">버전 · 부 번호</label><Input
-                id="font-minor"
-                name="versionMinor"
-                type="number"
-                min={0}
-                max={999}
-                step={1}
-                required
-                bind:value={draft.versionMinor}
-              />
-            </div>
-          </div>
-          <div class="space-y-1.5">
-            <label for="font-description" class="text-sm">설명</label><textarea
-              id="font-description"
-              name="description"
-              rows="2"
-              class="w-full rounded-md border bg-transparent px-3 py-2 text-sm"
-              bind:value={draft.description}></textarea>
-          </div>
-        </fieldset>
-        <fieldset class="space-y-3">
-          <legend class="mb-3 font-semibold">디자이너 · 제작사</legend>
-          <div class="grid gap-3 sm:grid-cols-2">
-            {#each identityFields as field}
-              <div class="space-y-1.5">
-                <label for="font-{field.key}" class="text-sm">{field.label}</label><Input
-                  id="font-{field.key}"
-                  name={field.key}
-                  type={field.type}
-                  bind:value={draft[field.key]}
+      <div class="min-h-0 overflow-y-auto px-1 pb-1">
+        <Field.Group>
+          <Field.Set>
+            <Field.Legend>폰트 정보</Field.Legend>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <Field.Field>
+                <Field.Label for="font-name">폰트명 (패밀리)</Field.Label><Input
+                  id="font-name"
+                  name="name"
+                  bind:value={draft.name}
+                  required
+                  maxlength={200}
                 />
-              </div>
-            {/each}
-          </div>
-        </fieldset>
-        <fieldset class="space-y-3">
-          <legend class="mb-3 font-semibold">저작권 · 라이선스</legend>
-          <div class="space-y-1.5">
-            <label for="font-copyright" class="text-sm">저작권 표시</label><textarea
-              id="font-copyright"
-              name="copyright"
-              rows="2"
-              class="w-full rounded-md border bg-transparent px-3 py-2 text-sm"
-              bind:value={draft.copyright}></textarea>
-          </div>
-          <div class="space-y-1.5">
-            <label for="font-license" class="text-sm">라이선스 내용</label><textarea
-              id="font-license"
-              name="license"
-              rows="3"
-              class="w-full rounded-md border bg-transparent px-3 py-2 text-sm"
-              bind:value={draft.license}></textarea>
-          </div>
-          <div class="space-y-1.5">
-            <label for="font-license-url" class="text-sm">라이선스 URL</label><Input
-              id="font-license-url"
-              name="licenseURL"
-              type="url"
-              bind:value={draft.licenseURL}
-            />
-          </div>
-        </fieldset>
-        <fieldset class="space-y-3">
-          <legend class="mb-3 font-semibold">픽셀 그리드 · 메트릭</legend>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div class="space-y-1.5">
-              <label for="font-width" class="text-sm">너비 (px)</label><Input
-                id="font-width"
-                name="width"
-                type="number"
-                min={1}
-                max={MAX_GRID_SIZE}
-                step={1}
-                required
-                bind:value={draft.width}
+              </Field.Field>
+              <Field.Field>
+                <Field.Label for="font-style">스타일명</Field.Label><Input
+                  id="font-style"
+                  name="styleName"
+                  bind:value={draft.styleName}
+                  required
+                  maxlength={100}
+                />
+              </Field.Field>
+              <Field.Field>
+                <Field.Label for="font-major">버전 · 주 번호</Field.Label><Input
+                  id="font-major"
+                  name="versionMajor"
+                  type="number"
+                  min={0}
+                  max={999}
+                  step={1}
+                  required
+                  bind:value={draft.versionMajor}
+                />
+              </Field.Field>
+              <Field.Field>
+                <Field.Label for="font-minor">버전 · 부 번호</Field.Label><Input
+                  id="font-minor"
+                  name="versionMinor"
+                  type="number"
+                  min={0}
+                  max={999}
+                  step={1}
+                  required
+                  bind:value={draft.versionMinor}
+                />
+              </Field.Field>
+            </div>
+            <Field.Field>
+              <Field.Label for="font-description">설명</Field.Label><Textarea
+                id="font-description"
+                name="description"
+                rows={2}
+                bind:value={draft.description}
+              ></Textarea>
+            </Field.Field>
+          </Field.Set>
+          <Field.Set>
+            <Field.Legend>디자이너 · 제작사</Field.Legend>
+            <div class="grid gap-3 sm:grid-cols-2">
+              {#each identityFields as field}
+                <Field.Field>
+                  <Field.Label for="font-{field.key}">{field.label}</Field.Label><Input
+                    id="font-{field.key}"
+                    name={field.key}
+                    type={field.type}
+                    bind:value={draft[field.key]}
+                  />
+                </Field.Field>
+              {/each}
+            </div>
+          </Field.Set>
+          <Field.Set>
+            <Field.Legend>저작권 · 라이선스</Field.Legend>
+            <Field.Field>
+              <Field.Label for="font-copyright">저작권 표시</Field.Label><Textarea
+                id="font-copyright"
+                name="copyright"
+                rows={2}
+                bind:value={draft.copyright}
+              ></Textarea>
+            </Field.Field>
+            <Field.Field>
+              <Field.Label for="font-license">라이선스 내용</Field.Label><Textarea
+                id="font-license"
+                name="license"
+                rows={3}
+                bind:value={draft.license}
+              ></Textarea>
+            </Field.Field>
+            <Field.Field>
+              <Field.Label for="font-license-url">라이선스 URL</Field.Label><Input
+                id="font-license-url"
+                name="licenseURL"
+                type="url"
+                bind:value={draft.licenseURL}
               />
+            </Field.Field>
+          </Field.Set>
+          <Field.Set>
+            <Field.Legend>픽셀 그리드 · 메트릭</Field.Legend>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <Field.Field>
+                <Field.Label for="font-width">너비 (px)</Field.Label><Input
+                  id="font-width"
+                  name="width"
+                  aria-describedby="font-grid-description"
+                  type="number"
+                  min={1}
+                  max={MAX_GRID_SIZE}
+                  step={1}
+                  required
+                  bind:value={draft.width}
+                />
+              </Field.Field>
+              <Field.Field>
+                <Field.Label for="font-height">높이 (px)</Field.Label><Input
+                  id="font-height"
+                  name="height"
+                  aria-describedby="font-grid-description"
+                  type="number"
+                  min={1}
+                  max={MAX_GRID_SIZE}
+                  step={1}
+                  required
+                  bind:value={draft.height}
+                  onchange={() => {
+                    draft.baseline = Math.min(draft.baseline, draft.height || 16)
+                  }}
+                />
+              </Field.Field>
+              <Field.Field>
+                <Field.Label for="font-baseline">베이스라인 (위에서 px)</Field.Label><Input
+                  id="font-baseline"
+                  name="baseline"
+                  type="number"
+                  min={0}
+                  max={draft.height}
+                  step={1}
+                  required
+                  bind:value={draft.baseline}
+                />
+              </Field.Field>
             </div>
-            <div class="space-y-1.5">
-              <label for="font-height" class="text-sm">높이 (px)</label><Input
-                id="font-height"
-                name="height"
-                type="number"
-                min={1}
-                max={MAX_GRID_SIZE}
-                step={1}
-                required
-                bind:value={draft.height}
-                onchange={() => {
-                  draft.baseline = Math.min(draft.baseline, draft.height || 16)
-                }}
-              />
+            <Field.Description id="font-grid-description">
+              1–64px. 기존 그림의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.
+            </Field.Description>
+            {#if croppedPixels > 0}
+              <Field.Field orientation="horizontal" class="rounded-md border border-destructive/40 p-3">
+                <Checkbox
+                  id="font-allow-crop"
+                  name="allowCrop"
+                  bind:checked={allowCrop}
+                  required
+                  aria-describedby="font-crop-description"
+                />
+                <Field.Content>
+                  <Field.Label for="font-allow-crop">픽셀 삭제를 확인했고 이 크기를 적용합니다.</Field.Label>
+                  <Field.Description id="font-crop-description"
+                    >크기를 줄이면 범위 밖의 채워진 픽셀 {croppedPixels.toLocaleString()}개가 삭제됩니다.</Field.Description
+                  >
+                </Field.Content>
+              </Field.Field>
+            {/if}
+          </Field.Set>
+          <Field.Set>
+            <Field.Legend>Glyphs 내보내기</Field.Legend>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <Field.Field>
+                <Field.Label for="font-upm">UPM (Units per Em)</Field.Label><Input
+                  id="font-upm"
+                  name="unitsPerEm"
+                  type="number"
+                  min={16}
+                  max={16384}
+                  step={1}
+                  required
+                  bind:value={draft.unitsPerEm}
+                />
+              </Field.Field>
+              <Field.Field>
+                <Field.Label for="font-pixel-size">1픽셀 크기 (폰트 유닛)</Field.Label><Input
+                  id="font-pixel-size"
+                  name="pixelSize"
+                  type="number"
+                  min={1}
+                  max={1000}
+                  step={1}
+                  required
+                  bind:value={draft.pixelSize}
+                />
+              </Field.Field>
             </div>
-            <div class="space-y-1.5">
-              <label for="font-baseline" class="text-sm">베이스라인 (위에서 px)</label><Input
-                id="font-baseline"
-                name="baseline"
-                type="number"
-                min={0}
-                max={draft.height}
-                step={1}
-                required
-                bind:value={draft.baseline}
-              />
-            </div>
-          </div>
-          <p class="text-xs text-muted-foreground">
-            1–64px. 기존 그림의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.
-          </p>
-          {#if croppedPixels > 0}
-            <div class="space-y-2 rounded-md border border-destructive/40 p-3 text-sm">
-              <p>크기를 줄이면 범위 밖의 채워진 픽셀 {croppedPixels.toLocaleString()}개가 삭제됩니다.</p>
-              <label class="flex items-start gap-2"
-                ><input name="allowCrop" type="checkbox" bind:checked={allowCrop} required class="mt-1" />픽셀 삭제를
-                확인했고 이 크기를 적용합니다.</label
-              >
-            </div>
-          {/if}
-        </fieldset>
-        <fieldset class="space-y-3">
-          <legend class="mb-3 font-semibold">Glyphs 내보내기</legend>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div class="space-y-1.5">
-              <label for="font-upm" class="text-sm">UPM (Units per Em)</label><Input
-                id="font-upm"
-                name="unitsPerEm"
-                type="number"
-                min={16}
-                max={16384}
-                step={1}
-                required
-                bind:value={draft.unitsPerEm}
-              />
-            </div>
-            <div class="space-y-1.5">
-              <label for="font-pixel-size" class="text-sm">1픽셀 크기 (폰트 유닛)</label><Input
-                id="font-pixel-size"
-                name="pixelSize"
-                type="number"
-                min={1}
-                max={1000}
-                step={1}
-                required
-                bind:value={draft.pixelSize}
-              />
-            </div>
-          </div>
-          <p class="text-xs text-muted-foreground">
-            글자 폭 {draft.width * draft.pixelSize} · 어센더 {draft.baseline * draft.pixelSize} · 디센더 {(draft.baseline -
-              draft.height) *
-              draft.pixelSize} 유닛. 공통 pixel 컴포넌트와 픽셀 크기의 그리드로 내보냅니다.
-          </p>
-          <p class="text-xs text-muted-foreground">
-            HEX는 높이를 16·24·32·64px 중 다음 크기로, 너비를 8px 단위로 올림하여 빈 픽셀을 채웁니다. 프로젝트 크기는
-            유지됩니다.
-          </p>
-        </fieldset>
+            <Field.Description>
+              글자 폭 {draft.width * draft.pixelSize} · 어센더 {draft.baseline * draft.pixelSize} · 디센더 {(draft.baseline -
+                draft.height) *
+                draft.pixelSize} 유닛. 공통 pixel 컴포넌트와 픽셀 크기의 그리드로 내보냅니다.
+            </Field.Description>
+            <Field.Description>
+              HEX는 높이를 16·24·32·64px 중 다음 크기로, 너비를 8px 단위로 올림하여 빈 픽셀을 채웁니다. 프로젝트 크기는
+              유지됩니다.
+            </Field.Description>
+          </Field.Set>
+        </Field.Group>
       </div>
-      {#if error}<p role="alert" class="text-sm text-destructive">{error}</p>{/if}
-      {#if hasDraft}<p class="text-xs text-muted-foreground">
+      {#if error}<Field.Error>{error}</Field.Error>{/if}
+      {#if hasDraft}<Field.Description>
           설정을 적용하면 현재 편집 중인 픽셀과 베이스라인도 프로젝트에 반영됩니다.
-        </p>{/if}
+        </Field.Description>{/if}
       <Dialog.Footer>
         <Button type="button" variant="outline" onclick={onClose}>취소</Button>
         <Button type="submit">설정 적용</Button>
