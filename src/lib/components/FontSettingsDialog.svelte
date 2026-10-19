@@ -1,15 +1,24 @@
 <script lang="ts">
+  import {
+    Button,
+    Dialog,
+    DialogHeader,
+    HStack,
+    FormLayout,
+    Grid,
+    VStack,
+    Heading,
+    Text,
+    TextInput,
+    TextArea,
+    NumberInput,
+    CheckboxInput,
+  } from '@astryx-svelte/core'
   import {untrack} from 'svelte'
 
   import type {FontSettings} from '#lib/font-settings.js'
   import type {FontProject} from '#lib/types.js'
 
-  import {Button} from '#lib/components/ui/button/index.js'
-  import {Checkbox} from '#lib/components/ui/checkbox/index.js'
-  import * as Dialog from '#lib/components/ui/dialog/index.js'
-  import * as Field from '#lib/components/ui/field/index.js'
-  import {Input} from '#lib/components/ui/input/index.js'
-  import {Textarea} from '#lib/components/ui/textarea/index.js'
   import {getFontSettings, countCroppedPixels, MAX_GRID_SIZE} from '#lib/font-settings.js'
 
   let {
@@ -55,226 +64,190 @@
   ] as const
 </script>
 
-<Dialog.Root open onOpenChange={(open) => !open && onClose()}>
-  <Dialog.Content class="flex max-h-[90dvh] flex-col overflow-hidden sm:max-w-2xl">
-    <Dialog.Header>
-      <Dialog.Title>폰트 설정</Dialog.Title>
-      <Dialog.Description>폰트 정보, 픽셀 크기와 내보내기 메트릭을 설정합니다.</Dialog.Description>
-    </Dialog.Header>
-    <form class="flex min-h-0 flex-1 flex-col gap-4" onsubmit={submit}>
-      <div class="min-h-0 overflow-y-auto px-1 pb-1">
-        <Field.Group>
-          <Field.Set>
-            <Field.Legend>폰트 정보</Field.Legend>
-            <div class="grid gap-3 sm:grid-cols-2">
-              <Field.Field>
-                <Field.Label for="font-name">폰트명 (패밀리)</Field.Label><Input
-                  id="font-name"
-                  name="name"
-                  bind:value={draft.name}
-                  required
-                  maxlength={200}
-                />
-              </Field.Field>
-              <Field.Field>
-                <Field.Label for="font-style">스타일명</Field.Label><Input
-                  id="font-style"
-                  name="styleName"
-                  bind:value={draft.styleName}
-                  required
-                  maxlength={100}
-                />
-              </Field.Field>
-              <Field.Field>
-                <Field.Label for="font-major">버전 · 주 번호</Field.Label><Input
-                  id="font-major"
-                  name="versionMajor"
-                  type="number"
-                  min={0}
-                  max={999}
-                  step={1}
-                  required
-                  bind:value={draft.versionMajor}
-                />
-              </Field.Field>
-              <Field.Field>
-                <Field.Label for="font-minor">버전 · 부 번호</Field.Label><Input
-                  id="font-minor"
-                  name="versionMinor"
-                  type="number"
-                  min={0}
-                  max={999}
-                  step={1}
-                  required
-                  bind:value={draft.versionMinor}
-                />
-              </Field.Field>
-            </div>
-            <Field.Field>
-              <Field.Label for="font-description">설명</Field.Label><Textarea
-                id="font-description"
-                name="description"
-                rows={2}
-                bind:value={draft.description}
-              ></Textarea>
-            </Field.Field>
-          </Field.Set>
-          <Field.Set>
-            <Field.Legend>디자이너 · 제작사</Field.Legend>
-            <div class="grid gap-3 sm:grid-cols-2">
-              {#each identityFields as field}
-                <Field.Field>
-                  <Field.Label for="font-{field.key}">{field.label}</Field.Label><Input
-                    id="font-{field.key}"
-                    name={field.key}
-                    type={field.type}
-                    bind:value={draft[field.key]}
-                  />
-                </Field.Field>
-              {/each}
-            </div>
-          </Field.Set>
-          <Field.Set>
-            <Field.Legend>저작권 · 라이선스</Field.Legend>
-            <Field.Field>
-              <Field.Label for="font-copyright">저작권 표시</Field.Label><Textarea
-                id="font-copyright"
-                name="copyright"
-                rows={2}
-                bind:value={draft.copyright}
-              ></Textarea>
-            </Field.Field>
-            <Field.Field>
-              <Field.Label for="font-license">라이선스 내용</Field.Label><Textarea
-                id="font-license"
-                name="license"
-                rows={3}
-                bind:value={draft.license}
-              ></Textarea>
-            </Field.Field>
-            <Field.Field>
-              <Field.Label for="font-license-url">라이선스 URL</Field.Label><Input
-                id="font-license-url"
-                name="licenseURL"
-                type="url"
-                bind:value={draft.licenseURL}
+<Dialog isOpen onOpenChange={(open) => !open && onClose()} purpose="form" width={672}>
+  <DialogHeader
+    title="폰트 설정"
+    subtitle="폰트 정보, 픽셀 크기와 내보내기 메트릭을 설정합니다."
+    onOpenChange={(open) => !open && onClose()}
+  />
+  <VStack padding={4} isScrollable class="min-h-0">
+    <form id="font-settings" onsubmit={submit}>
+      <FormLayout>
+        <VStack gap={4} as="section" aria-labelledby="font-info-heading">
+          <Heading level={3} id="font-info-heading">폰트 정보</Heading>
+          <Grid columns={{minWidth: 240, max: 2}} gap={4}>
+            <TextInput
+              label="폰트명 (패밀리)"
+              htmlName="name"
+              value={draft.name}
+              onChange={(value) => (draft.name = value)}
+              isRequired
+            />
+            <TextInput
+              label="스타일명"
+              htmlName="styleName"
+              value={draft.styleName}
+              onChange={(value) => (draft.styleName = value)}
+              isRequired
+            />
+            <NumberInput
+              label="버전 · 주 번호"
+              value={draft.versionMajor}
+              onChange={(value) => (draft.versionMajor = value)}
+              min={0}
+              max={999}
+              isIntegerOnly
+              isRequired
+              isWheelEnabled={false}
+            />
+            <NumberInput
+              label="버전 · 부 번호"
+              value={draft.versionMinor}
+              onChange={(value) => (draft.versionMinor = value)}
+              min={0}
+              max={999}
+              isIntegerOnly
+              isRequired
+              isWheelEnabled={false}
+            />
+          </Grid>
+          <TextArea
+            label="설명"
+            htmlName="description"
+            value={draft.description}
+            onChange={(value) => (draft.description = value)}
+            rows={2}
+          />
+        </VStack>
+        <VStack gap={4} as="section" aria-labelledby="font-credits-heading">
+          <Heading level={3} id="font-credits-heading">디자이너 · 제작사</Heading>
+          <Grid columns={{minWidth: 240, max: 2}} gap={4}>
+            {#each identityFields as field}
+              <TextInput
+                label={field.label}
+                htmlName={field.key}
+                value={draft[field.key]}
+                onChange={(value) => (draft[field.key] = value)}
               />
-            </Field.Field>
-          </Field.Set>
-          <Field.Set>
-            <Field.Legend>픽셀 그리드 · 메트릭</Field.Legend>
-            <div class="grid gap-3 sm:grid-cols-2">
-              <Field.Field>
-                <Field.Label for="font-width">너비 (px)</Field.Label><Input
-                  id="font-width"
-                  name="width"
-                  aria-describedby="font-grid-description"
-                  type="number"
-                  min={1}
-                  max={MAX_GRID_SIZE}
-                  step={1}
-                  required
-                  bind:value={draft.width}
-                />
-              </Field.Field>
-              <Field.Field>
-                <Field.Label for="font-height">높이 (px)</Field.Label><Input
-                  id="font-height"
-                  name="height"
-                  aria-describedby="font-grid-description"
-                  type="number"
-                  min={1}
-                  max={MAX_GRID_SIZE}
-                  step={1}
-                  required
-                  bind:value={draft.height}
-                  onchange={() => {
-                    draft.baseline = Math.min(draft.baseline, draft.height || 16)
-                  }}
-                />
-              </Field.Field>
-              <Field.Field>
-                <Field.Label for="font-baseline">베이스라인 (위에서 px)</Field.Label><Input
-                  id="font-baseline"
-                  name="baseline"
-                  type="number"
-                  min={0}
-                  max={draft.height}
-                  step={1}
-                  required
-                  bind:value={draft.baseline}
-                />
-              </Field.Field>
-            </div>
-            <Field.Description id="font-grid-description">
-              1–64px. 기존 그림의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.
-            </Field.Description>
-            {#if croppedPixels > 0}
-              <Field.Field orientation="horizontal" class="rounded-md border border-destructive/40 p-3">
-                <Checkbox
-                  id="font-allow-crop"
-                  name="allowCrop"
-                  bind:checked={allowCrop}
-                  required
-                  aria-describedby="font-crop-description"
-                />
-                <Field.Content>
-                  <Field.Label for="font-allow-crop">픽셀 삭제를 확인했고 이 크기를 적용합니다.</Field.Label>
-                  <Field.Description id="font-crop-description"
-                    >크기를 줄이면 범위 밖의 채워진 픽셀 {croppedPixels.toLocaleString()}개가 삭제됩니다.</Field.Description
-                  >
-                </Field.Content>
-              </Field.Field>
-            {/if}
-          </Field.Set>
-          <Field.Set>
-            <Field.Legend>Glyphs 내보내기</Field.Legend>
-            <div class="grid gap-3 sm:grid-cols-2">
-              <Field.Field>
-                <Field.Label for="font-upm">UPM (Units per Em)</Field.Label><Input
-                  id="font-upm"
-                  name="unitsPerEm"
-                  type="number"
-                  min={16}
-                  max={16384}
-                  step={1}
-                  required
-                  bind:value={draft.unitsPerEm}
-                />
-              </Field.Field>
-              <Field.Field>
-                <Field.Label for="font-pixel-size">1픽셀 크기 (폰트 유닛)</Field.Label><Input
-                  id="font-pixel-size"
-                  name="pixelSize"
-                  type="number"
-                  min={1}
-                  max={1000}
-                  step={1}
-                  required
-                  bind:value={draft.pixelSize}
-                />
-              </Field.Field>
-            </div>
-            <Field.Description>
-              글자 폭 {draft.width * draft.pixelSize} · 어센더 {draft.baseline * draft.pixelSize} · 디센더 {(draft.baseline -
-                draft.height) *
-                draft.pixelSize} 유닛. 공통 pixel 컴포넌트와 픽셀 크기의 그리드로 내보냅니다.
-            </Field.Description>
-            <Field.Description>
-              HEX는 높이를 16·24·32·64px 중 다음 크기로, 너비를 8px 단위로 올림하여 빈 픽셀을 채웁니다. 프로젝트 크기는
-              유지됩니다.
-            </Field.Description>
-          </Field.Set>
-        </Field.Group>
-      </div>
-      {#if error}<Field.Error>{error}</Field.Error>{/if}
-      {#if hasDraft}<Field.Description>
-          설정을 적용하면 현재 편집 중인 픽셀과 베이스라인도 프로젝트에 반영됩니다.
-        </Field.Description>{/if}
-      <Dialog.Footer>
-        <Button type="button" variant="outline" onclick={onClose}>취소</Button>
-        <Button type="submit">설정 적용</Button>
-      </Dialog.Footer>
+            {/each}
+          </Grid>
+        </VStack>
+        <VStack gap={4} as="section" aria-labelledby="font-license-heading">
+          <Heading level={3} id="font-license-heading">저작권 · 라이선스</Heading>
+          <TextArea
+            label="저작권 표시"
+            htmlName="copyright"
+            value={draft.copyright}
+            onChange={(value) => (draft.copyright = value)}
+            rows={2}
+          />
+          <TextArea
+            label="라이선스 내용"
+            htmlName="license"
+            value={draft.license}
+            onChange={(value) => (draft.license = value)}
+          />
+          <TextInput
+            label="라이선스 URL"
+            htmlName="licenseURL"
+            value={draft.licenseURL}
+            onChange={(value) => (draft.licenseURL = value)}
+          />
+        </VStack>
+        <VStack gap={4} as="section" aria-labelledby="font-grid-heading">
+          <Heading level={3} id="font-grid-heading">픽셀 그리드 · 메트릭</Heading>
+          <Grid columns={{minWidth: 240, max: 2}} gap={4}>
+            <NumberInput
+              label="너비 (px)"
+              value={draft.width}
+              onChange={(value) => (draft.width = value)}
+              min={1}
+              max={MAX_GRID_SIZE}
+              isIntegerOnly
+              isRequired
+              hasNumberSteppers
+              isWheelEnabled={false}
+            />
+            <NumberInput
+              label="높이 (px)"
+              value={draft.height}
+              onChange={(value) => {
+                draft.height = value
+                draft.baseline = Math.min(draft.baseline, value)
+              }}
+              min={1}
+              max={MAX_GRID_SIZE}
+              isIntegerOnly
+              isRequired
+              hasNumberSteppers
+              isWheelEnabled={false}
+            />
+            <NumberInput
+              label="베이스라인 (위에서 px)"
+              value={draft.baseline}
+              onChange={(value) => (draft.baseline = value)}
+              min={0}
+              max={draft.height}
+              isIntegerOnly
+              isRequired
+              hasNumberSteppers
+              isWheelEnabled={false}
+            />
+          </Grid>
+          <Text type="supporting">1–64px. 기존 그림의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.</Text>
+          {#if croppedPixels > 0}
+            <CheckboxInput
+              label="픽셀 삭제를 확인했고 이 크기를 적용합니다."
+              description={`크기를 줄이면 범위 밖의 채워진 픽셀 ${croppedPixels.toLocaleString()}개가 삭제됩니다.`}
+              value={allowCrop}
+              onChange={(value) => (allowCrop = value)}
+              isRequired
+            />
+          {/if}
+        </VStack>
+        <VStack gap={4} as="section" aria-labelledby="font-glyphs-heading">
+          <Heading level={3} id="font-glyphs-heading">Glyphs 내보내기</Heading>
+          <Grid columns={{minWidth: 240, max: 2}} gap={4}>
+            <NumberInput
+              label="UPM (Units per Em)"
+              value={draft.unitsPerEm}
+              onChange={(value) => (draft.unitsPerEm = value)}
+              min={16}
+              max={16384}
+              isIntegerOnly
+              isRequired
+              isWheelEnabled={false}
+            />
+            <NumberInput
+              label="1픽셀 크기 (폰트 유닛)"
+              value={draft.pixelSize}
+              onChange={(value) => (draft.pixelSize = value)}
+              min={1}
+              max={1000}
+              isIntegerOnly
+              isRequired
+              isWheelEnabled={false}
+            />
+          </Grid>
+          <Text type="supporting"
+            >글자 폭 {draft.width * draft.pixelSize} · 어센더 {draft.baseline * draft.pixelSize} · 디센더 {(draft.baseline -
+              draft.height) *
+              draft.pixelSize} 유닛. 공통 pixel 컴포넌트와 픽셀 크기의 그리드로 내보냅니다.</Text
+          >
+          <Text type="supporting"
+            >HEX는 높이를 16·24·32·64px 중 다음 크기로, 너비를 8px 단위로 올림하여 빈 픽셀을 채웁니다. 프로젝트 크기는
+            유지됩니다.</Text
+          >
+        </VStack>
+        {#if error}<Text role="alert" class="text-error">{error}</Text>{/if}
+        {#if hasDraft}<Text type="supporting"
+            >설정을 적용하면 현재 편집 중인 픽셀과 베이스라인도 프로젝트에 반영됩니다.</Text
+          >{/if}
+      </FormLayout>
     </form>
-  </Dialog.Content>
-</Dialog.Root>
+  </VStack>
+  <HStack padding={4} gap={2} justify="end" class="border-default shrink-0 border-t">
+    <Button label="취소" onclick={onClose} />
+    <Button label="설정 적용" variant="primary" type="submit" form="font-settings" />
+  </HStack>
+</Dialog>

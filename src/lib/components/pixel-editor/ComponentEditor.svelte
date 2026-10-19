@@ -1,11 +1,10 @@
 <script lang="ts">
+  import {Button, HStack, VStack, Heading, Token, StackItem} from '@astryx-svelte/core'
   import {ChevronLeft} from '@lucide/svelte'
   import {untrack} from 'svelte'
 
   import type {PixelComponent} from '#lib/types.js'
 
-  import * as ButtonGroup from '#lib/components/ui/button-group/index.js'
-  import {Button} from '#lib/components/ui/button/index.js'
   import {normalizeBaseline} from '#lib/font-metrics.js'
   import {COMPONENT_TYPE_LABELS, getJamoLabel} from '#lib/hangul.js'
   import {projectState} from '#lib/state.svelte.js'
@@ -58,40 +57,37 @@
   })
 </script>
 
-<div class="flex h-full min-h-0 flex-col p-2">
-  <div class="flex shrink-0 items-center justify-between gap-2">
-    <div class="flex flex-wrap items-center gap-2">
-      <Button variant="ghost" size="icon-sm" onclick={onCancel}><ChevronLeft class="size-6" /></Button>
-      <h2 class="flex items-center truncate font-bold">
-        컴포넌트 편집 <span class="ml-2 rounded bg-ring px-1 py-0.5 text-sm text-primary-foreground"
-          >{COMPONENT_TYPE_LABELS[localComponent.type]}
-          {getJamoLabel(localComponent.type, localComponent.typeIndex)}</span
-        >
-      </h2>
-    </div>
-    <ButtonGroup.Root>
-      <ButtonGroup.Root>
-        <Button size="sm" variant="ghost" onclick={onCancel}>취소</Button>
-      </ButtonGroup.Root>
-      <ButtonGroup.Root>
-        <Button size="sm" onclick={handleSave}>저장</Button>
-      </ButtonGroup.Root>
-    </ButtonGroup.Root>
-  </div>
-
+<VStack height="100%" gap={3} padding={3} class="min-h-0">
+  <HStack gap={2} justify="between" align="center" wrap="wrap" class="shrink-0">
+    <HStack gap={2} align="center">
+      <Button label="컴포넌트 목록으로" isIconOnly variant="ghost" onclick={onCancel}>
+        {#snippet icon()}<ChevronLeft />{/snippet}
+      </Button>
+      <Heading level={3} accessibilityLevel={2}>컴포넌트 편집</Heading>
+      <Token
+        label={`${COMPONENT_TYPE_LABELS[localComponent.type]} ${getJamoLabel(localComponent.type, localComponent.typeIndex)}`}
+      />
+    </HStack>
+    <HStack gap={2}>
+      <Button label="취소" variant="ghost" onclick={onCancel} />
+      <Button label="저장" variant="primary" onclick={handleSave} />
+    </HStack>
+  </HStack>
   {#if activeGroupNames.length > 0}
-    <div class="mt-2 ml-2 flex shrink-0 flex-wrap gap-2">
-      {#each activeGroupNames as name}
-        <span class="rounded border bg-secondary px-1.5 py-0.5 text-sm text-secondary-foreground">{name}</span>
-      {/each}
-    </div>
+    <HStack gap={2} wrap="wrap" class="shrink-0">
+      {#each activeGroupNames as name}<Token label={name} size="sm" />{/each}
+    </HStack>
   {/if}
-
-  <div class="mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto">
-    <div class="mb-4 flex shrink-0 justify-center">
-      <GridCanvas bitmap={localComponent.bitmap} bind:baseline onUpdate={(bm) => (localComponent.bitmap = bm)} />
-    </div>
-
-    <ComponentPreviewGrid component={localComponent} />
-  </div>
-</div>
+  <StackItem size="fill" isScrollable>
+    <VStack height="100%" gap={4}>
+      <StackItem
+        ><GridCanvas
+          bitmap={localComponent.bitmap}
+          bind:baseline
+          onUpdate={(bm) => (localComponent.bitmap = bm)}
+        /></StackItem
+      >
+      <ComponentPreviewGrid component={localComponent} />
+    </VStack>
+  </StackItem>
+</VStack>

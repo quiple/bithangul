@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {VStack, HStack, StackItem, Text} from '@astryx-svelte/core'
   import {onDestroy} from 'svelte'
 
   import {bytesPerRow, packedPixel} from '#lib/bitmap.js'
@@ -9,6 +10,7 @@
     SYLLABLES_PER_CHOSUNG,
     composeHangul,
   } from '#lib/hangul.js'
+  import {observeSize} from '#lib/observe-size.js'
 
   let {
     generatedData = null,
@@ -36,19 +38,19 @@
   let scrollTop = $state(0)
   let containerHeight = $state(600)
   let containerWidth = $state(800)
-  let container: HTMLDivElement = $state(undefined!)
+
   let scrollFrame = 0
   let pendingScrollTop = 0
 
   let generatedView = $derived(generatedData ? new Uint8Array(generatedData) : null)
 
   // 패널 너비에서 레이블 너비를 빼고, 28셀에 맞게 CSS 셀 크기 계산
-  let cssCanvasWidth = $derived(containerWidth - LABEL_W)
+  let cssCanvasWidth = $derived(Math.max(1, containerWidth - LABEL_W))
   let cssCellSize = $derived(cssCanvasWidth / COLS)
   let cssRowHeight = $derived((cssCellSize * height) / width)
 
   // 가상 스크롤: 보이는 행만 렌더링
-  let startRow = $derived(Math.max(0, Math.floor(scrollTop / cssRowHeight) - 2))
+  let startRow = $derived(Math.min(TOTAL_ROWS - 1, Math.max(0, Math.floor(scrollTop / cssRowHeight) - 2)))
   let visibleRowCount = $derived(Math.ceil(containerHeight / cssRowHeight) + 4)
   let endRow = $derived(Math.min(TOTAL_ROWS, startRow + visibleRowCount))
   let visibleRows = $derived(Array.from({length: endRow - startRow}, (_, i) => startRow + i))
@@ -82,12 +84,12 @@
     if (!ctx) return
 
     // 배경 (흰색)
-    ctx.fillStyle = '#fff'
+    ctx.fillStyle = getComputedStyle(canvas).backgroundColor
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
     if (!view) return
     const firstIdx = rowIdx * COLS
-    ctx.fillStyle = '#000'
+    ctx.fillStyle = getComputedStyle(canvas).color
 
     for (let col = 0; col < COLS; col++) {
       const itemIdx = firstIdx + col
@@ -128,47 +130,34 @@
   }
 </script>
 
-<div class="flex h-full flex-col bg-background">
-  <!-- 스크롤 영역 -->
-  <div
-    class="relative flex-1 overflow-x-hidden overflow-y-auto"
-    bind:this={container}
-    bind:clientHeight={containerHeight}
-    bind:clientWidth={containerWidth}
+<VStack height="100%" class="min-h-0 bg-surface">
+  <StackItem
+    size="fill"
+    isScrollable
+    class="overflow-x-hidden"
+    {...observeSize((element) => {
+      containerHeight = element.clientHeight
+      containerWidth = element.clientWidth
+    })}
     onscroll={onScroll}
   >
-    <!-- 전체 높이를 잡아주는 spacer -->
-    <div style="height: {TOTAL_ROWS * cssRowHeight}px; position: relative;">
-      {#each visibleRows as rowIdx (rowIdx)}
-        <div
-          style="position: absolute; top: {rowIdx * cssRowHeight}px; left: 0; right: 0; height: {cssRowHeight}px;"
-          class="flex items-stretch"
+    <VStack height={startRow * cssRowHeight} aria-hidden="true" />
+    {#each visibleRows as rowIdx (rowIdx)}
+      <HStack height={cssRowHeight} class="border-default border-b">
+        <VStack width={LABEL_W} justify="center" align="center" class="shrink-0 bg-muted"
+          ><Text type="supporting">{rowLabel(rowIdx)}</Text></VStack
         >
-          <!-- 행 레이블: 초성+중성 대표 글자 -->
-          <div
-            class="flex shrink-0 items-center justify-center bg-muted/30 text-xs font-bold text-muted-foreground"
-            style="width: {LABEL_W}px;"
-          >
-            {rowLabel(rowIdx)}
-          </div>
-
-          <!-- 글리프는 최소 해상도 canvas에, 1px 격자선은 CSS 오버레이에 렌더링 -->
-          <div class="relative shrink-0" style="width: {cssCanvasWidth}px; height: {cssRowHeight}px;">
-            <canvas
-              use:rowCanvasAction={{rowIdx, view: generatedView, width, height}}
-              width={CANVAS_W}
-              height={CANVAS_H}
-              class="block h-full w-full"
-            ></canvas>
-            <div
-              aria-hidden="true"
-              class="pointer-events-none absolute inset-0 border-border"
-              class:border-b={rowIdx < TOTAL_ROWS - 1}
-              style="background-image: repeating-linear-gradient(to right, var(--border) 0 1px, transparent 1px {cssCellSize}px);"
-            ></div>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </div>
-</div>
+        <VStack width={cssCanvasWidth} height={cssRowHeight} class="shrink-0">
+          <canvas
+            use:rowCanvasAction={{rowIdx, view: generatedView, width, height}}
+            width={CANVAS_W}
+            height={CANVAS_H}
+            class="block h-full w-full bg-surface text-primary pixelated"
+            aria-label={`${rowLabel(rowIdx)} 음절 미리보기`}
+          ></canvas>
+        </VStack>
+      </HStack>
+    {/each}
+    <VStack height={(TOTAL_ROWS - endRow) * cssRowHeight} aria-hidden="true" />
+  </StackItem>
+</VStack>

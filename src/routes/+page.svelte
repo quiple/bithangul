@@ -1,4 +1,19 @@
 <script lang="ts">
+  import {
+    AppShell,
+    Layout,
+    LayoutPanel,
+    LayoutContent,
+    ResizeHandle,
+    Button,
+    Dialog,
+    DialogHeader,
+    HStack,
+    VStack,
+    Heading,
+    Text,
+  } from '@astryx-svelte/core'
+  import {useResizable} from '@astryx-svelte/core/hooks'
   import {Download, Upload, FileCode, BookOpen, Settings} from '@lucide/svelte'
   import {onMount} from 'svelte'
 
@@ -10,12 +25,6 @@
   import GroupManager from '#lib/components/pixel-editor/GroupManager.svelte'
   import SplitComponentDialog from '#lib/components/pixel-editor/SplitComponentDialog.svelte'
   import Preview from '#lib/components/Preview.svelte'
-  import * as ButtonGroup from '#lib/components/ui/button-group/index.js'
-  import {Button, buttonVariants} from '#lib/components/ui/button/index.js'
-  import * as Dialog from '#lib/components/ui/dialog/index.js'
-  import * as Resizable from '#lib/components/ui/resizable/index.js'
-  import {Spinner} from '#lib/components/ui/spinner/index.js'
-  import * as Tooltip from '#lib/components/ui/tooltip/index.js'
   import {downloadText} from '#lib/export.js'
   import {getHEXDimensions, type FontExportType} from '#lib/font-export.js'
   import {applyFontSettings, getFontSettings, type FontSettings} from '#lib/font-settings.js'
@@ -24,6 +33,8 @@
   import {projectState} from '#lib/state.svelte.js'
   import ExportWorker from '#lib/workers/export.worker?worker'
   import GeneratorWorker from '#lib/workers/generator.worker?worker'
+
+  const panel = useResizable({defaultSize: 480, minSizePx: 280, maxSizePx: 900, autoSaveId: 'bithangul-editor'})
 
   let generatorWorker: Worker
   let exportWorker: Worker
@@ -211,151 +222,117 @@
   }
 </script>
 
-<div class="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
-  <header class="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b bg-card px-4 py-2">
-    <div class="flex items-center gap-4">
-      <h1 class="truncate text-lg font-bold">BitHangul</h1>
-      <ButtonGroup.Root>
-        <ButtonGroup.Root>
-          <Button variant="outline" size="sm" onclick={handleLoadProject}>
-            <Upload /> 불러오기...
-          </Button>
-          <Button variant="outline" size="sm" onclick={handleSaveProject}>
-            <Download /> 저장
-          </Button>
-          <Button variant="outline" size="sm" onclick={openFontSettings}><Settings /> 폰트 설정</Button>
-        </ButtonGroup.Root>
-        <ButtonGroup.Root>
-          <Button variant="outline" size="sm" onclick={() => (exampleDialogOpen = true)}>
-            <BookOpen /> 예제 불러오기...
-          </Button>
-        </ButtonGroup.Root>
-      </ButtonGroup.Root>
-    </div>
-
-    <div class="flex items-center">
-      <ButtonGroup.Root>
-        <ButtonGroup.Root>
-          <Tooltip.Provider>
-            <Tooltip.Root>
-              <Tooltip.Trigger
-                class={buttonVariants({variant: 'outline', size: 'sm'})}
-                onclick={() => handleExport('bdf')}
-                disabled={!generatedData || isGenerating || exporting}
-              >
-                {#if isExportingBDF}<Spinner />{:else}<FileCode />{/if}
-                {isExportingBDF ? '내보내는 중…' : 'BDF로 내보내기'}
-              </Tooltip.Trigger>
-              <Tooltip.Content>
-                <p>폰트를 비트맵 배포 형식(BDF)으로 내보냅니다.</p>
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Tooltip.Provider>
-
-          <Tooltip.Provider>
-            <Tooltip.Root>
-              <Tooltip.Trigger
-                class={buttonVariants({variant: 'outline', size: 'sm'})}
-                onclick={() => handleExport('hex')}
-                disabled={!generatedData || isGenerating || exporting}
-              >
-                {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
-                {isExportingHEX ? '내보내는 중…' : 'HEX로 내보내기'}
-              </Tooltip.Trigger>
-              <Tooltip.Content align="end">
-                <p>
-                  HEX는 {getHEXDimensions(settings).width}×{getHEXDimensions(settings).height}px로 빈 픽셀을 채워
-                  저장합니다. 확장 크기는 불러오는 도구에서 높이를 지정해야 합니다.
-                </p>
-              </Tooltip.Content>
-            </Tooltip.Root>
-          </Tooltip.Provider>
-          <Button
-            variant="outline"
-            size="sm"
-            onclick={() => handleExport('glyphs')}
-            disabled={!generatedData || isGenerating || exporting}
-          >
-            {#if isExportingGlyphs}<Spinner />{:else}<FileCode />{/if}
-            {isExportingGlyphs ? '내보내는 중…' : 'Glyphs로 내보내기'}
-          </Button>
-        </ButtonGroup.Root>
-      </ButtonGroup.Root>
-    </div>
-  </header>
-  {#if exportError}<p role="alert" class="px-4 py-2 text-sm text-destructive">{exportError}</p>{/if}
-
-  <Resizable.PaneGroup direction="horizontal" class="flex flex-1 overflow-hidden">
-    <Resizable.Pane defaultSize={35} minSize={20} maxSize={60} class="flex flex-col bg-sidebar">
-      {#if projectState.selectedComponentId && projectState.selectedComponent}
-        {@const sel = projectState.selectedComponent}
-        {#key settingsRevision}
-          <ComponentEditor
-            bind:this={editor}
-            component={sel}
-            onSave={(updated, baseline) => {
-              projectState.project.baseline = baseline
-              projectState.updateComponent(updated.id, updated)
-              projectState.selectComponent(null)
-              handleGenerate()
+<!-- Frame: wrapping toolbar | editor 480px (280–900px, resizable) | preview fills remaining space.
+     Narrow screens retain independently scrollable panels; toolbar actions wrap. -->
+<AppShell contentPadding={0} variant="surface" mobileNav={false}>
+  {#snippet topNav()}
+    <HStack padding={3} gap={3} justify="between" align="center" wrap="wrap" class="border-default border-b">
+      <HStack gap={2} align="center" wrap="wrap">
+        <Heading level={3} accessibilityLevel={1}>BitHangul</Heading>
+        <Button label="불러오기…" size="sm" onclick={handleLoadProject}>{#snippet icon()}<Upload />{/snippet}</Button>
+        <Button label="저장" size="sm" onclick={handleSaveProject}>{#snippet icon()}<Download />{/snippet}</Button>
+        <Button label="폰트 설정" size="sm" onclick={openFontSettings}>{#snippet icon()}<Settings />{/snippet}</Button>
+        <Button label="예제 불러오기…" size="sm" onclick={() => (exampleDialogOpen = true)}
+          >{#snippet icon()}<BookOpen />{/snippet}</Button
+        >
+      </HStack>
+      <HStack gap={2} wrap="wrap">
+        <Button
+          label="BDF로 내보내기"
+          size="sm"
+          onclick={() => handleExport('bdf')}
+          isDisabled={!generatedData || isGenerating || exporting}
+          isLoading={isExportingBDF}
+          tooltip="폰트를 비트맵 배포 형식(BDF)으로 내보냅니다.">{#snippet icon()}<FileCode />{/snippet}</Button
+        >
+        <Button
+          label="HEX로 내보내기"
+          size="sm"
+          onclick={() => handleExport('hex')}
+          isDisabled={!generatedData || isGenerating || exporting}
+          isLoading={isExportingHEX}
+          tooltip={`HEX는 ${getHEXDimensions(settings).width}×${getHEXDimensions(settings).height}px로 빈 픽셀을 채워 저장합니다. 확장 크기는 불러오는 도구에서 높이를 지정해야 합니다.`}
+          >{#snippet icon()}<FileCode />{/snippet}</Button
+        >
+        <Button
+          label="Glyphs로 내보내기"
+          size="sm"
+          onclick={() => handleExport('glyphs')}
+          isDisabled={!generatedData || isGenerating || exporting}
+          isLoading={isExportingGlyphs}>{#snippet icon()}<FileCode />{/snippet}</Button
+        >
+      </HStack>
+    </HStack>
+  {/snippet}
+  <Layout>
+    {#snippet header()}{#if exportError}<Text role="alert" class="text-error">{exportError}</Text>{/if}{/snippet}
+    {#snippet start()}
+      <LayoutPanel resizable={panel.props} isScrollable={false} padding={0} label="컴포넌트 편집">
+        {#if projectState.selectedComponentId && projectState.selectedComponent}
+          {@const sel = projectState.selectedComponent}
+          {#key settingsRevision}
+            <ComponentEditor
+              bind:this={editor}
+              component={sel}
+              onSave={(updated, baseline) => {
+                projectState.project.baseline = baseline
+                projectState.updateComponent(updated.id, updated)
+                projectState.selectComponent(null)
+                handleGenerate()
+              }}
+              onCancel={() => {
+                projectState.selectComponent(null)
+              }}
+            />
+          {/key}
+        {:else}
+          <ComponentList
+            components={projectState.project.components}
+            scrollPositions={componentListScrollPositions}
+            bind:activeTab={componentListActiveTab}
+            onScrollPositionChange={(type, position) => {
+              componentListScrollPositions = {...componentListScrollPositions, [type]: position}
             }}
-            onCancel={() => {
-              projectState.selectComponent(null)
+            onSelect={(id) => {
+              projectState.selectComponent(id)
+            }}
+            onSplit={(component) => {
+              splitTarget = component
+              splitDialogOpen = true
+            }}
+            onDelete={(component) => {
+              deleteTarget = component
+            }}
+            onOpenGroupManager={(type) => {
+              gmType = type
+              gmOpen = true
             }}
           />
-        {/key}
-      {:else}
-        <ComponentList
-          components={projectState.project.components}
-          scrollPositions={componentListScrollPositions}
-          bind:activeTab={componentListActiveTab}
-          onScrollPositionChange={(type, position) => {
-            componentListScrollPositions = {...componentListScrollPositions, [type]: position}
-          }}
-          onSelect={(id) => {
-            projectState.selectComponent(id)
-          }}
-          onSplit={(component) => {
-            splitTarget = component
-            splitDialogOpen = true
-          }}
-          onDelete={(component) => {
-            deleteTarget = component
-          }}
-          onOpenGroupManager={(type) => {
-            gmType = type
-            gmOpen = true
-          }}
-        />
-      {/if}
-    </Resizable.Pane>
-    <Resizable.Handle class="w-2 border-x bg-card" />
-    <Resizable.Pane defaultSize={65} minSize={40} class="overflow-hidden">
+        {/if}
+      </LayoutPanel>
+      <ResizeHandle resizable={panel.props} label="편집 패널 너비" hasDivider />
+    {/snippet}
+    <LayoutContent padding={0} isScrollable={false} label="폰트 미리보기">
       <Preview {generatedData} width={settings.width} height={settings.height} />
-    </Resizable.Pane>
-  </Resizable.PaneGroup>
-</div>
+    </LayoutContent>
+  </Layout>
+</AppShell>
 
-<Dialog.Root bind:open={exampleDialogOpen}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>예제 불러오기</Dialog.Title>
-      <Dialog.Description>예제 프로젝트를 선택하면 현재 프로젝트를 대체합니다.</Dialog.Description>
-    </Dialog.Header>
-    <div class="flex flex-col gap-2">
-      {#each EXAMPLES as example}
-        <Button variant="outline" class="h-auto justify-start text-left" onclick={() => loadExample(example.loader)}>
-          <BookOpen class="size-4 shrink-0" />
-          <span class="font-medium">{example.name}</span>
-        </Button>
-      {/each}
-    </div>
-    <Dialog.Footer>
-      <Button variant="outline" onclick={() => (exampleDialogOpen = false)}>취소</Button>
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
-
+<Dialog isOpen={exampleDialogOpen} onOpenChange={(value) => (exampleDialogOpen = value)}>
+  <DialogHeader
+    title="예제 불러오기"
+    subtitle="예제 프로젝트를 선택하면 현재 프로젝트를 대체합니다."
+    onOpenChange={(value) => (exampleDialogOpen = value)}
+  />
+  <VStack padding={4} gap={2}>
+    {#each EXAMPLES as example}
+      <Button label={example.name} onclick={() => loadExample(example.loader)}
+        >{#snippet icon()}<BookOpen />{/snippet}</Button
+      >
+    {/each}
+  </VStack>
+  <HStack padding={4} justify="end"><Button label="취소" onclick={() => (exampleDialogOpen = false)} /></HStack>
+</Dialog>
 <GroupManager
   open={gmOpen}
   type={gmType}
@@ -387,38 +364,34 @@
   }}
 />
 
-<Dialog.Root open={deleteTarget !== null} onOpenChange={(open) => !open && (deleteTarget = null)}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>바리에이션을 삭제할까요?</Dialog.Title>
-      <Dialog.Description>
-        {#if deletePlan && deletePlan.groups.length > 0}
-          {COMPONENT_TYPE_LABELS[deletePlan.component.type]} 바리에이션 관리에서 ‘{deletePlan.groups
-            .map(({group}) => group.name)
-            .join(', ')}’ 규칙을 제거합니다. 이 규칙에서 파생된 모든 행의
-          {deletePlan.affectedComponentCount}개 컴포넌트가 함께 정리됩니다.
-        {:else}
-          이 컴포넌트에는 삭제할 수 있는 바리에이션 규칙이 없습니다.
-        {/if}
-      </Dialog.Description>
-    </Dialog.Header>
-    <Dialog.Footer>
-      <Button variant="outline" onclick={() => (deleteTarget = null)}>취소</Button>
-      <Button
-        variant="destructive"
-        disabled={!deletePlan || deletePlan.groups.length === 0}
-        onclick={() => {
-          if (deleteTarget) {
-            const deleted = projectState.deleteComponent(deleteTarget.id)
-            deleteTarget = null
-            if (deleted) handleGenerate()
-          }
-        }}>바리에이션과 컴포넌트 삭제</Button
-      >
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
-
+<Dialog isOpen={deleteTarget !== null} onOpenChange={(open) => !open && (deleteTarget = null)} purpose="required">
+  <DialogHeader title="바리에이션을 삭제할까요?" />
+  <VStack padding={4}>
+    <Text>
+      {#if deletePlan && deletePlan.groups.length > 0}
+        {COMPONENT_TYPE_LABELS[deletePlan.component.type]} 바리에이션 관리에서 ‘{deletePlan.groups
+          .map(({group}) => group.name)
+          .join(', ')}’ 규칙을 제거합니다. 이 규칙에서 파생된 모든 행의 {deletePlan.affectedComponentCount}개 컴포넌트가
+        함께 정리됩니다.
+      {:else}이 컴포넌트에는 삭제할 수 있는 바리에이션 규칙이 없습니다.{/if}
+    </Text>
+  </VStack>
+  <HStack padding={4} gap={2} justify="end" wrap="wrap">
+    <Button label="취소" onclick={() => (deleteTarget = null)} />
+    <Button
+      label="바리에이션과 컴포넌트 삭제"
+      variant="destructive"
+      isDisabled={!deletePlan || deletePlan.groups.length === 0}
+      onclick={() => {
+        if (deleteTarget) {
+          const deleted = projectState.deleteComponent(deleteTarget.id)
+          deleteTarget = null
+          if (deleted) handleGenerate()
+        }
+      }}
+    />
+  </HStack>
+</Dialog>
 {#if settingsProject}
   <FontSettingsDialog
     project={settingsProject}

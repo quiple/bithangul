@@ -1,4 +1,17 @@
 <script lang="ts">
+  import {
+    Button,
+    ContextMenu,
+    TabList,
+    Tab,
+    Item,
+    VStack,
+    HStack,
+    StackItem,
+    Heading,
+    Text,
+    Badge,
+  } from '@astryx-svelte/core'
   import {CopyPlus, Settings, Trash2} from '@lucide/svelte'
   import {onDestroy, onMount, tick} from 'svelte'
 
@@ -6,10 +19,8 @@
 
   import {getActiveVariationId} from '#lib/component-utils.js'
   import Thumbnail from '#lib/components/Thumbnail.svelte'
-  import {Button} from '#lib/components/ui/button/index.js'
-  import * as ContextMenu from '#lib/components/ui/context-menu/index.js'
-  import * as Tabs from '#lib/components/ui/tabs/index.js'
   import {COMPONENT_INDICES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, getJamoLabel} from '#lib/hangul.js'
+  import {observeSize} from '#lib/observe-size.js'
   import {projectState} from '#lib/state.svelte.js'
 
   interface Props {
@@ -55,15 +66,14 @@
   const HEADING_HEIGHT = HEADING_CONTENT_HEIGHT + SECTION_GAP
   const COMPONENT_ROW_HEIGHT = 64
   const OVERSCAN_PX = COMPONENT_ROW_HEIGHT * 4
-  const THREE_COLUMN_MIN_WIDTH = 640
 
-  let scrollContainer: HTMLDivElement | undefined = $state()
+  let scrollContainer: HTMLElement | undefined = $state()
   let viewportHeight = $state(0)
-  let viewportWidth = $state(0)
+
   let currentScrollTop = $state(0)
   let pendingScrollTop = 0
   let scrollFrame = 0
-  let columnCount = $derived(viewportWidth >= THREE_COLUMN_MIN_WIDTH ? 3 : 2)
+  const columnCount = 1
 
   let activeGroups = $derived(projectState.project.groups[activeTab])
 
@@ -202,86 +212,91 @@
 {#snippet componentItem(component: PixelComponent)}
   {@const variationName = getVariationName(component)}
   {@const jamo = getJamoLabel(component.type, component.typeIndex)}
-
-  <ContextMenu.Root>
-    <ContextMenu.Trigger class="group block min-w-0">
-      <Button
-        variant="outline"
-        class="h-14 w-full min-w-0 justify-start gap-2 overflow-hidden px-2 text-left"
-        onclick={() => onSelect(component.id)}
-        title={`${COMPONENT_TYPE_LABELS[component.type]} ${jamo}, ${variationName}`}
-      >
-        <span class="flex size-10 shrink-0 items-center justify-center overflow-hidden bg-background">
-          <Thumbnail bitmap={component.bitmap} size={40} class="transition group-hover:brightness-95" />
-        </span>
-        <span class="min-w-0 flex-1 leading-tight">
-          <span class="block truncate text-sm font-medium">{variationName}</span>
-          <span class="mt-1 block truncate text-xs text-muted-foreground"
-            >{COMPONENT_TYPE_LABELS[component.type]} {jamo}</span
+  <ContextMenu
+    label="컴포넌트 작업"
+    items={[
+      {label: '컴포넌트 나누기', onClick: () => onSplit(component)},
+      {type: 'divider'},
+      {label: '컴포넌트 삭제', variant: 'destructive', onClick: () => onDelete(component)},
+    ]}
+  >
+    <Item
+      label={variationName}
+      description={`${COMPONENT_TYPE_LABELS[component.type]} ${jamo}`}
+      onclick={() => onSelect(component.id)}
+    >
+      {#snippet startContent()}<Thumbnail bitmap={component.bitmap} size={32} />{/snippet}
+      {#snippet endContent()}
+        <HStack gap={1}>
+          <Button
+            label={`${variationName} 나누기`}
+            isIconOnly
+            variant="ghost"
+            size="sm"
+            onclick={() => onSplit(component)}>{#snippet icon()}<CopyPlus />{/snippet}</Button
           >
-        </span>
-      </Button>
-    </ContextMenu.Trigger>
-    <ContextMenu.Content class="w-52">
-      <ContextMenu.Item onSelect={() => onSplit(component)}>
-        <CopyPlus />
-        컴포넌트 나누기
-      </ContextMenu.Item>
-      <ContextMenu.Separator />
-      <ContextMenu.Item variant="destructive" onSelect={() => onDelete(component)}>
-        <Trash2 />
-        컴포넌트 삭제
-      </ContextMenu.Item>
-    </ContextMenu.Content>
-  </ContextMenu.Root>
+          <Button
+            label={`${variationName} 삭제`}
+            isIconOnly
+            variant="ghost"
+            size="sm"
+            onclick={() => onDelete(component)}>{#snippet icon()}<Trash2 />{/snippet}</Button
+          >
+        </HStack>
+      {/snippet}
+    </Item>
+  </ContextMenu>
 {/snippet}
 
-<Tabs.Root value={activeTab} onValueChange={handleTabChange} class="flex h-full min-h-0 flex-col gap-0">
-  <div class="flex shrink-0 items-center justify-between gap-2 border-b py-1 pr-1 pl-4">
-    <h2 class="hidden truncate font-bold sm:block">컴포넌트</h2>
-    <Tabs.List class="grid max-w-75 flex-1 grid-cols-3">
-      <Tabs.Trigger value="chosung">초성</Tabs.Trigger>
-      <Tabs.Trigger value="jungsung">중성</Tabs.Trigger>
-      <Tabs.Trigger value="jongsung">종성</Tabs.Trigger>
-    </Tabs.List>
-  </div>
-
-  <div class="flex shrink-0 items-center justify-between gap-2 px-3 py-2">
-    <div class="flex items-baseline gap-1.5">
-      <h3 class="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-        {COMPONENT_TYPE_LABELS[activeTab]}
-      </h3>
-      <span class="text-xs text-muted-foreground">{listLayout.totalComponents}개</span>
-    </div>
-    <Button variant="outline" size="sm" class="h-7 px-2 text-xs" onclick={() => onOpenGroupManager(activeTab)}>
-      <Settings class="size-3" /> 바리에이션 관리
-    </Button>
-  </div>
-
-  <div
-    class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
-    bind:this={scrollContainer}
-    bind:clientHeight={viewportHeight}
-    bind:clientWidth={viewportWidth}
+<VStack height="100%" class="min-h-0">
+  <HStack padding={3} gap={2} justify="between" align="center" class="border-default shrink-0 border-b">
+    <Heading level={3} accessibilityLevel={2}>컴포넌트</Heading>
+    <TabList value={activeTab} onChange={handleTabChange} role="tablist" aria-label="자모 종류" size="sm">
+      <Tab value="chosung" label="초성" panelId="component-list-panel" />
+      <Tab value="jungsung" label="중성" panelId="component-list-panel" />
+      <Tab value="jongsung" label="종성" panelId="component-list-panel" />
+    </TabList>
+  </HStack>
+  <HStack paddingInline={3} paddingBlock={2} gap={2} justify="between" align="center" class="shrink-0">
+    <HStack gap={2} align="center"
+      ><Text type="label">{COMPONENT_TYPE_LABELS[activeTab]}</Text><Badge value={listLayout.totalComponents} /></HStack
+    >
+    <Button label="바리에이션 관리" size="sm" onclick={() => onOpenGroupManager(activeTab)}
+      >{#snippet icon()}<Settings />{/snippet}</Button
+    >
+  </HStack>
+  <StackItem
+    size="fill"
+    isScrollable
+    id="component-list-panel"
+    role="tabpanel"
+    aria-label={COMPONENT_TYPE_LABELS[activeTab]}
+    {...observeSize((element) => {
+      scrollContainer = element
+      viewportHeight = element.clientHeight
+    })}
     onscroll={handleScroll}
   >
-    <div class="relative mx-2" style={`height: ${listLayout.totalHeight}px`}>
-      {#each visibleRows as row (row.key)}
-        <div class="absolute inset-x-0 top-0" style={`height: ${row.height}px; transform: translateY(${row.top}px)`}>
-          {#if row.kind === 'heading'}
-            <div class="flex items-center gap-2 border-b" style={`height: ${HEADING_CONTENT_HEIGHT}px`}>
-              <h4 class="text-base font-bold">{JAMO_BY_TYPE[activeTab][row.typeIndex]}</h4>
-              <span class="text-xs text-muted-foreground">{row.count}개</span>
-            </div>
-          {:else}
-            <div class="grid gap-2 pb-2" style={`grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));`}>
-              {#each row.components as component (component.id)}
-                {@render componentItem(component)}
-              {/each}
-            </div>
-          {/if}
-        </div>
-      {/each}
-    </div>
-  </div>
-</Tabs.Root>
+    <VStack height={visibleRows[0]?.top ?? 0} aria-hidden="true" />
+    {#each visibleRows as row (row.key)}
+      <VStack height={row.height} justify="center" class="border-default border-b">
+        {#if row.kind === 'heading'}
+          <HStack paddingInline={3} gap={2} align="center">
+            <Heading level={4}>{JAMO_BY_TYPE[activeTab][row.typeIndex]}</Heading><Text type="supporting"
+              >{row.count}개</Text
+            >
+          </HStack>
+        {:else}
+          {#each row.components as component (component.id)}{@render componentItem(component)}{/each}
+        {/if}
+      </VStack>
+    {/each}
+    <VStack
+      height={Math.max(
+        0,
+        listLayout.totalHeight - ((visibleRows.at(-1)?.top ?? 0) + (visibleRows.at(-1)?.height ?? 0)),
+      )}
+      aria-hidden="true"
+    />
+  </StackItem>
+</VStack>

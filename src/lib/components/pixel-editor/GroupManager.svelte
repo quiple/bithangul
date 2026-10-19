@@ -1,12 +1,21 @@
 <script lang="ts">
+  import {
+    Button,
+    Dialog,
+    DialogHeader,
+    TextInput,
+    ToggleButton,
+    VStack,
+    HStack,
+    Grid,
+    Heading,
+    Text,
+    StackItem,
+  } from '@astryx-svelte/core'
   import {Plus, Trash} from '@lucide/svelte'
 
   import type {ComponentType, JamoGroup} from '#lib/types.js'
 
-  import {Button} from '#lib/components/ui/button/index.js'
-  import * as Dialog from '#lib/components/ui/dialog/index.js'
-  import {Input} from '#lib/components/ui/input/index.js'
-  import {Toggle} from '#lib/components/ui/toggle/index.js'
   import {COMPONENT_TYPES, COMPONENT_TYPE_LABELS, JAMO_BY_TYPE, JAMO_INDICES, getJamoLabel} from '#lib/hangul.js'
 
   interface Props {
@@ -130,86 +139,67 @@
   }
 </script>
 
-<Dialog.Root {open} {onOpenChange}>
-  <Dialog.Content class="flex max-h-[92vh] flex-col sm:max-w-4xl">
-    <Dialog.Header>
-      <Dialog.Title>{type ? `${COMPONENT_TYPE_LABELS[type]} 바리에이션 관리` : '바리에이션 관리'}</Dialog.Title>
-      <Dialog.Description>
-        {type
-          ? `${COMPONENT_TYPE_LABELS[type]} 자형이 사용될 다른 자모 조합을 바리에이션별로 설정합니다.`
-          : '컴포넌트 바리에이션을 관리합니다.'}
-      </Dialog.Description>
-    </Dialog.Header>
-
-    <div class="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
-      {#each draftGroups as group, groupIndex (group.id)}
-        <section
-          class="space-y-4 rounded-lg border bg-card p-4"
-          style="content-visibility: auto; contain-intrinsic-size: auto 26rem;"
-        >
-          <div class="flex items-center gap-3">
-            <Input bind:value={group.name} placeholder="바리에이션 이름" class="max-w-80" />
-            <div class="flex-1"></div>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              class="shrink-0 text-destructive"
-              onclick={() => removeGroup(groupIndex)}
-              aria-label={`${group.name} 삭제`}
-            >
-              <Trash class="size-4" />
-            </Button>
-          </div>
-
-          {#each getConditionTypes() as conditionType}
-            <div class="space-y-2 rounded-md bg-muted/40 p-3">
-              <div class="flex items-center justify-between gap-2">
-                <div>
-                  <h3 class="text-sm font-semibold">{COMPONENT_TYPE_LABELS[conditionType]} 조건</h3>
-                  <p class="text-xs text-muted-foreground">
-                    {(group.conditions[conditionType] || []).length}/{JAMO_BY_TYPE[conditionType].length}개 선택
-                  </p>
-                </div>
-                <div class="flex gap-1">
-                  <Button variant="ghost" size="sm" onclick={() => selectAll(groupIndex, conditionType)}>모두</Button>
-                  <Button variant="ghost" size="sm" onclick={() => clearSelection(groupIndex, conditionType)}
-                    >해제</Button
-                  >
-                </div>
-              </div>
-
-              <div class="grid grid-cols-5 gap-1 sm:grid-cols-10 lg:grid-cols-14">
-                {#each JAMO_BY_TYPE[conditionType] as _, itemIndex}
-                  <Toggle
-                    variant="outline"
-                    class="bg-background text-base transition data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:font-semibold data-[state=on]:text-primary-foreground"
-                    pressed={(group.conditions[conditionType] || []).includes(itemIndex)}
-                    onPressedChange={() => toggleItem(groupIndex, conditionType, itemIndex)}
-                  >
-                    <span class:text-xs={conditionType === 'jongsung' && itemIndex === 0}>
-                      {getItemLabel(conditionType, itemIndex)}
-                    </span>
-                  </Toggle>
-                {/each}
-              </div>
-            </div>
-          {/each}
-        </section>
-      {/each}
-
-      <Button variant="outline" class="w-full border-dashed py-8 text-muted-foreground" onclick={addGroup}>
-        <Plus class="size-4" />
-        새 {type ? COMPONENT_TYPE_LABELS[type] : ''} 바리에이션 추가
-      </Button>
-
-      {#if errorMsg}
-        <p class="text-sm font-medium text-destructive">{errorMsg}</p>
-      {/if}
-    </div>
-
-    <Dialog.Footer class="pt-2">
-      <Button variant="outline" onclick={() => onOpenChange(false)}>취소</Button>
-      <Button onclick={handleSave}>저장</Button>
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
+<Dialog isOpen={open} {onOpenChange} purpose="form" width={896}>
+  <DialogHeader
+    title={type ? `${COMPONENT_TYPE_LABELS[type]} 바리에이션 관리` : '바리에이션 관리'}
+    subtitle="자형이 사용될 다른 자모 조합을 바리에이션별로 설정합니다."
+    {onOpenChange}
+  />
+  <VStack padding={4} gap={6} isScrollable class="min-h-0">
+    {#each draftGroups as group, groupIndex (group.id)}
+      <VStack as="section" gap={4} class="border-default border-b" paddingBlockEnd={4}>
+        <HStack gap={3} align="end">
+          <StackItem size="fill"
+            ><TextInput
+              label="바리에이션 이름"
+              value={group.name}
+              onChange={(value) => (group.name = value)}
+              isRequired
+            /></StackItem
+          >
+          <Button label={`${group.name} 삭제`} isIconOnly variant="ghost" onclick={() => removeGroup(groupIndex)}>
+            {#snippet icon()}<Trash />{/snippet}
+          </Button>
+        </HStack>
+        {#each getConditionTypes() as conditionType}
+          <VStack gap={2}>
+            <HStack justify="between" align="center" gap={2}>
+              <VStack gap={1}>
+                <Heading level={4}>{COMPONENT_TYPE_LABELS[conditionType]} 조건</Heading>
+                <Text type="supporting"
+                  >{(group.conditions[conditionType] || []).length}/{JAMO_BY_TYPE[conditionType].length}개 선택</Text
+                >
+              </VStack>
+              <HStack gap={1}>
+                <Button label="모두" variant="ghost" size="sm" onclick={() => selectAll(groupIndex, conditionType)} />
+                <Button
+                  label="해제"
+                  variant="ghost"
+                  size="sm"
+                  onclick={() => clearSelection(groupIndex, conditionType)}
+                />
+              </HStack>
+            </HStack>
+            <Grid columns={{minWidth: 40, max: 14}} gap={1}>
+              {#each JAMO_BY_TYPE[conditionType] as _, itemIndex}
+                <ToggleButton
+                  label={getItemLabel(conditionType, itemIndex)}
+                  isPressed={(group.conditions[conditionType] || []).includes(itemIndex)}
+                  onPressedChange={() => toggleItem(groupIndex, conditionType, itemIndex)}
+                />
+              {/each}
+            </Grid>
+          </VStack>
+        {/each}
+      </VStack>
+    {/each}
+    <Button label={`새 ${type ? COMPONENT_TYPE_LABELS[type] : ''} 바리에이션 추가`} onclick={addGroup}>
+      {#snippet icon()}<Plus />{/snippet}
+    </Button>
+    {#if errorMsg}<Text role="alert" class="text-error">{errorMsg}</Text>{/if}
+  </VStack>
+  <HStack padding={4} gap={2} justify="end" class="border-default shrink-0 border-t">
+    <Button label="취소" onclick={() => onOpenChange(false)} />
+    <Button label="저장" variant="primary" onclick={handleSave} />
+  </HStack>
+</Dialog>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {GripHorizontal} from '@lucide/svelte'
+  import {VStack} from '@astryx-svelte/core'
   import {untrack} from 'svelte'
 
   import {FONT_ASCENT} from '#lib/font-metrics.js'
@@ -28,7 +28,7 @@
 
   let isDrawing = false
   let drawMode = 1 // 1 = draw, 0 = erase
-  let containerEl: HTMLDivElement = $state(undefined!)
+  let containerEl: SVGSVGElement = $state(undefined!)
   let baselineDrag: {pointerId: number; startY: number; startBaseline: number} | null = null
 
   function setBaseline(value: number) {
@@ -39,19 +39,19 @@
     if (e.button !== 0 || baselineDrag) return
     e.preventDefault()
     baselineDrag = {pointerId: e.pointerId, startY: e.clientY, startBaseline: baseline}
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    ;(e.currentTarget as SVGElement).setPointerCapture(e.pointerId)
   }
 
   function moveBaseline(e: PointerEvent) {
     if (!baselineDrag || e.pointerId !== baselineDrag.pointerId) return
-    const pixelHeight = (containerEl.clientHeight + 1) / ROWS
+    const pixelHeight = containerEl.getBoundingClientRect().height / ROWS
     setBaseline(baselineDrag.startBaseline + (e.clientY - baselineDrag.startY) / pixelHeight)
   }
 
   function endBaselineDrag(e: PointerEvent) {
     if (e.pointerId !== baselineDrag?.pointerId) return
     baselineDrag = null
-    const handle = e.currentTarget as HTMLElement
+    const handle = e.currentTarget as SVGElement
     if (handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId)
   }
 
@@ -110,42 +110,74 @@
   }
 </script>
 
-<div class="w-full py-6">
-  <div class="relative mx-auto w-[calc(100%-11rem)] max-w-100">
-    <div
-      bind:this={containerEl}
-      class="relative grid w-full cursor-crosshair touch-none gap-px border bg-border select-none"
-      style="aspect-ratio: {COLS} / {ROWS}; grid-template-columns: repeat({COLS}, 1fr); grid-template-rows: repeat({ROWS}, 1fr);"
-      onpointerdown={handlePointerDown}
-      onpointermove={handlePointerMove}
-      onpointerup={handlePointerUp}
-      onpointercancel={handlePointerUp}
-      oncontextmenu={(e) => e.preventDefault()}
-      role="grid"
-      tabindex="-1"
-      aria-label="픽셀 편집 그리드. 베이스라인은 위에서 {baseline}행 아래에 있습니다."
+<!-- Pixel coordinates are drawing geometry, independent of UI spacing tokens. Equal gutters keep the bitmap centered. -->
+<VStack width="100%" align="center" paddingBlock={4}>
+  <VStack width="100%" maxWidth={600}>
+    <svg
+      viewBox={`-104 -24 ${COLS * 24 + 208} ${ROWS * 24 + 48}`}
+      width="100%"
+      class="overflow-visible select-none"
+      aria-label="픽셀 편집기"
     >
-      {#each localBitmap as row, r}
-        {#each row as cell, c}
-          {@const thickR = (r + 1) % 8 === 0 && r + 1 < ROWS}
-          {@const thickC = (c + 1) % 8 === 0 && c + 1 < COLS}
-          <div
-            class="size-full {cell ? 'bg-primary' : 'bg-background'} {thickC
-              ? 'border-r-2 border-r-border'
-              : ''} {thickR ? 'border-b-2 border-b-border' : ''}"
-            role="gridcell"
-            aria-label="Pixel {r},{c}"
-          ></div>
-        {/each}
-      {/each}
-    </div>
-    <div
-      class="pointer-events-none absolute inset-x-0 z-10"
-      style="top: calc({(baseline / ROWS) * 100}% + {0.5 - baseline / ROWS}px);"
-    >
-      <div class="-translate-y-1/2 border-t-2 border-dashed border-sky-500" aria-hidden="true"></div>
-      <div class="absolute top-0 left-full ml-1 flex -translate-y-1/2 items-center gap-1">
-        <div
+      <svg
+        bind:this={containerEl}
+        x={0}
+        y={0}
+        width={COLS * 24}
+        height={ROWS * 24}
+        viewBox={`0 0 ${COLS * 24} ${ROWS * 24}`}
+        class="cursor-crosshair touch-none"
+        onpointerdown={handlePointerDown}
+        onpointermove={handlePointerMove}
+        onpointerup={handlePointerUp}
+        onpointercancel={handlePointerUp}
+        oncontextmenu={(e) => e.preventDefault()}
+        role="grid"
+        tabindex="-1"
+        aria-label={`픽셀 편집 그리드. 베이스라인은 위에서 ${baseline}행 아래에 있습니다.`}
+      >
+        {#each localBitmap as row, r}{#each row as cell, c}
+            <rect
+              x={c * 24}
+              y={r * 24}
+              width={24}
+              height={24}
+              fill={cell ? 'var(--color-text-primary)' : 'var(--color-background-surface)'}
+              stroke="var(--color-border-emphasized)"
+              stroke-width={0.5}
+              role="gridcell"
+              aria-label={`Pixel ${r},${c}`}
+            />
+          {/each}{/each}
+        {#each Array.from({length: Math.floor((COLS - 1) / 8)}, (_, i) => (i + 1) * 8) as col}<line
+            x1={col * 24}
+            x2={col * 24}
+            y1={0}
+            y2={ROWS * 24}
+            stroke="var(--color-border-emphasized)"
+            stroke-width={2}
+          />{/each}
+        {#each Array.from({length: Math.floor((ROWS - 1) / 8)}, (_, i) => (i + 1) * 8) as row}<line
+            y1={row * 24}
+            y2={row * 24}
+            x1={0}
+            x2={COLS * 24}
+            stroke="var(--color-border-emphasized)"
+            stroke-width={2}
+          />{/each}
+      </svg>
+      <line
+        x1={0}
+        x2={COLS * 24}
+        y1={baseline * 24}
+        y2={baseline * 24}
+        stroke="var(--color-accent)"
+        stroke-width={2}
+        stroke-dasharray="4 2"
+        pointer-events="none"
+      />
+      <g transform={`translate(${COLS * 24 + 8}, ${baseline * 24})`}>
+        <g
           role="slider"
           tabindex="0"
           aria-label="베이스라인 위치. 위아래 방향키로 1픽셀씩 조정"
@@ -153,8 +185,8 @@
           aria-valuemin={0}
           aria-valuemax={ROWS}
           aria-valuenow={baseline}
-          aria-valuetext="위에서 {baseline}픽셀"
-          class="pointer-events-auto flex size-6 shrink-0 cursor-ns-resize touch-none items-center justify-center rounded border border-sky-500 bg-background text-sky-600 select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+          aria-valuetext={`위에서 ${baseline}픽셀`}
+          class="cursor-ns-resize touch-none"
           onpointerdown={startBaselineDrag}
           onpointermove={moveBaseline}
           onpointerup={endBaselineDrag}
@@ -162,10 +194,20 @@
           onlostpointercapture={endBaselineDrag}
           onkeydown={handleBaselineKey}
         >
-          <GripHorizontal class="size-4" aria-hidden="true" />
-        </div>
-        <span class="w-14 text-[10px] leading-4 text-muted-foreground">베이스라인 ·<br />위에서 {baseline}px</span>
-      </div>
-    </div>
-  </div>
-</div>
+          <rect
+            x={0}
+            y={-12}
+            width={24}
+            height={24}
+            rx={4}
+            fill="var(--color-background-surface)"
+            stroke="var(--color-accent)"
+          />
+          <path d="M6 -3 H18 M6 3 H18" stroke="var(--color-accent)" stroke-width={2} />
+        </g>
+        <text x={30} y={-2} fill="var(--color-text-secondary)" class="text-sm">베이스라인 ·</text>
+        <text x={30} y={12} fill="var(--color-text-secondary)" class="text-sm">위에서 {baseline}px</text>
+      </g>
+    </svg>
+  </VStack>
+</VStack>

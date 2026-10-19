@@ -20,9 +20,15 @@
     "fmt": "oxfmt --write .",
     "test": "nub --node --import ./tests/register.mjs --test tests/*.test.ts"
   },
+  "dependencies": {
+    "@astryx-svelte/core": "0.5.2",
+    "@astryx-svelte/theme-neutral": "0.5.2",
+    "@stylexjs/stylex": "^0.19.1"
+  },
   "devDependencies": {
     "@internationalized/date": "^3.12.4",
     "@lucide/svelte": "^1.57.0",
+    "@stylexjs/unplugin": "^0.19.1",
     "@sveltejs/adapter-auto": "^8.0.0",
     "@sveltejs/adapter-cloudflare": "^8.0.1",
     "@sveltejs/kit": "^3.1.0",

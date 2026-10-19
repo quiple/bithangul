@@ -1,9 +1,12 @@
 <script lang="ts">
+  import {VStack, StackItem, Heading, Text} from '@astryx-svelte/core'
+
   import type {PixelComponent, ComponentType} from '#lib/types.js'
 
-  import {getBorderColor, flattenBitmap, bytesPerRow, packedPixel} from '#lib/bitmap.js'
+  import {flattenBitmap, bytesPerRow, packedPixel} from '#lib/bitmap.js'
   import {checkConditionMatch, createVariationGroupLookup, getConditionSpecificity} from '#lib/conditions.js'
   import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT, SYLLABLES_PER_CHOSUNG} from '#lib/hangul.js'
+  import {observeSize} from '#lib/observe-size.js'
   import {projectState} from '#lib/state.svelte.js'
 
   interface Props {
@@ -147,11 +150,11 @@
     if (!ctx) return
 
     // Clear canvas
-    ctx.fillStyle = '#fff'
+    ctx.fillStyle = getComputedStyle(canvas).backgroundColor
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
     // Draw grid lines
-    const borderColor = getBorderColor(canvas)
+    const borderColor = getComputedStyle(canvas).borderColor
     ctx.fillStyle = borderColor
 
     // Draw vertical lines
@@ -165,7 +168,7 @@
 
     // Draw glyphs
     const view = new Uint8Array(previewData)
-    ctx.fillStyle = '#000'
+    ctx.fillStyle = getComputedStyle(canvas).color
 
     for (let i = 0; i < affectedIndices.length; i++) {
       const offset = i * stride
@@ -204,23 +207,24 @@
   })
 </script>
 
-<div class="flex min-h-32 min-w-0 flex-1 flex-col gap-2">
-  <h3 class="shrink-0 truncate pl-2 font-medium">미리보기 ({affectedIndices.length}자)</h3>
-
+<VStack minHeight={128} gap={2} class="min-w-0 flex-1">
+  <Heading level={4} accessibilityLevel={3}>미리보기 ({affectedIndices.length}자)</Heading>
   {#if previewData}
-    <div
-      class="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto rounded border bg-white"
-      bind:clientWidth={containerWidth}
+    <StackItem
+      size="fill"
+      isScrollable
+      class="border-default overflow-x-hidden rounded-lg border bg-surface"
+      {...observeSize((element) => (containerWidth = element.clientWidth))}
     >
-      <canvas
-        bind:this={canvas}
-        width={canvasWidth}
-        height={canvasHeight}
-        class="block"
-        style="width: {canvasDisplayWidth}px; height: {canvasDisplayHeight}px; --border-color: var(--border, #e5e5e5);"
-      ></canvas>
-    </div>
-  {:else}
-    <div class="rounded border p-4 text-center text-sm text-muted-foreground">조건에 맞는 자모가 없습니다.</div>
-  {/if}
-</div>
+      <VStack width={canvasDisplayWidth} height={canvasDisplayHeight}>
+        <canvas
+          bind:this={canvas}
+          width={canvasWidth}
+          height={canvasHeight}
+          class="border-default block h-full w-full bg-surface text-primary pixelated"
+          aria-label="조합 글자 미리보기"
+        ></canvas>
+      </VStack>
+    </StackItem>
+  {:else}<Text type="supporting">조건에 맞는 자모가 없습니다.</Text>{/if}
+</VStack>
