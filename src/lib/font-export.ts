@@ -60,17 +60,25 @@ export function exportBDF(buffer: ArrayBuffer, settings: FontSettings) {
   return lines.join('\n')
 }
 
-export function canExportHEX(settings: Pick<FontSettings, 'width' | 'height'>) {
-  return settings.height === 16 && (settings.width === 8 || settings.width === 16)
+// Extended Unifont HEX heights supported by hexdraw --height. The format
+// has no size header, so consumers must be told the exported height.
+export function getHEXDimensions(settings: Pick<FontSettings, 'width' | 'height'>) {
+  const height = [16, 24, 32, 64].find((height) => height >= settings.height)
+  if (!height || settings.height < 1 || settings.width < 1 || settings.width > 64) {
+    throw new Error('HEX 내보내기는 1–64px 그리드를 지원합니다.')
+  }
+  return {width: bytesPerRow(settings.width) * 8, height}
 }
 
 export function exportHEX(buffer: ArrayBuffer, settings: FontSettings) {
-  if (!canExportHEX(settings)) throw new Error('GNU Unifont HEX는 8×16 또는 16×16 픽셀에서 지원합니다.')
+  const dimensions = getHEXDimensions(settings)
   const data = validateBuffer(buffer, settings)
-  const stride = bytesPerRow(settings.width) * settings.height
+  const rowBytes = bytesPerRow(settings.width)
+  const stride = rowBytes * settings.height
+  const padding = '00'.repeat(rowBytes * (dimensions.height - settings.height))
   return Array.from(
     {length: HANGUL_SYLLABLE_COUNT},
-    (_, i) => `${hex(HANGUL_START_CODE_POINT + i)}:${bytesHex(data.subarray(i * stride, (i + 1) * stride))}`,
+    (_, i) => `${hex(HANGUL_START_CODE_POINT + i)}:${bytesHex(data.subarray(i * stride, (i + 1) * stride))}${padding}`,
   ).join('\n')
 }
 

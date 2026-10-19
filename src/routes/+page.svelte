@@ -1,9 +1,10 @@
 <script lang="ts">
-  import {Download, Upload, FileCode, BookOpen} from '@lucide/svelte'
+  import {Download, Upload, FileCode, BookOpen, Settings} from '@lucide/svelte'
   import {onMount} from 'svelte'
 
   import type {FontProject, ComponentType, PixelComponent} from '#lib/types.js'
 
+  import FontSettingsDialog from '#lib/components/FontSettingsDialog.svelte'
   import ComponentEditor from '#lib/components/pixel-editor/ComponentEditor.svelte'
   import ComponentList from '#lib/components/pixel-editor/ComponentList.svelte'
   import GroupManager from '#lib/components/pixel-editor/GroupManager.svelte'
@@ -16,6 +17,8 @@
   import {Spinner} from '#lib/components/ui/spinner/index.js'
   import * as Tooltip from '#lib/components/ui/tooltip/index.js'
   import {downloadText} from '#lib/export.js'
+  import {getHEXDimensions, type FontExportType} from '#lib/font-export.js'
+  import {applyFontSettings, getFontSettings, type FontSettings} from '#lib/font-settings.js'
   import {COMPONENT_TYPE_LABELS} from '#lib/hangul.js'
   import {serializeProject, deserializeProject} from '#lib/serialization.js'
   import {projectState} from '#lib/state.svelte.js'
@@ -31,6 +34,39 @@
   let isGenerating = $state(false)
   let isExportingBDF = $state(false)
   let isExportingHEX = $state(false)
+  let isExportingGlyphs = $state(false)
+  let exportError = $state('')
+  let exportFilename = ''
+  const exporting = $derived(isExportingBDF || isExportingHEX || isExportingGlyphs)
+  const settings = $derived(getFontSettings(projectState.project))
+  let settingsProject = $state<FontProject | null>(null)
+  let settingsHasDraft = $state(false)
+  let settingsRevision = $state(0)
+  let editor = $state<{getDraft: () => {component: PixelComponent; baseline: number}} | undefined>()
+
+  function openFontSettings() {
+    const snapshot = structuredClone($state.snapshot(projectState.project))
+    const draft = projectState.selectedComponentId ? editor?.getDraft() : undefined
+    settingsHasDraft = Boolean(draft)
+    if (draft) {
+      snapshot.baseline = draft.baseline
+      snapshot.components = snapshot.components.map((component) =>
+        component.id === draft.component.id ? draft.component : component,
+      )
+    }
+    settingsProject = snapshot
+  }
+
+  function saveFontSettings(next: FontSettings) {
+    if (!settingsProject) return
+    const selectedId = projectState.selectedComponentId
+    projectState.loadProject(applyFontSettings($state.snapshot(settingsProject), next))
+    projectState.selectComponent(selectedId)
+    settingsRevision++
+    settingsProject = null
+    generatedData = null
+    handleGenerate()
+  }
 
   /** 초성·중성·종성 컴포넌트 목록의 스크롤 위치를 각각 보존 */
   let componentListScrollPositions = $state<Record<ComponentType, number>>({
@@ -95,15 +131,19 @@
 
     exportWorker = new ExportWorker()
     exportWorker.onmessage = (e) => {
-      const {type, result} = e.data
-      const name = projectState.project.name || 'bithangul'
-      if (type === 'bdf') {
-        downloadText(result, `${name}.bdf`, 'text/plain')
-        isExportingBDF = false
-      } else if (type === 'hex') {
-        downloadText(result, `${name}.hex`, 'text/plain')
-        isExportingHEX = false
+      const {type, result, error} = e.data
+      isExportingBDF = false
+      isExportingHEX = false
+      isExportingGlyphs = false
+      if (error) {
+        exportError = error
+        return
       }
+      downloadText(result, `${exportFilename}.${type}`, 'text/plain')
+    }
+    exportWorker.onerror = () => {
+      isExportingBDF = isExportingHEX = isExportingGlyphs = false
+      exportError = '내보내기에 실패했습니다. 다시 시도해 주세요.'
     }
 
     return () => {
@@ -155,26 +195,24 @@
     input.click()
   }
 
-  function handleExport(type: 'bdf' | 'hex') {
-    if (!generatedData || isExportingBDF || isExportingHEX) return
+  function handleExport(type: FontExportType) {
+    if (!generatedData || isGenerating || exporting) return
+    exportError = ''
+    exportFilename = projectState.project.name || 'bithangul'
+    if (type === 'hex') {
+      const {width, height} = getHEXDimensions(settings)
+      exportFilename += `-${width}x${height}`
+    }
     if (type === 'bdf') isExportingBDF = true
-    else isExportingHEX = true
-
+    else if (type === 'hex') isExportingHEX = true
+    else isExportingGlyphs = true
     const bufferCopy = generatedData.slice(0)
-    exportWorker.postMessage(
-      {
-        type,
-        buffer: bufferCopy,
-        fontName: type === 'bdf' ? projectState.project.name || 'bithangul' : undefined,
-        baseline: projectState.project.baseline,
-      },
-      [bufferCopy],
-    )
+    exportWorker.postMessage({type, buffer: bufferCopy, settings: $state.snapshot(settings)}, [bufferCopy])
   }
 </script>
 
 <div class="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
-  <header class="flex h-14 shrink-0 items-center justify-between gap-2 border-b bg-card px-4">
+  <header class="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b bg-card px-4 py-2">
     <div class="flex items-center gap-4">
       <h1 class="truncate text-lg font-bold">BitHangul</h1>
       <ButtonGroup.Root>
@@ -185,6 +223,7 @@
           <Button variant="outline" size="sm" onclick={handleSaveProject}>
             <Download /> 저장
           </Button>
+          <Button variant="outline" size="sm" onclick={openFontSettings}><Settings /> 폰트 설정</Button>
         </ButtonGroup.Root>
         <ButtonGroup.Root>
           <Button variant="outline" size="sm" onclick={() => (exampleDialogOpen = true)}>
@@ -202,7 +241,7 @@
               <Tooltip.Trigger
                 class={buttonVariants({variant: 'outline', size: 'sm'})}
                 onclick={() => handleExport('bdf')}
-                disabled={!generatedData || isGenerating || isExportingBDF || isExportingHEX}
+                disabled={!generatedData || isGenerating || exporting}
               >
                 {#if isExportingBDF}<Spinner />{:else}<FileCode />{/if}
                 {isExportingBDF ? '내보내는 중…' : 'BDF로 내보내기'}
@@ -218,37 +257,53 @@
               <Tooltip.Trigger
                 class={buttonVariants({variant: 'outline', size: 'sm'})}
                 onclick={() => handleExport('hex')}
-                disabled={!generatedData || isGenerating || isExportingBDF || isExportingHEX}
+                disabled={!generatedData || isGenerating || exporting}
               >
                 {#if isExportingHEX}<Spinner />{:else}<FileCode />{/if}
                 {isExportingHEX ? '내보내는 중…' : 'HEX로 내보내기'}
               </Tooltip.Trigger>
               <Tooltip.Content align="end">
-                <p>폰트를 GNU Unifont HEX 형식으로 내보냅니다.</p>
+                <p>
+                  HEX는 {getHEXDimensions(settings).width}×{getHEXDimensions(settings).height}px로 빈 픽셀을 채워
+                  저장합니다. 확장 크기는 불러오는 도구에서 높이를 지정해야 합니다.
+                </p>
               </Tooltip.Content>
             </Tooltip.Root>
           </Tooltip.Provider>
+          <Button
+            variant="outline"
+            size="sm"
+            onclick={() => handleExport('glyphs')}
+            disabled={!generatedData || isGenerating || exporting}
+          >
+            {#if isExportingGlyphs}<Spinner />{:else}<FileCode />{/if}
+            {isExportingGlyphs ? '내보내는 중…' : 'Glyphs로 내보내기'}
+          </Button>
         </ButtonGroup.Root>
       </ButtonGroup.Root>
     </div>
   </header>
+  {#if exportError}<p role="alert" class="px-4 py-2 text-sm text-destructive">{exportError}</p>{/if}
 
   <Resizable.PaneGroup direction="horizontal" class="flex flex-1 overflow-hidden">
     <Resizable.Pane defaultSize={35} minSize={20} maxSize={60} class="flex flex-col bg-sidebar">
       {#if projectState.selectedComponentId && projectState.selectedComponent}
         {@const sel = projectState.selectedComponent}
-        <ComponentEditor
-          component={sel}
-          onSave={(updated, baseline) => {
-            projectState.project.baseline = baseline
-            projectState.updateComponent(updated.id, updated)
-            projectState.selectComponent(null)
-            handleGenerate()
-          }}
-          onCancel={() => {
-            projectState.selectComponent(null)
-          }}
-        />
+        {#key settingsRevision}
+          <ComponentEditor
+            bind:this={editor}
+            component={sel}
+            onSave={(updated, baseline) => {
+              projectState.project.baseline = baseline
+              projectState.updateComponent(updated.id, updated)
+              projectState.selectComponent(null)
+              handleGenerate()
+            }}
+            onCancel={() => {
+              projectState.selectComponent(null)
+            }}
+          />
+        {/key}
       {:else}
         <ComponentList
           components={projectState.project.components}
@@ -276,7 +331,7 @@
     </Resizable.Pane>
     <Resizable.Handle class="w-2 border-x bg-card" />
     <Resizable.Pane defaultSize={65} minSize={40} class="overflow-hidden">
-      <Preview {generatedData} />
+      <Preview {generatedData} width={settings.width} height={settings.height} />
     </Resizable.Pane>
   </Resizable.PaneGroup>
 </div>
@@ -363,3 +418,12 @@
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
+
+{#if settingsProject}
+  <FontSettingsDialog
+    project={settingsProject}
+    hasDraft={settingsHasDraft}
+    onApply={saveFontSettings}
+    onClose={() => (settingsProject = null)}
+  />
+{/if}
