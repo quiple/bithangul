@@ -139,8 +139,9 @@
   }
 </script>
 
-<Dialog isOpen={open} {onOpenChange} purpose="form" width={896}>
+<Dialog padding={0} isOpen={open} {onOpenChange} purpose="form" width={896}>
   <DialogHeader
+    class="bg-transparent backdrop-filter-none [&>div]:p-4"
     title={type ? `${COMPONENT_TYPE_LABELS[type]} 바리에이션 관리` : '바리에이션 관리'}
     subtitle="자형이 사용될 다른 자모 조합을 바리에이션별로 설정합니다."
     {onOpenChange}

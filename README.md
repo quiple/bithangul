@@ -88,7 +88,7 @@ Run `nub run test` for bitmap, generation, settings round-trip, and export check
 
 ## UI components
 
-The interface uses Astryx Svelte 0.5.2 with its Liquid Glass theme (preserving the existing font families). AppShell and Layout
+The interface uses Astryx Svelte 0.5.2 with its Liquid Glass theme (preserving the application font family from before the Astryx migration). AppShell and Layout
 provide the editor panels; Astryx supplies forms, dialogs, tabs, buttons and list
 rows. SVG and canvas remain responsible for pixel artwork and virtual previews.
 

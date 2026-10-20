@@ -64,8 +64,9 @@
   ] as const
 </script>
 
-<Dialog isOpen onOpenChange={(open) => !open && onClose()} purpose="form" width={672}>
+<Dialog padding={0} isOpen onOpenChange={(open) => !open && onClose()} purpose="form" width={672}>
   <DialogHeader
+    class="bg-transparent backdrop-filter-none [&>div]:p-4"
     title="폰트 설정"
     subtitle="폰트 정보, 픽셀 크기와 내보내기 메트릭을 설정합니다."
     onOpenChange={(open) => !open && onClose()}

@@ -322,8 +322,9 @@
   </Layout>
 </AppShell>
 
-<Dialog isOpen={exampleDialogOpen} onOpenChange={(value) => (exampleDialogOpen = value)}>
+<Dialog padding={0} isOpen={exampleDialogOpen} onOpenChange={(value) => (exampleDialogOpen = value)}>
   <DialogHeader
+    class="bg-transparent backdrop-filter-none [&>div]:p-4"
     title="예제 불러오기"
     subtitle="예제 프로젝트를 선택하면 현재 프로젝트를 대체합니다."
     onOpenChange={(value) => (exampleDialogOpen = value)}
@@ -368,8 +369,13 @@
   }}
 />
 
-<Dialog isOpen={deleteTarget !== null} onOpenChange={(open) => !open && (deleteTarget = null)} purpose="required">
-  <DialogHeader title="바리에이션을 삭제할까요?" />
+<Dialog
+  padding={0}
+  isOpen={deleteTarget !== null}
+  onOpenChange={(open) => !open && (deleteTarget = null)}
+  purpose="required"
+>
+  <DialogHeader class="bg-transparent backdrop-filter-none [&>div]:p-4" title="바리에이션을 삭제할까요?" />
   <VStack padding={4}>
     <Text>
       {#if deletePlan && deletePlan.groups.length > 0}

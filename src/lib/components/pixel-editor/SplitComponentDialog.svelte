@@ -119,8 +119,9 @@
   })
 </script>
 
-<Dialog isOpen={open} {onOpenChange} purpose="form" width={672}>
+<Dialog padding={0} isOpen={open} {onOpenChange} purpose="form" width={672}>
   <DialogHeader
+    class="bg-transparent backdrop-filter-none [&>div]:p-4"
     title="컴포넌트 나누기"
     subtitle={`${componentLabel} 컴포넌트를 기준으로 새 바리에이션을 만들고, 같은 자모 종류의 모든 행에 추가합니다.`}
     {onOpenChange}
