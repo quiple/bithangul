@@ -1,4 +1,7 @@
 <script lang="ts">
+  import {Theme} from '@astryx-svelte/core'
+  import {liquidGlassTheme} from '@astryx-svelte/theme-liquid-glass'
+
   import '#app.css'
   import appleTouchIcon from '#lib/assets/apple-touch-icon.png'
   import {projectState} from '#lib/state.svelte.js'
@@ -43,4 +46,6 @@
   <link rel="apple-touch-icon" type="image/png" href={appleTouchIcon} />
 </svelte:head>
 
-{@render children()}
+<Theme theme={liquidGlassTheme}>
+  {@render children()}
+</Theme>

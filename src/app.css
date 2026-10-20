@@ -4,10 +4,19 @@
 @import 'tailwindcss/preflight.css' layer(base);
 @import '@astryx-svelte/core/base.css';
 @import '@astryx-svelte/core/astryx.css';
-@import '@astryx-svelte/theme-neutral/theme.css';
+@import '@astryx-svelte/theme-liquid-glass/theme.css';
 @import '@astryx-svelte/core/tailwind-theme.css';
 @import 'tailwindcss/utilities.css' layer(utilities);
 
 @utility pixelated {
   image-rendering: pixelated;
+}
+
+/* Keep the existing Astryx font families when applying Liquid Glass materials. */
+@layer product {
+  [data-astryx-theme='liquid-glass'] {
+    --font-family-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-family-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-family-code: 'SF Mono', Monaco, Consolas, monospace;
+  }
 }

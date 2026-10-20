@@ -11,7 +11,7 @@ importers:
       '@astryx-svelte/core':
         specifier: 0.5.2
         version: 0.5.2(@stylexjs/stylex@0.19.1)(@stylexjs/unplugin@0.19.1(unplugin@2.3.11))(svelte@5.57.2)(vite@8.3.4)
-      '@astryx-svelte/theme-neutral':
+      '@astryx-svelte/theme-liquid-glass':
         specifier: 0.5.2
         version: 0.5.2(@astryx-svelte/core@0.5.2(@stylexjs/stylex@0.19.1)(@stylexjs/unplugin@0.19.1(unplugin@2.3.11))(svelte@5.57.2)(vite@8.3.4))(svelte@5.57.2)
       '@stylexjs/stylex':
@@ -82,8 +82,8 @@ packages:
       vite:
         optional: true
 
-  '@astryx-svelte/theme-neutral@0.5.2':
-    resolution: {integrity: sha512-coEOO+ZFPeiiwtcTDm5XAHxD1G9X2ijUyv+c5n2aGZkqVOLF7JV/Hfe9mPy1TzwjrLG4reTaZshwf8pBEURKhg==}
+  '@astryx-svelte/theme-liquid-glass@0.5.2':
+    resolution: {integrity: sha512-JY8b3iHE6gmmU53an5RbERj75Hrtm6CfmiOc5IY4+mb7cfI5Uu8l44N5A3BvIHvGU6KbagTFYjQX/zZnv8mbpA==}
     peerDependencies:
       '@astryx-svelte/core': ^0.5.2
       svelte: ^5.0.0
@@ -1829,7 +1829,7 @@ snapshots:
       svelte: 5.57.2
       vite: 8.3.4
 
-  '@astryx-svelte/theme-neutral@0.5.2(@astryx-svelte/core@0.5.2(@stylexjs/stylex@0.19.1)(@stylexjs/unplugin@0.19.1(unplugin@2.3.11))(svelte@5.57.2)(vite@8.3.4))(svelte@5.57.2)':
+  '@astryx-svelte/theme-liquid-glass@0.5.2(@astryx-svelte/core@0.5.2(@stylexjs/stylex@0.19.1)(@stylexjs/unplugin@0.19.1(unplugin@2.3.11))(svelte@5.57.2)(vite@8.3.4))(svelte@5.57.2)':
     dependencies:
       '@astryx-svelte/core': 0.5.2(@stylexjs/stylex@0.19.1)(@stylexjs/unplugin@0.19.1(unplugin@2.3.11))(svelte@5.57.2)(vite@8.3.4)
       '@lucide/svelte': 1.57.0(svelte@5.57.2)

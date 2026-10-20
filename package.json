@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@astryx-svelte/core": "0.5.2",
-    "@astryx-svelte/theme-neutral": "0.5.2",
+    "@astryx-svelte/theme-liquid-glass": "0.5.2",
     "@stylexjs/stylex": "^0.19.1"
   },
   "devDependencies": {
