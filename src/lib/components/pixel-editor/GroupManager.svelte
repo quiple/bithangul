@@ -147,7 +147,7 @@
   />
   <VStack padding={4} gap={6} isScrollable class="min-h-0">
     {#each draftGroups as group, groupIndex (group.id)}
-      <VStack as="section" gap={4} class="border-default border-b" paddingBlockEnd={4}>
+      <VStack as="section" gap={4} class="border-b border-border" paddingBlockEnd={4}>
         <HStack gap={3} align="end">
           <StackItem size="fill"
             ><TextInput
@@ -198,7 +198,7 @@
     </Button>
     {#if errorMsg}<Text role="alert" class="text-error">{errorMsg}</Text>{/if}
   </VStack>
-  <HStack padding={4} gap={2} justify="end" class="border-default shrink-0 border-t">
+  <HStack padding={4} gap={2} justify="end" class="shrink-0 border-t border-border">
     <Button label="취소" onclick={() => onOpenChange(false)} />
     <Button label="저장" variant="primary" onclick={handleSave} />
   </HStack>

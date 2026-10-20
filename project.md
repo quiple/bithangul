@@ -8,7 +8,7 @@
 
 - **Framework**: Svelte / SvelteKit
 - **Language**: TypeScript
-- **UI Component**: shadcn-svelte
+- **UI Component**: Astryx Svelte (`@astryx-svelte/core`, neutral theme)
 - **Icons**: Lucide Svelte
 - **Performance**: Web Worker (글리프 합성), Virtual List (프리뷰 렌더링)
 

@@ -3,6 +3,7 @@
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/preflight.css' layer(base);
 @import '@astryx-svelte/core/base.css';
+@import '@astryx-svelte/core/astryx.css';
 @import '@astryx-svelte/theme-neutral/theme.css';
 @import '@astryx-svelte/core/tailwind-theme.css';
 @import 'tailwindcss/utilities.css' layer(utilities);

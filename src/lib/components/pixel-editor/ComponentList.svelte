@@ -249,7 +249,7 @@
 {/snippet}
 
 <VStack height="100%" class="min-h-0">
-  <HStack padding={3} gap={2} justify="between" align="center" class="border-default shrink-0 border-b">
+  <HStack padding={3} gap={2} justify="between" align="center" class="shrink-0 border-b border-border">
     <Heading level={3} accessibilityLevel={2}>컴포넌트</Heading>
     <TabList value={activeTab} onChange={handleTabChange} role="tablist" aria-label="자모 종류" size="sm">
       <Tab value="chosung" label="초성" panelId="component-list-panel" />
@@ -259,7 +259,9 @@
   </HStack>
   <HStack paddingInline={3} paddingBlock={2} gap={2} justify="between" align="center" class="shrink-0">
     <HStack gap={2} align="center"
-      ><Text type="label">{COMPONENT_TYPE_LABELS[activeTab]}</Text><Badge value={listLayout.totalComponents} /></HStack
+      ><Text type="label">{COMPONENT_TYPE_LABELS[activeTab]}</Text><Badge
+        label={String(listLayout.totalComponents)}
+      /></HStack
     >
     <Button label="바리에이션 관리" size="sm" onclick={() => onOpenGroupManager(activeTab)}
       >{#snippet icon()}<Settings />{/snippet}</Button
@@ -279,7 +281,7 @@
   >
     <VStack height={visibleRows[0]?.top ?? 0} aria-hidden="true" />
     {#each visibleRows as row (row.key)}
-      <VStack height={row.height} justify="center" class="border-default border-b">
+      <VStack height={row.height} justify="center" class="border-b border-border">
         {#if row.kind === 'heading'}
           <HStack paddingInline={3} gap={2} align="center">
             <Heading level={4}>{JAMO_BY_TYPE[activeTab][row.typeIndex]}</Heading><Text type="supporting"

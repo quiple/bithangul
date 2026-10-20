@@ -85,3 +85,15 @@ cropped.
   [Glyphs pixel-font workflow](https://glyphsapp.com/learn/pixelfont).
 
 Run `nub run test` for bitmap, generation, settings round-trip, and export checks.
+
+## UI components
+
+The interface uses Astryx Svelte 0.5.2 with its neutral theme. AppShell and Layout
+provide the editor panels; Astryx supplies forms, dialogs, tabs, buttons and list
+rows. SVG and canvas remain responsible for pixel artwork and virtual previews.
+
+`app.css` imports Astryx's base, precompiled component CSS and theme, followed by
+its Tailwind token bridge. The published package contains compiled StyleX classes,
+so `astryx.css` is required in both development and production. The Astryx Vite
+preset keeps package styles on the StyleX transform path; its HTML injection hook
+is omitted because SvelteKit owns the HTML shell.

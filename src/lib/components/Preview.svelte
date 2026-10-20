@@ -28,8 +28,8 @@
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS) // 399
 
   // 원본 비트맵과 같은 최소 해상도로 그리고 CSS에서 표시 크기만 확대합니다.
-  const CANVAS_W = $derived(COLS * width)
-  const CANVAS_H = $derived(height)
+  const CANVAS_W = $derived(COLS * (width + 1) + 1)
+  const CANVAS_H = $derived(height + 1)
   const stride = $derived(bytesPerRow(width) * height)
 
   // 행 레이블 너비 (CSS w-6 = 24px)
@@ -46,8 +46,7 @@
 
   // 패널 너비에서 레이블 너비를 빼고, 28셀에 맞게 CSS 셀 크기 계산
   let cssCanvasWidth = $derived(Math.max(1, containerWidth - LABEL_W))
-  let cssCellSize = $derived(cssCanvasWidth / COLS)
-  let cssRowHeight = $derived((cssCellSize * height) / width)
+  let cssRowHeight = $derived((cssCanvasWidth * CANVAS_H) / CANVAS_W)
 
   // 가상 스크롤: 보이는 행만 렌더링
   let startRow = $derived(Math.min(TOTAL_ROWS - 1, Math.max(0, Math.floor(scrollTop / cssRowHeight) - 2)))
@@ -87,6 +86,12 @@
     ctx.fillStyle = getComputedStyle(canvas).backgroundColor
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
+    ctx.fillStyle = getComputedStyle(canvas).borderColor
+    for (let col = 0; col <= COLS; col++) {
+      ctx.fillRect(col * (width + 1), 0, 1, CANVAS_H)
+    }
+    ctx.fillRect(0, 0, CANVAS_W, 1)
+
     if (!view) return
     const firstIdx = rowIdx * COLS
     ctx.fillStyle = getComputedStyle(canvas).color
@@ -98,12 +103,12 @@
       const offset = itemIdx * stride
       if (offset + stride > view.byteLength) break
 
-      const cellX = col * width
+      const cellX = col * (width + 1) + 1
 
       for (let r = 0; r < height; r++) {
         for (let c = 0; c < width; c++) {
           if (packedPixel(view, width, r, c, offset)) {
-            ctx.fillRect(cellX + c, r, 1, 1)
+            ctx.fillRect(cellX + c, r + 1, 1, 1)
           }
         }
       }
@@ -143,7 +148,7 @@
   >
     <VStack height={startRow * cssRowHeight} aria-hidden="true" />
     {#each visibleRows as rowIdx (rowIdx)}
-      <HStack height={cssRowHeight} class="border-default border-b">
+      <HStack height={cssRowHeight}>
         <VStack width={LABEL_W} justify="center" align="center" class="shrink-0 bg-muted"
           ><Text type="supporting">{rowLabel(rowIdx)}</Text></VStack
         >
@@ -152,7 +157,7 @@
             use:rowCanvasAction={{rowIdx, view: generatedView, width, height}}
             width={CANVAS_W}
             height={CANVAS_H}
-            class="block h-full w-full bg-surface text-primary pixelated"
+            class="block h-full w-full border-border bg-surface text-primary pixelated"
             aria-label={`${rowLabel(rowIdx)} 음절 미리보기`}
           ></canvas>
         </VStack>

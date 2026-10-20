@@ -162,7 +162,7 @@
     {/each}
     {#if errorMessage}<Text role="alert" class="text-error">{errorMessage}</Text>{/if}
   </VStack>
-  <HStack padding={4} gap={2} justify="end" class="border-default shrink-0 border-t">
+  <HStack padding={4} gap={2} justify="end" class="shrink-0 border-t border-border">
     <Button label="취소" onclick={() => onOpenChange(false)} />
     <Button label="바리에이션 만들고 나누기" variant="primary" onclick={handleSplit} />
   </HStack>

@@ -6,6 +6,7 @@
     LayoutContent,
     ResizeHandle,
     Button,
+    ButtonGroup,
     Dialog,
     DialogHeader,
     HStack,
@@ -13,7 +14,7 @@
     Heading,
     Text,
   } from '@astryx-svelte/core'
-  import {useResizable} from '@astryx-svelte/core/hooks'
+  import {useResizable} from '@astryx-svelte/core'
   import {Download, Upload, FileCode, BookOpen, Settings} from '@lucide/svelte'
   import {onMount} from 'svelte'
 
@@ -34,7 +35,7 @@
   import ExportWorker from '#lib/workers/export.worker?worker'
   import GeneratorWorker from '#lib/workers/generator.worker?worker'
 
-  const panel = useResizable({defaultSize: 480, minSizePx: 280, maxSizePx: 900, autoSaveId: 'bithangul-editor'})
+  const panel = useResizable(() => ({defaultSize: 480, minSizePx: 280, maxSizePx: 900, autoSaveId: 'bithangul-editor'}))
 
   let generatorWorker: Worker
   let exportWorker: Worker
@@ -226,17 +227,20 @@
      Narrow screens retain independently scrollable panels; toolbar actions wrap. -->
 <AppShell contentPadding={0} variant="surface" mobileNav={false}>
   {#snippet topNav()}
-    <HStack padding={3} gap={3} justify="between" align="center" wrap="wrap" class="border-default border-b">
+    <HStack padding={3} gap={3} justify="between" align="center" wrap="wrap" class="border-b border-border">
       <HStack gap={2} align="center" wrap="wrap">
         <Heading level={3} accessibilityLevel={1}>BitHangul</Heading>
-        <Button label="불러오기…" size="sm" onclick={handleLoadProject}>{#snippet icon()}<Upload />{/snippet}</Button>
-        <Button label="저장" size="sm" onclick={handleSaveProject}>{#snippet icon()}<Download />{/snippet}</Button>
-        <Button label="폰트 설정" size="sm" onclick={openFontSettings}>{#snippet icon()}<Settings />{/snippet}</Button>
+        <ButtonGroup label="프로젝트" size="sm">
+          <Button label="불러오기…" size="sm" onclick={handleLoadProject}>{#snippet icon()}<Upload />{/snippet}</Button>
+          <Button label="저장" size="sm" onclick={handleSaveProject}>{#snippet icon()}<Download />{/snippet}</Button>
+          <Button label="폰트 설정" size="sm" onclick={openFontSettings}>{#snippet icon()}<Settings />{/snippet}</Button
+          >
+        </ButtonGroup>
         <Button label="예제 불러오기…" size="sm" onclick={() => (exampleDialogOpen = true)}
           >{#snippet icon()}<BookOpen />{/snippet}</Button
         >
       </HStack>
-      <HStack gap={2} wrap="wrap">
+      <ButtonGroup label="폰트 내보내기" size="sm">
         <Button
           label="BDF로 내보내기"
           size="sm"
@@ -261,7 +265,7 @@
           isDisabled={!generatedData || isGenerating || exporting}
           isLoading={isExportingGlyphs}>{#snippet icon()}<FileCode />{/snippet}</Button
         >
-      </HStack>
+      </ButtonGroup>
     </HStack>
   {/snippet}
   <Layout>

@@ -93,7 +93,7 @@
             <NumberInput
               label="버전 · 주 번호"
               value={draft.versionMajor}
-              onChange={(value) => (draft.versionMajor = value)}
+              onChange={(value: number) => (draft.versionMajor = value)}
               min={0}
               max={999}
               isIntegerOnly
@@ -103,7 +103,7 @@
             <NumberInput
               label="버전 · 부 번호"
               value={draft.versionMinor}
-              onChange={(value) => (draft.versionMinor = value)}
+              onChange={(value: number) => (draft.versionMinor = value)}
               min={0}
               max={999}
               isIntegerOnly
@@ -160,7 +160,7 @@
             <NumberInput
               label="너비 (px)"
               value={draft.width}
-              onChange={(value) => (draft.width = value)}
+              onChange={(value: number) => (draft.width = value)}
               min={1}
               max={MAX_GRID_SIZE}
               isIntegerOnly
@@ -171,7 +171,7 @@
             <NumberInput
               label="높이 (px)"
               value={draft.height}
-              onChange={(value) => {
+              onChange={(value: number) => {
                 draft.height = value
                 draft.baseline = Math.min(draft.baseline, value)
               }}
@@ -185,7 +185,7 @@
             <NumberInput
               label="베이스라인 (위에서 px)"
               value={draft.baseline}
-              onChange={(value) => (draft.baseline = value)}
+              onChange={(value: number) => (draft.baseline = value)}
               min={0}
               max={draft.height}
               isIntegerOnly
@@ -211,7 +211,7 @@
             <NumberInput
               label="UPM (Units per Em)"
               value={draft.unitsPerEm}
-              onChange={(value) => (draft.unitsPerEm = value)}
+              onChange={(value: number) => (draft.unitsPerEm = value)}
               min={16}
               max={16384}
               isIntegerOnly
@@ -221,7 +221,7 @@
             <NumberInput
               label="1픽셀 크기 (폰트 유닛)"
               value={draft.pixelSize}
-              onChange={(value) => (draft.pixelSize = value)}
+              onChange={(value: number) => (draft.pixelSize = value)}
               min={1}
               max={1000}
               isIntegerOnly
@@ -246,7 +246,7 @@
       </FormLayout>
     </form>
   </VStack>
-  <HStack padding={4} gap={2} justify="end" class="border-default shrink-0 border-t">
+  <HStack padding={4} gap={2} justify="end" class="shrink-0 border-t border-border">
     <Button label="취소" onclick={onClose} />
     <Button label="설정 적용" variant="primary" type="submit" form="font-settings" />
   </HStack>

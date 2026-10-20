@@ -213,7 +213,7 @@
     <StackItem
       size="fill"
       isScrollable
-      class="border-default overflow-x-hidden rounded-lg border bg-surface"
+      class="overflow-x-hidden rounded-lg border border-border bg-surface"
       {...observeSize((element) => (containerWidth = element.clientWidth))}
     >
       <VStack width={canvasDisplayWidth} height={canvasDisplayHeight}>
@@ -221,7 +221,7 @@
           bind:this={canvas}
           width={canvasWidth}
           height={canvasHeight}
-          class="border-default block h-full w-full bg-surface text-primary pixelated"
+          class="block h-full w-full border-border bg-surface text-primary pixelated"
           aria-label="조합 글자 미리보기"
         ></canvas>
       </VStack>

@@ -41,8 +41,3 @@ export function createEmptyBitmap(width = 16, height = 16): number[][] {
 export function resizeBitmap(bitmap: number[][], width: number, height: number): number[][] {
   return Array.from({length: height}, (_, r) => Array.from({length: width}, (_, c) => (bitmap[r]?.[c] ? 1 : 0)))
 }
-
-export function getBorderColor(canvas: HTMLCanvasElement): string {
-  const style = getComputedStyle(canvas)
-  return style.getPropertyValue('--border-color').trim() || '#e5e5e5'
-}
