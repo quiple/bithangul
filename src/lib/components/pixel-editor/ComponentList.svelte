@@ -5,6 +5,7 @@
     TabList,
     Tab,
     Item,
+    Grid,
     VStack,
     HStack,
     StackItem,
@@ -12,7 +13,7 @@
     Text,
     Badge,
   } from '@astryx-svelte/core'
-  import {CopyPlus, Settings, Trash2} from '@lucide/svelte'
+  import {Settings} from '@lucide/svelte'
   import {onDestroy, onMount, tick} from 'svelte'
 
   import type {ComponentType, PixelComponent} from '#lib/types.js'
@@ -73,7 +74,8 @@
   let currentScrollTop = $state(0)
   let pendingScrollTop = 0
   let scrollFrame = 0
-  const columnCount = 1
+  let viewportWidth = $state(0)
+  let columnCount = $derived(viewportWidth >= 640 ? 3 : 2)
 
   let activeGroups = $derived(projectState.project.groups[activeTab])
 
@@ -225,25 +227,7 @@
       description={`${COMPONENT_TYPE_LABELS[component.type]} ${jamo}`}
       onclick={() => onSelect(component.id)}
     >
-      {#snippet startContent()}<Thumbnail bitmap={component.bitmap} size={32} />{/snippet}
-      {#snippet endContent()}
-        <HStack gap={1}>
-          <Button
-            label={`${variationName} 나누기`}
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            onclick={() => onSplit(component)}>{#snippet icon()}<CopyPlus />{/snippet}</Button
-          >
-          <Button
-            label={`${variationName} 삭제`}
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            onclick={() => onDelete(component)}>{#snippet icon()}<Trash2 />{/snippet}</Button
-          >
-        </HStack>
-      {/snippet}
+      {#snippet startContent()}<Thumbnail bitmap={component.bitmap} size={40} />{/snippet}
     </Item>
   </ContextMenu>
 {/snippet}
@@ -276,12 +260,13 @@
     {...observeSize((element) => {
       scrollContainer = element
       viewportHeight = element.clientHeight
+      viewportWidth = element.clientWidth
     })}
     onscroll={handleScroll}
   >
     <VStack height={visibleRows[0]?.top ?? 0} aria-hidden="true" />
     {#each visibleRows as row (row.key)}
-      <VStack height={row.height} justify="center" class="border-b border-border">
+      <VStack height={row.height} justify="center">
         {#if row.kind === 'heading'}
           <HStack paddingInline={3} gap={2} align="center">
             <Heading level={4}>{JAMO_BY_TYPE[activeTab][row.typeIndex]}</Heading><Text type="supporting"
@@ -289,7 +274,13 @@
             >
           </HStack>
         {:else}
-          {#each row.components as component (component.id)}{@render componentItem(component)}{/each}
+          <Grid columns={columnCount} gap={2} class="px-3 pb-2">
+            {#each row.components as component (component.id)}
+              <VStack height={56} justify="center" class="min-w-0 overflow-hidden rounded-lg border border-border">
+                {@render componentItem(component)}
+              </VStack>
+            {/each}
+          </Grid>
         {/if}
       </VStack>
     {/each}

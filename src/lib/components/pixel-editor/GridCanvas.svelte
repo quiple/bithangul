@@ -143,12 +143,33 @@
               width={24}
               height={24}
               fill={cell ? 'var(--color-text-primary)' : 'var(--color-background-surface)'}
-              stroke="var(--color-border-emphasized)"
-              stroke-width={0.5}
               role="gridcell"
               aria-label={`Pixel ${r},${c}`}
             />
           {/each}{/each}
+        <!-- Draw each shared edge once so translucent border colors do not stack. -->
+        {#each Array.from({length: COLS - 1}, (_, i) => i + 1) as col}
+          <line
+            x1={col * 24}
+            x2={col * 24}
+            y1={0}
+            y2={ROWS * 24}
+            stroke="var(--color-border-emphasized)"
+            stroke-width={0.5}
+            pointer-events="none"
+          />
+        {/each}
+        {#each Array.from({length: ROWS - 1}, (_, i) => i + 1) as row}
+          <line
+            y1={row * 24}
+            y2={row * 24}
+            x1={0}
+            x2={COLS * 24}
+            stroke="var(--color-border-emphasized)"
+            stroke-width={0.5}
+            pointer-events="none"
+          />
+        {/each}
         {#each Array.from({length: Math.floor((COLS - 1) / 8)}, (_, i) => (i + 1) * 8) as col}<line
             x1={col * 24}
             x2={col * 24}
@@ -166,6 +187,17 @@
             stroke-width={2}
           />{/each}
       </svg>
+      <!-- Outside the nested viewport so the outline is not clipped in half. -->
+      <rect
+        x={0}
+        y={0}
+        width={COLS * 24}
+        height={ROWS * 24}
+        fill="none"
+        stroke="var(--color-border-emphasized)"
+        stroke-width={0.5}
+        pointer-events="none"
+      />
       <line
         x1={0}
         x2={COLS * 24}
@@ -176,7 +208,7 @@
         stroke-dasharray="4 2"
         pointer-events="none"
       />
-      <g transform={`translate(${COLS * 24 + 8}, ${baseline * 24})`}>
+      <g transform={`translate(${COLS * 24 + 4}, ${baseline * 24})`}>
         <g
           role="slider"
           tabindex="0"
@@ -185,7 +217,7 @@
           aria-valuemin={0}
           aria-valuemax={ROWS}
           aria-valuenow={baseline}
-          aria-valuetext={`위에서 ${baseline}픽셀`}
+          aria-valuetext={`${baseline}픽셀`}
           class="cursor-ns-resize touch-none"
           onpointerdown={startBaselineDrag}
           onpointermove={moveBaseline}
@@ -194,19 +226,13 @@
           onlostpointercapture={endBaselineDrag}
           onkeydown={handleBaselineKey}
         >
-          <rect
-            x={0}
-            y={-12}
-            width={24}
-            height={24}
-            rx={4}
-            fill="var(--color-background-surface)"
-            stroke="var(--color-accent)"
-          />
-          <path d="M6 -3 H18 M6 3 H18" stroke="var(--color-accent)" stroke-width={2} />
+          <rect x={0} y={-12} width={20} height={24} fill="transparent" />
+          <rect x={0} y={-8} width={16} height={16} rx={3} fill="var(--color-accent)" />
+          <path d="M4 -2 H12 M4 2 H12" stroke="var(--color-on-accent)" stroke-width={1.5} pointer-events="none" />
         </g>
-        <text x={30} y={-2} fill="var(--color-text-secondary)" class="text-sm">베이스라인 ·</text>
-        <text x={30} y={12} fill="var(--color-text-secondary)" class="text-sm">위에서 {baseline}px</text>
+        <text x={22} y={0} dominant-baseline="central" fill="var(--color-text-secondary)" class="text-sm"
+          >베이스라인 · {baseline}px</text
+        >
       </g>
     </svg>
   </VStack>

@@ -26,3 +26,21 @@
     --font-family-code: 'SF Mono', Monaco, Consolas, monospace;
   }
 }
+
+/* Liquid Glass 0.5.2's button radius overrides ButtonGroup's joined edges.
+   Keep capsule corners only on the outer members, including tooltip siblings. */
+@layer product {
+  [data-astryx-theme='liquid-glass'] .astryx-button-group[data-orientation='horizontal'] > .astryx-button {
+    border-radius: 0;
+  }
+  [data-astryx-theme='liquid-glass'] .astryx-button-group[data-orientation='horizontal'] > .astryx-button:first-child {
+    border-start-start-radius: var(--radius-full);
+    border-end-start-radius: var(--radius-full);
+  }
+  [data-astryx-theme='liquid-glass']
+    .astryx-button-group[data-orientation='horizontal']
+    > .astryx-button:not(:has(~ .astryx-button)) {
+    border-start-end-radius: var(--radius-full);
+    border-end-end-radius: var(--radius-full);
+  }
+}
