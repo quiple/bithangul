@@ -132,39 +132,32 @@
   })
 
   // Calculate layout based on container width
-  let cols = $derived(Math.max(1, Math.floor((containerWidth - INTERNAL_BORDER) / displayCellWidth)))
+  let cols = $derived(Math.max(1, Math.floor((containerWidth + INTERNAL_BORDER) / displayCellWidth)))
   let rows = $derived(Math.ceil(affectedIndices.length / cols))
 
-  let canvasWidth = $derived(cols * internalCellWidth + INTERNAL_BORDER)
-  let canvasHeight = $derived(
-    Math.max(internalCellHeight + INTERNAL_BORDER, rows * internalCellHeight + INTERNAL_BORDER),
-  )
-  let canvasDisplayWidth = $derived(cols * displayCellWidth + INTERNAL_BORDER)
-  let canvasDisplayHeight = $derived(
-    Math.max(displayCellHeight + INTERNAL_BORDER, rows * displayCellHeight + INTERNAL_BORDER),
-  )
+  let canvasWidth = $derived(cols * internalCellWidth - INTERNAL_BORDER)
+  let canvasHeight = $derived(Math.max(height, rows * internalCellHeight - INTERNAL_BORDER))
+  let canvasDisplayWidth = $derived(cols * displayCellWidth - INTERNAL_BORDER)
+  let canvasDisplayHeight = $derived(Math.max(height * 2, rows * displayCellHeight - INTERNAL_BORDER))
 
   function draw() {
     if (!canvas || !previewData) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Clear canvas
-    ctx.fillStyle = getComputedStyle(canvas).backgroundColor
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // Theme surfaces may be translucent: painting over the old frame leaves ghosts.
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Draw grid lines
-    const borderColor = getComputedStyle(canvas).borderColor
-    ctx.fillStyle = borderColor
-
-    // Draw vertical lines
-    for (let c = 0; c <= cols; c++) {
-      ctx.fillRect(c * internalCellWidth, 0, INTERNAL_BORDER, canvas.height)
+    // One filled path unions the separators, so intersections receive alpha once.
+    ctx.fillStyle = getComputedStyle(canvas).borderColor
+    ctx.beginPath()
+    for (let c = 1; c < cols; c++) {
+      ctx.rect(c * internalCellWidth - INTERNAL_BORDER, 0, INTERNAL_BORDER, canvas.height)
     }
-    // Draw horizontal lines
-    for (let r = 0; r <= rows; r++) {
-      ctx.fillRect(0, r * internalCellHeight, canvas.width, INTERNAL_BORDER)
+    for (let r = 1; r < rows; r++) {
+      ctx.rect(0, r * internalCellHeight - INTERNAL_BORDER, canvas.width, INTERNAL_BORDER)
     }
+    ctx.fill()
 
     // Draw glyphs
     const view = new Uint8Array(previewData)
@@ -177,8 +170,8 @@
       const col = i % cols
       const row = Math.floor(i / cols)
 
-      const cellX = col * internalCellWidth + INTERNAL_BORDER
-      const cellY = row * internalCellHeight + INTERNAL_BORDER
+      const cellX = col * internalCellWidth
+      const cellY = row * internalCellHeight
 
       for (let r = 0; r < height; r++) {
         for (let c = 0; c < width; c++) {
@@ -213,7 +206,7 @@
     <StackItem
       size="fill"
       isScrollable
-      class="overflow-x-hidden rounded-lg border border-border bg-surface"
+      class="overflow-x-hidden bg-surface"
       {...observeSize((element) => (containerWidth = element.clientWidth))}
     >
       <VStack width={canvasDisplayWidth} height={canvasDisplayHeight}>

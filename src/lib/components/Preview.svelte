@@ -28,7 +28,7 @@
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS) // 399
 
   // 원본 비트맵과 같은 최소 해상도로 그리고 CSS에서 표시 크기만 확대합니다.
-  const CANVAS_W = $derived(COLS * (width + 1) + 1)
+  const CANVAS_W = $derived(COLS * (width + 1) - 1)
   const CANVAS_H = $derived(height + 1)
   const stride = $derived(bytesPerRow(width) * height)
 
@@ -82,15 +82,15 @@
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // 배경 (흰색)
-    ctx.fillStyle = getComputedStyle(canvas).backgroundColor
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
-
+    // Clear instead of compositing a translucent surface over the previous frame.
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
     ctx.fillStyle = getComputedStyle(canvas).borderColor
-    for (let col = 0; col <= COLS; col++) {
-      ctx.fillRect(col * (width + 1), 0, 1, CANVAS_H)
+    ctx.beginPath()
+    for (let col = 1; col < COLS; col++) {
+      ctx.rect(col * (width + 1) - 1, 0, 1, CANVAS_H)
     }
-    ctx.fillRect(0, 0, CANVAS_W, 1)
+    if (rowIdx < TOTAL_ROWS - 1) ctx.rect(0, height, CANVAS_W, 1)
+    ctx.fill()
 
     if (!view) return
     const firstIdx = rowIdx * COLS
@@ -103,12 +103,12 @@
       const offset = itemIdx * stride
       if (offset + stride > view.byteLength) break
 
-      const cellX = col * (width + 1) + 1
+      const cellX = col * (width + 1)
 
       for (let r = 0; r < height; r++) {
         for (let c = 0; c < width; c++) {
           if (packedPixel(view, width, r, c, offset)) {
-            ctx.fillRect(cellX + c, r + 1, 1, 1)
+            ctx.fillRect(cellX + c, r, 1, 1)
           }
         }
       }
