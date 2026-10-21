@@ -27,9 +27,9 @@
   const TOTAL_ITEMS = HANGUL_SYLLABLE_COUNT
   const TOTAL_ROWS = Math.ceil(TOTAL_ITEMS / COLS) // 399
 
-  // 원본 비트맵과 같은 최소 해상도로 그리고 CSS에서 표시 크기만 확대합니다.
-  const CANVAS_W = $derived(COLS * (width + 1) - 1)
-  const CANVAS_H = $derived(height + 1)
+  // 비트맵을 빈 간격 없이 이어 그리고, 구분선은 화면 기준 1px로 겹쳐 그립니다.
+  const CANVAS_W = $derived(COLS * width)
+  const CANVAS_H = $derived(height)
   const stride = $derived(bytesPerRow(width) * height)
 
   // 행 레이블 너비 (CSS w-6 = 24px)
@@ -95,7 +95,7 @@
       const offset = itemIdx * stride
       if (offset + stride > view.byteLength) break
 
-      const cellX = col * (width + 1)
+      const cellX = col * width
 
       for (let r = 0; r < height; r++) {
         for (let c = 0; c < width; c++) {
@@ -159,8 +159,8 @@
             aria-hidden="true"
           >
             <path
-              d={Array.from({length: COLS - 1}, (_, i) => `M${(i + 1) * (width + 1) - 0.5} 0 V${CANVAS_H}`).join(' ') +
-                (rowIdx < TOTAL_ROWS - 1 ? ` M0 ${height + 0.5} H${CANVAS_W}` : '')}
+              d={Array.from({length: COLS - 1}, (_, i) => `M${(i + 1) * width} 0 V${CANVAS_H}`).join(' ') +
+                (rowIdx < TOTAL_ROWS - 1 ? ` M0 ${height - CANVAS_W / cssCanvasWidth / 2} H${CANVAS_W}` : '')}
               fill="none"
               stroke="var(--color-border)"
               stroke-width={1}
