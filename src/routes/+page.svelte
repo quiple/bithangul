@@ -16,7 +16,6 @@
     Text,
   } from '@astryx-svelte/core'
   import {useResizable} from '@astryx-svelte/core'
-  import {FileCode} from '@lucide/svelte'
   import {onMount} from 'svelte'
   import {innerWidth} from 'svelte/reactivity/window'
 
@@ -302,7 +301,7 @@
     <HStack padding={3} gap={3} justify="between" align="center" wrap="wrap" class="border-b border-border">
       <HStack gap={2} align="center" wrap="wrap">
         <Heading level={3} accessibilityLevel={1}>BitHangul</Heading>
-        <HStack gap={1} as="nav" aria-label="메인 메뉴">
+        <ButtonGroup label="메인 메뉴" size="sm">
           <DropdownMenu
             button={{label: '파일', variant: 'ghost', size: 'sm'}}
             hasChevron={false}
@@ -310,8 +309,32 @@
             items={[
               {label: '불러오기…', onClick: handleLoadProject},
               {label: '저장', onClick: handleSaveProject},
+              {
+                label: '예제 불러오기',
+                items: EXAMPLES.map((example) => ({
+                  label: example.name,
+                  description: '현재 프로젝트를 이 예제로 대체합니다.',
+                  onClick: () => loadExample(example.loader),
+                })),
+              },
               {type: 'divider'},
               {label: '폰트 설정', onClick: openFontSettings},
+              {type: 'divider'},
+              {
+                label: isExportingBDF ? 'BDF로 내보내는 중…' : 'BDF로 내보내기',
+                onClick: () => handleExport('bdf'),
+                isDisabled: !generatedData || isGenerating || exporting,
+              },
+              {
+                label: isExportingHEX ? 'HEX로 내보내는 중…' : 'HEX로 내보내기',
+                onClick: () => handleExport('hex'),
+                isDisabled: !generatedData || isGenerating || exporting,
+              },
+              {
+                label: isExportingGlyphs ? 'Glyphs로 내보내는 중…' : 'Glyphs로 내보내기',
+                onClick: () => handleExport('glyphs'),
+                isDisabled: !generatedData || isGenerating || exporting,
+              },
             ]}
           />
           <DropdownMenu
@@ -320,44 +343,8 @@
             menuWidth={220}
             items={[{label: '모든 글리프 이동…', items: moveItems}]}
           />
-        </HStack>
-        <DropdownMenu
-          button={{label: '예제 불러오기', variant: 'ghost', size: 'sm'}}
-          hasChevron={false}
-          menuWidth={300}
-          items={EXAMPLES.map((example) => ({
-            label: example.name,
-            description: '현재 프로젝트를 이 예제로 대체합니다.',
-            onClick: () => loadExample(example.loader),
-          }))}
-        />
+        </ButtonGroup>
       </HStack>
-      <ButtonGroup label="폰트 내보내기" size="sm">
-        <Button
-          label="BDF로 내보내기"
-          size="sm"
-          onclick={() => handleExport('bdf')}
-          isDisabled={!generatedData || isGenerating || exporting}
-          isLoading={isExportingBDF}
-          tooltip="폰트를 비트맵 배포 형식(BDF)으로 내보냅니다.">{#snippet icon()}<FileCode />{/snippet}</Button
-        >
-        <Button
-          label="HEX로 내보내기"
-          size="sm"
-          onclick={() => handleExport('hex')}
-          isDisabled={!generatedData || isGenerating || exporting}
-          isLoading={isExportingHEX}
-          tooltip={`HEX는 ${getHEXDimensions(settings).width}×${getHEXDimensions(settings).height}px로 빈 픽셀을 채워 저장합니다. 확장 크기는 불러오는 도구에서 높이를 지정해야 합니다.`}
-          >{#snippet icon()}<FileCode />{/snippet}</Button
-        >
-        <Button
-          label="Glyphs로 내보내기"
-          size="sm"
-          onclick={() => handleExport('glyphs')}
-          isDisabled={!generatedData || isGenerating || exporting}
-          isLoading={isExportingGlyphs}>{#snippet icon()}<FileCode />{/snippet}</Button
-        >
-      </ButtonGroup>
     </HStack>
   {/snippet}
   <Text role="status" aria-live="polite" class="sr-only">{moveMessage}</Text>
