@@ -1,5 +1,6 @@
 <script lang="ts">
-  import {Theme} from '@astryx-svelte/core'
+  import {InternationalizationProvider, Theme} from '@astryx-svelte/core'
+  import koKR from '@astryx-svelte/core/locales/ko-KR.json'
   import {liquidGlassTheme} from '@astryx-svelte/theme-liquid-glass'
 
   import '#app.css'
@@ -46,6 +47,8 @@
   <link rel="apple-touch-icon" type="image/png" href={appleTouchIcon} />
 </svelte:head>
 
-<Theme theme={liquidGlassTheme}>
-  {@render children()}
-</Theme>
+<InternationalizationProvider locale="ko-KR" messages={{'ko-KR': koKR}}>
+  <Theme theme={liquidGlassTheme}>
+    {@render children()}
+  </Theme>
+</InternationalizationProvider>
