@@ -144,7 +144,7 @@
               height={24}
               fill={cell ? 'var(--color-text-primary)' : 'var(--color-background-surface)'}
               role="gridcell"
-              aria-label={`Pixel ${r},${c}`}
+              aria-label={`픽셀 ${r + 1}행 ${c + 1}열`}
             />
           {/each}{/each}
         <!-- Draw each shared edge once so translucent border colors do not stack. -->
