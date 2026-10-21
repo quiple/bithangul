@@ -17,6 +17,7 @@
   import {useResizable} from '@astryx-svelte/core'
   import {Download, Upload, FileCode, BookOpen, Settings} from '@lucide/svelte'
   import {onMount} from 'svelte'
+  import {innerWidth} from 'svelte/reactivity/window'
 
   import type {FontProject, ComponentType, PixelComponent} from '#lib/types.js'
 
@@ -35,7 +36,11 @@
   import ExportWorker from '#lib/workers/export.worker?worker'
   import GeneratorWorker from '#lib/workers/generator.worker?worker'
 
-  const panel = useResizable(() => ({defaultSize: 480, minSizePx: 280, maxSizePx: 900, autoSaveId: 'bithangul-editor'}))
+  const panel = useResizable(() => ({
+    defaultSize: '35%',
+    minSizePx: (innerWidth.current ?? 1200) * 0.2,
+    maxSizePx: (innerWidth.current ?? 1200) * 0.6,
+  }))
 
   let generatorWorker: Worker
   let exportWorker: Worker
@@ -223,7 +228,7 @@
   }
 </script>
 
-<!-- Frame: wrapping toolbar | editor 480px (280–900px, resizable) | preview fills remaining space.
+<!-- Frame: wrapping toolbar | editor 35% (20–60%, resizable) | preview fills remaining 65% initially.
      Narrow screens retain independently scrollable panels; toolbar actions wrap. -->
 <AppShell contentPadding={0} variant="surface" mobileNav={false}>
   {#snippet topNav()}
