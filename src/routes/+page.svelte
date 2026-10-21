@@ -16,7 +16,7 @@
     Text,
   } from '@astryx-svelte/core'
   import {useResizable} from '@astryx-svelte/core'
-  import {FileCode, BookOpen} from '@lucide/svelte'
+  import {FileCode} from '@lucide/svelte'
   import {onMount} from 'svelte'
   import {innerWidth} from 'svelte/reactivity/window'
 
@@ -94,7 +94,6 @@
     jongsung: 0,
   })
   let componentListActiveTab = $state<ComponentType>('chosung')
-  let exampleDialogOpen = $state(false)
 
   // Group Manager State
   let gmOpen = $state(false)
@@ -152,7 +151,7 @@
       event.defaultPrevented
     )
       return
-    if (settingsProject || gmOpen || splitDialogOpen || deleteTarget || exampleDialogOpen) return
+    if (settingsProject || gmOpen || splitDialogOpen || deleteTarget) return
     if (
       event
         .composedPath()
@@ -193,7 +192,6 @@
       console.error('예제 불러오기 실패:', err)
       alert('예제를 불러오는 데 실패했습니다.')
     }
-    exampleDialogOpen = false
   }
 
   onMount(() => {
@@ -323,9 +321,16 @@
             items={[{label: '모든 글리프 이동…', items: moveItems}]}
           />
         </HStack>
-        <Button label="예제 불러오기…" size="sm" onclick={() => (exampleDialogOpen = true)}
-          >{#snippet icon()}<BookOpen />{/snippet}</Button
-        >
+        <DropdownMenu
+          button={{label: '예제 불러오기', variant: 'ghost', size: 'sm'}}
+          hasChevron={false}
+          menuWidth={300}
+          items={EXAMPLES.map((example) => ({
+            label: example.name,
+            description: '현재 프로젝트를 이 예제로 대체합니다.',
+            onClick: () => loadExample(example.loader),
+          }))}
+        />
       </HStack>
       <ButtonGroup label="폰트 내보내기" size="sm">
         <Button
@@ -410,22 +415,6 @@
   </Layout>
 </AppShell>
 
-<Dialog padding={0} isOpen={exampleDialogOpen} onOpenChange={(value) => (exampleDialogOpen = value)}>
-  <DialogHeader
-    class="bg-transparent backdrop-filter-none [&>div]:p-4"
-    title="예제 불러오기"
-    subtitle="예제 프로젝트를 선택하면 현재 프로젝트를 대체합니다."
-    onOpenChange={(value) => (exampleDialogOpen = value)}
-  />
-  <VStack padding={4} gap={2}>
-    {#each EXAMPLES as example}
-      <Button label={example.name} onclick={() => loadExample(example.loader)}
-        >{#snippet icon()}<BookOpen />{/snippet}</Button
-      >
-    {/each}
-  </VStack>
-  <HStack padding={4} justify="end"><Button label="취소" onclick={() => (exampleDialogOpen = false)} /></HStack>
-</Dialog>
 <GroupManager
   open={gmOpen}
   type={gmType}
