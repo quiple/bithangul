@@ -220,8 +220,13 @@
             d={[
               ...Array.from({length: cols - 1}, (_, i) => `M${(i + 1) * internalCellWidth - 0.5} 0 V${canvasHeight}`),
               ...Array.from({length: rows - 1}, (_, i) => `M0 ${(i + 1) * internalCellHeight - 0.5} H${canvasWidth}`),
-              ...(canvasDisplayWidth < containerWidth ? [`M${canvasWidth} 0 V${canvasHeight}`] : []),
-              ...(canvasDisplayHeight < containerHeight ? [`M0 ${canvasHeight} H${canvasWidth}`] : []),
+              // Inset by half a screen pixel so the 1px stroke stays inside the SVG viewport.
+              ...(canvasDisplayWidth < containerWidth
+                ? [`M${canvasWidth - canvasWidth / canvasDisplayWidth / 2} 0 V${canvasHeight}`]
+                : []),
+              ...(canvasDisplayHeight < containerHeight
+                ? [`M0 ${canvasHeight - canvasHeight / canvasDisplayHeight / 2} H${canvasWidth}`]
+                : []),
             ].join(' ')}
             fill="none"
             stroke="var(--color-border)"
