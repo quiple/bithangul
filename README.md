@@ -100,7 +100,7 @@ is omitted because SvelteKit owns the HTML shell.
 
 ## Moving all glyphs
 
-Use **편집 → 모든 글리프 이동…** to move all component bitmaps one pixel up,
+Use **편집 → 모든 글리프 이동** to move all component bitmaps one pixel up,
 down, left or right. **Ctrl+Alt+Arrow** performs the same action (Control+Option
 on macOS). Shortcuts are inactive in text inputs and dialogs. If any filled
 pixel would leave the grid, the entire move is blocked and that menu action is
