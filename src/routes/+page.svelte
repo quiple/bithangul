@@ -351,8 +351,7 @@
   <Layout>
     {#snippet header()}{#if exportError}<Text role="alert" class="text-error">{exportError}</Text>{/if}{/snippet}
     {#snippet start()}
-      <!-- The handle extends into the start panel; reserve space outside its scroll containers. -->
-      <LayoutPanel resizable={panel.props} isScrollable={false} padding={0} class="pe-4" label="컴포넌트 편집">
+      <LayoutPanel resizable={panel.props} isScrollable={false} padding={0} label="컴포넌트 편집">
         {#if projectState.selectedComponentId && projectState.selectedComponent}
           {@const sel = projectState.selectedComponent}
           {#key settingsRevision}

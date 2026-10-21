@@ -254,6 +254,7 @@
   <StackItem
     size="fill"
     isScrollable
+    class="me-4"
     id="component-list-panel"
     role="tabpanel"
     aria-label={COMPONENT_TYPE_LABELS[activeTab]}

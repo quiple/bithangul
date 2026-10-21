@@ -78,7 +78,7 @@
       {#each activeGroupNames as name}<Token label={name} size="sm" />{/each}
     </HStack>
   {/if}
-  <StackItem size="fill" isScrollable>
+  <StackItem size="fill" isScrollable class="me-4">
     <VStack height="100%" gap={4}>
       <StackItem
         ><GridCanvas
