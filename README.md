@@ -97,3 +97,12 @@ its Tailwind token bridge. The published package contains compiled StyleX classe
 so `astryx.css` is required in both development and production. The Astryx Vite
 preset keeps package styles on the StyleX transform path; its HTML injection hook
 is omitted because SvelteKit owns the HTML shell.
+
+## Moving all glyphs
+
+Use **편집 → 모든 글리프 이동…** to move all component bitmaps one pixel up,
+down, left or right. **Ctrl+Alt+Arrow** performs the same action (Control+Option
+on macOS). Shortcuts are inactive in text inputs and dialogs. If any filled
+pixel would leave the grid, the entire move is blocked and that menu action is
+disabled. A move includes and commits the current editor draft; the baseline
+and grid dimensions remain unchanged.

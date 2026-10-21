@@ -7,6 +7,7 @@
     ResizeHandle,
     Button,
     ButtonGroup,
+    DropdownMenu,
     Dialog,
     DialogHeader,
     HStack,
@@ -15,7 +16,7 @@
     Text,
   } from '@astryx-svelte/core'
   import {useResizable} from '@astryx-svelte/core'
-  import {Download, Upload, FileCode, BookOpen, Settings} from '@lucide/svelte'
+  import {FileCode, BookOpen} from '@lucide/svelte'
   import {onMount} from 'svelte'
   import {innerWidth} from 'svelte/reactivity/window'
 
@@ -31,6 +32,7 @@
   import {getHEXDimensions, type FontExportType} from '#lib/font-export.js'
   import {applyFontSettings, getFontSettings, type FontSettings} from '#lib/font-settings.js'
   import {COMPONENT_TYPE_LABELS} from '#lib/hangul.js'
+  import {canNudge, nudgeComponents, type NudgeDirection} from '#lib/nudge.js'
   import {serializeProject, deserializeProject} from '#lib/serialization.js'
   import {projectState} from '#lib/state.svelte.js'
   import ExportWorker from '#lib/workers/export.worker?worker'
@@ -103,6 +105,71 @@
   let splitTarget = $state<PixelComponent | null>(null)
   let deleteTarget = $state<PixelComponent | null>(null)
   let deletePlan = $derived(deleteTarget ? projectState.getComponentDeletionPlan(deleteTarget.id) : null)
+
+  const moveDirections = [
+    {direction: 'up', label: '위로 1px 이동', key: 'ArrowUp', shortcut: 'Ctrl+Alt+↑'},
+    {direction: 'down', label: '아래로 1px 이동', key: 'ArrowDown', shortcut: 'Ctrl+Alt+↓'},
+    {direction: 'left', label: '왼쪽으로 1px 이동', key: 'ArrowLeft', shortcut: 'Ctrl+Alt+←'},
+    {direction: 'right', label: '오른쪽으로 1px 이동', key: 'ArrowRight', shortcut: 'Ctrl+Alt+→'},
+  ] as const
+  let moveMessage = $state('')
+  const moveComponents = $derived.by(() => {
+    const draft = projectState.selectedComponentId ? editor?.getDraft() : undefined
+    return projectState.project.components.map((component) =>
+      component.id === draft?.component.id ? draft.component : component,
+    )
+  })
+  const moveItems = $derived(
+    moveDirections.map(({direction, label, shortcut}) => ({
+      label,
+      description: shortcut,
+      isDisabled: !canNudge(moveComponents, direction),
+      onClick: () => moveAllGlyphs(direction),
+    })),
+  )
+
+  function moveAllGlyphs(direction: NudgeDirection) {
+    const moved = nudgeComponents(moveComponents, direction)
+    if (!moved) {
+      moveMessage = '이동할 픽셀이 없거나, 이동하면 픽셀이 그리드 밖으로 벗어납니다.'
+      return
+    }
+    const draft = projectState.selectedComponentId ? editor?.getDraft() : undefined
+    if (draft) projectState.project.baseline = draft.baseline
+    for (const component of moved) projectState.updateComponent(component.id, component)
+    settingsRevision++
+    moveMessage = `모든 글리프를 ${moveDirections.find((item) => item.direction === direction)!.label.replace(' 이동', '')} 이동했습니다.`
+    handleGenerate()
+  }
+
+  function handleNudgeKey(event: KeyboardEvent) {
+    if (
+      !event.ctrlKey ||
+      !event.altKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.defaultPrevented
+    )
+      return
+    if (settingsProject || gmOpen || splitDialogOpen || deleteTarget || exampleDialogOpen) return
+    if (
+      event
+        .composedPath()
+        .some(
+          (target) =>
+            target instanceof HTMLElement &&
+            (target.matches('input, textarea, select, [role="textbox"], [role="spinbutton"]') ||
+              target.isContentEditable),
+        )
+    )
+      return
+    const move = moveDirections.find((item) => item.key === event.key)
+    if (!move) return
+    event.preventDefault()
+    event.stopPropagation()
+    moveAllGlyphs(move.direction)
+  }
 
   const EXAMPLES: {name: string; loader: () => Promise<FontProject>}[] = [
     {
@@ -228,6 +295,8 @@
   }
 </script>
 
+<svelte:window onkeydowncapture={handleNudgeKey} />
+
 <!-- Frame: wrapping toolbar | editor 35% (20–60%, resizable) | preview fills remaining 65% initially.
      Narrow screens retain independently scrollable panels; toolbar actions wrap. -->
 <AppShell contentPadding={0} variant="surface" mobileNav={false}>
@@ -235,12 +304,25 @@
     <HStack padding={3} gap={3} justify="between" align="center" wrap="wrap" class="border-b border-border">
       <HStack gap={2} align="center" wrap="wrap">
         <Heading level={3} accessibilityLevel={1}>BitHangul</Heading>
-        <ButtonGroup label="프로젝트" size="sm">
-          <Button label="불러오기…" size="sm" onclick={handleLoadProject}>{#snippet icon()}<Upload />{/snippet}</Button>
-          <Button label="저장" size="sm" onclick={handleSaveProject}>{#snippet icon()}<Download />{/snippet}</Button>
-          <Button label="폰트 설정" size="sm" onclick={openFontSettings}>{#snippet icon()}<Settings />{/snippet}</Button
-          >
-        </ButtonGroup>
+        <HStack gap={1} as="nav" aria-label="메인 메뉴">
+          <DropdownMenu
+            button={{label: '파일', variant: 'ghost', size: 'sm'}}
+            hasChevron={false}
+            menuWidth={220}
+            items={[
+              {label: '불러오기…', onClick: handleLoadProject},
+              {label: '저장', onClick: handleSaveProject},
+              {type: 'divider'},
+              {label: '폰트 설정', onClick: openFontSettings},
+            ]}
+          />
+          <DropdownMenu
+            button={{label: '편집', variant: 'ghost', size: 'sm'}}
+            hasChevron={false}
+            menuWidth={220}
+            items={[{label: '모든 글리프 이동…', items: moveItems}]}
+          />
+        </HStack>
         <Button label="예제 불러오기…" size="sm" onclick={() => (exampleDialogOpen = true)}
           >{#snippet icon()}<BookOpen />{/snippet}</Button
         >
@@ -273,6 +355,7 @@
       </ButtonGroup>
     </HStack>
   {/snippet}
+  <Text role="status" aria-live="polite" class="sr-only">{moveMessage}</Text>
   <Layout>
     {#snippet header()}{#if exportError}<Text role="alert" class="text-error">{exportError}</Text>{/if}{/snippet}
     {#snippet start()}
