@@ -12,6 +12,13 @@
   image-rendering: pixelated;
 }
 
+@layer product {
+  [data-astryx-theme='liquid-glass'] .astryx-dialog {
+    color-scheme: light;
+    background-color: var(--color-on-dark);
+  }
+}
+
 /* Preserve the application font stack from before the Astryx migration. */
 @layer product {
   [data-astryx-theme='liquid-glass'] {
