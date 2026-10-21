@@ -341,7 +341,7 @@
             button={{label: '편집', variant: 'ghost', size: 'sm'}}
             hasChevron={false}
             menuWidth={220}
-            items={[{label: '모든 글리프 이동…', items: moveItems}]}
+            items={[{label: '모든 글리프 이동', items: moveItems}]}
           />
         </ButtonGroup>
       </HStack>
