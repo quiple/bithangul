@@ -26,6 +26,7 @@
 
   let canvas: HTMLCanvasElement = $state(undefined!)
   let containerWidth = $state(0)
+  let containerHeight = $state(0)
 
   interface MatchedGlyph {
     index: number
@@ -148,17 +149,6 @@
     // Theme surfaces may be translucent: painting over the old frame leaves ghosts.
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // One filled path unions the separators, so intersections receive alpha once.
-    ctx.fillStyle = getComputedStyle(canvas).borderColor
-    ctx.beginPath()
-    for (let c = 1; c < cols; c++) {
-      ctx.rect(c * internalCellWidth - INTERNAL_BORDER, 0, INTERNAL_BORDER, canvas.height)
-    }
-    for (let r = 1; r < rows; r++) {
-      ctx.rect(0, r * internalCellHeight - INTERNAL_BORDER, canvas.width, INTERNAL_BORDER)
-    }
-    ctx.fill()
-
     // Draw glyphs
     const view = new Uint8Array(previewData)
     ctx.fillStyle = getComputedStyle(canvas).color
@@ -207,9 +197,12 @@
       size="fill"
       isScrollable
       class="overflow-x-hidden bg-surface"
-      {...observeSize((element) => (containerWidth = element.clientWidth))}
+      {...observeSize((element) => {
+        containerWidth = element.clientWidth
+        containerHeight = element.clientHeight
+      })}
     >
-      <VStack width={canvasDisplayWidth} height={canvasDisplayHeight}>
+      <VStack width={canvasDisplayWidth} height={canvasDisplayHeight} class="relative">
         <canvas
           bind:this={canvas}
           width={canvasWidth}
@@ -217,6 +210,25 @@
           class="block h-full w-full border-border bg-surface text-primary pixelated"
           aria-label="조합 글자 미리보기"
         ></canvas>
+        <svg
+          class="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            d={[
+              ...Array.from({length: cols - 1}, (_, i) => `M${(i + 1) * internalCellWidth - 0.5} 0 V${canvasHeight}`),
+              ...Array.from({length: rows - 1}, (_, i) => `M0 ${(i + 1) * internalCellHeight - 0.5} H${canvasWidth}`),
+              ...(canvasDisplayWidth < containerWidth ? [`M${canvasWidth} 0 V${canvasHeight}`] : []),
+              ...(canvasDisplayHeight < containerHeight ? [`M0 ${canvasHeight} H${canvasWidth}`] : []),
+            ].join(' ')}
+            fill="none"
+            stroke="var(--color-border)"
+            stroke-width={1}
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
       </VStack>
     </StackItem>
   {:else}<Text type="supporting">조건에 맞는 자모가 없습니다.</Text>{/if}

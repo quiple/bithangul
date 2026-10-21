@@ -84,14 +84,6 @@
 
     // Clear instead of compositing a translucent surface over the previous frame.
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
-    ctx.fillStyle = getComputedStyle(canvas).borderColor
-    ctx.beginPath()
-    for (let col = 1; col < COLS; col++) {
-      ctx.rect(col * (width + 1) - 1, 0, 1, CANVAS_H)
-    }
-    if (rowIdx < TOTAL_ROWS - 1) ctx.rect(0, height, CANVAS_W, 1)
-    ctx.fill()
-
     if (!view) return
     const firstIdx = rowIdx * COLS
     ctx.fillStyle = getComputedStyle(canvas).color
@@ -152,7 +144,7 @@
         <VStack width={LABEL_W} justify="center" align="center" class="shrink-0 bg-muted"
           ><Text type="supporting">{rowLabel(rowIdx)}</Text></VStack
         >
-        <VStack width={cssCanvasWidth} height={cssRowHeight} class="shrink-0">
+        <VStack width={cssCanvasWidth} height={cssRowHeight} class="relative shrink-0">
           <canvas
             use:rowCanvasAction={{rowIdx, view: generatedView, width, height}}
             width={CANVAS_W}
@@ -160,6 +152,21 @@
             class="block h-full w-full border-border bg-surface text-primary pixelated"
             aria-label={`${rowLabel(rowIdx)} 음절 미리보기`}
           ></canvas>
+          <svg
+            class="pointer-events-none absolute inset-0 h-full w-full"
+            viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              d={Array.from({length: COLS - 1}, (_, i) => `M${(i + 1) * (width + 1) - 0.5} 0 V${CANVAS_H}`).join(' ') +
+                (rowIdx < TOTAL_ROWS - 1 ? ` M0 ${height + 0.5} H${CANVAS_W}` : '')}
+              fill="none"
+              stroke="var(--color-border)"
+              stroke-width={1}
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
         </VStack>
       </HStack>
     {/each}
