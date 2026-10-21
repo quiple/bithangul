@@ -18,11 +18,10 @@
   const width = $derived(component.bitmap[0]?.length ?? 16)
   const height = $derived(component.bitmap.length)
   const stride = $derived(bytesPerRow(width) * height)
-  const INTERNAL_BORDER = 1
-  const internalCellWidth = $derived(width + INTERNAL_BORDER)
-  const internalCellHeight = $derived(height + INTERNAL_BORDER)
-  const displayCellWidth = $derived(width * 2 + INTERNAL_BORDER)
-  const displayCellHeight = $derived(height * 2 + INTERNAL_BORDER)
+  const internalCellWidth = $derived(width)
+  const internalCellHeight = $derived(height)
+  const displayCellWidth = $derived(width * 2)
+  const displayCellHeight = $derived(height * 2)
 
   let canvas: HTMLCanvasElement = $state(undefined!)
   let containerWidth = $state(0)
@@ -133,13 +132,13 @@
   })
 
   // Calculate layout based on container width
-  let cols = $derived(Math.max(1, Math.floor((containerWidth + INTERNAL_BORDER) / displayCellWidth)))
+  let cols = $derived(Math.max(1, Math.floor(containerWidth / displayCellWidth)))
   let rows = $derived(Math.ceil(affectedIndices.length / cols))
 
-  let canvasWidth = $derived(cols * internalCellWidth - INTERNAL_BORDER)
-  let canvasHeight = $derived(Math.max(height, rows * internalCellHeight - INTERNAL_BORDER))
-  let canvasDisplayWidth = $derived(cols * displayCellWidth - INTERNAL_BORDER)
-  let canvasDisplayHeight = $derived(Math.max(height * 2, rows * displayCellHeight - INTERNAL_BORDER))
+  let canvasWidth = $derived(cols * internalCellWidth)
+  let canvasHeight = $derived(Math.max(height, rows * internalCellHeight))
+  let canvasDisplayWidth = $derived(cols * displayCellWidth)
+  let canvasDisplayHeight = $derived(Math.max(height * 2, rows * displayCellHeight))
 
   function draw() {
     if (!canvas || !previewData) return
@@ -218,8 +217,8 @@
         >
           <path
             d={[
-              ...Array.from({length: cols - 1}, (_, i) => `M${(i + 1) * internalCellWidth - 0.5} 0 V${canvasHeight}`),
-              ...Array.from({length: rows - 1}, (_, i) => `M0 ${(i + 1) * internalCellHeight - 0.5} H${canvasWidth}`),
+              ...Array.from({length: cols - 1}, (_, i) => `M${(i + 1) * internalCellWidth} 0 V${canvasHeight}`),
+              ...Array.from({length: rows - 1}, (_, i) => `M0 ${(i + 1) * internalCellHeight} H${canvasWidth}`),
               // Inset by half a screen pixel so the 1px stroke stays inside the SVG viewport.
               ...(canvasDisplayWidth < containerWidth
                 ? [`M${canvasWidth - canvasWidth / canvasDisplayWidth / 2} 0 V${canvasHeight}`]
