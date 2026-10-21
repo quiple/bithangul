@@ -196,7 +196,7 @@
     <StackItem
       size="fill"
       isScrollable
-      class="overflow-x-hidden bg-surface"
+      class="overflow-x-hidden border border-border bg-surface"
       {...observeSize((element) => {
         containerWidth = element.clientWidth
         containerHeight = element.clientHeight
