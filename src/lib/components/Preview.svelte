@@ -127,7 +127,7 @@
   }
 </script>
 
-<VStack height="100%" class="min-h-0 bg-surface">
+<VStack height="100%" class="min-h-0 bg-glyph-grid">
   <StackItem
     size="fill"
     isScrollable
@@ -149,7 +149,7 @@
             use:rowCanvasAction={{rowIdx, view: generatedView, width, height}}
             width={CANVAS_W}
             height={CANVAS_H}
-            class="block h-full w-full border-border bg-surface text-primary pixelated"
+            class="block h-full w-full border-border text-primary pixelated"
             aria-label={`${rowLabel(rowIdx)} 음절 미리보기`}
           ></canvas>
           <svg
