@@ -78,7 +78,8 @@
       {#each activeGroupNames as name}<Token label={name} size="sm" />{/each}
     </HStack>
   {/if}
-  <StackItem size="fill" isScrollable class="me-4">
+  <!-- Parent padding (3) plus margin (1) reserves the same handle space as the list (4). -->
+  <StackItem size="fill" isScrollable class="me-1">
     <VStack height="100%" gap={4}>
       <StackItem
         ><GridCanvas
