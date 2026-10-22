@@ -195,7 +195,7 @@
               isWheelEnabled={false}
             />
           </Grid>
-          <Text type="supporting">1–64px. 기존 그림의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.</Text>
+          <Text type="supporting">1~64px. 기존 그림의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.</Text>
           {#if croppedPixels > 0}
             <CheckboxInput
               label="픽셀 삭제를 확인했고 이 크기를 적용합니다."
@@ -233,7 +233,7 @@
           <Text type="supporting"
             >글자 폭 {draft.width * draft.pixelSize} · 어센더 {draft.baseline * draft.pixelSize} · 디센더 {(draft.baseline -
               draft.height) *
-              draft.pixelSize} 유닛. 공통 pixel 컴포넌트와 픽셀 크기의 그리드로 내보냅니다.</Text
+              draft.pixelSize}유닛. 공통 픽셀 컴포넌트와 픽셀 크기의 그리드로 내보냅니다.</Text
           >
           <Text type="supporting"
             >HEX는 높이를 16·24·32·64px 중 다음 크기로, 너비를 8px 단위로 올림하여 빈 픽셀을 채웁니다. 프로젝트 크기는
