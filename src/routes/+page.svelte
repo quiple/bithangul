@@ -140,6 +140,23 @@
     handleGenerate()
   }
 
+  function handleGlobalKey(event: KeyboardEvent) {
+    if (
+      !event.defaultPrevented &&
+      !event.isComposing &&
+      (event.ctrlKey || event.metaKey) &&
+      !event.altKey &&
+      !event.shiftKey &&
+      (event.code === 'KeyS' || event.key.toLowerCase() === 's')
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (!event.repeat) handleSaveProject()
+      return
+    }
+    handleNudgeKey(event)
+  }
+
   function handleNudgeKey(event: KeyboardEvent) {
     if (
       !event.ctrlKey ||
@@ -296,7 +313,7 @@
   }
 </script>
 
-<svelte:window onkeydowncapture={handleNudgeKey} />
+<svelte:window onkeydowncapture={handleGlobalKey} />
 
 <!-- Frame: wrapping toolbar | editor 35% (20–60%, resizable) | preview fills remaining 65% initially.
      Narrow screens retain independently scrollable panels; toolbar actions wrap. -->
