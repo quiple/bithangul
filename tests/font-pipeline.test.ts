@@ -123,14 +123,14 @@ test('Glyphs pixel references, Unicode values and scaled baseline/metadata are e
     license: 'one\ntwo',
   }
   const output = exportGlyphs(generateFont(project).buffer, settings)
-  assert.match(output, /"\.formatVersion" = 3/)
-  assert.match(output, /"unicode" = 44032/)
-  assert.match(output, /"ref" = "pixel"/)
-  assert.match(output, /"pos" = \(\n0,\n950\n\)/)
-  assert.match(output, /"pos" = \(\n800,\n-200\n\)/)
-  assert.match(output, /"key" = "designers"/)
-  assert.match(output, /"gridLength" = 50/)
-  assert.match(output, /"width" = 850/)
+  assert.match(output, /\.formatVersion = 3/)
+  assert.match(output, /unicode = 44032/)
+  assert.match(output, /ref = pixel/)
+  assert.match(output, /pos = \(0,950\)/)
+  assert.match(output, /pos = \(800,-200\)/)
+  assert.match(output, /key = designers/)
+  assert.match(output, /gridLength = 50/)
+  assert.match(output, /width = 850/)
   assert.match(output, /Copyright \\"test\\"/)
 })
 
@@ -163,13 +163,16 @@ test('HEX pads height upward and byte-aligns width without cropping or changing 
   }
 })
 
-test('optimized Glyphs export preserves every byte of the example font', () => {
+test('example export matches the file verified in Glyphs 3.5.1', () => {
   const project = deserializeProject(
     JSON.parse(readFileSync(new URL('../src/lib/assets/Dunggeunmo.json', import.meta.url), 'utf8')),
   )
   const output = exportGlyphs(generateFont(project).buffer, getFontSettings(project))
+  assert.ok(output.startsWith('{\n.appVersion = \"3335\";\n.formatVersion = 3;\naxes = ('))
+  assert.match(output, /nodes = \(\n\(0,0,l\),/)
+  assert.doesNotMatch(output, /\"\.formatVersion\"/)
   assert.equal(
     createHash('sha256').update(output).digest('hex'),
-    '621ceb97ae61d2fcd68e7e9ddec5055078dc636a4b8353139f05270510d80ded',
+    'a36853e936950d791f0663ab964f1ccf79255285b503af03781b05cd771b99e1',
   )
 })
