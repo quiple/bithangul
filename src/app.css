@@ -8,6 +8,11 @@
 @import '@astryx-svelte/core/tailwind-theme.css';
 @import 'tailwindcss/utilities.css' layer(utilities);
 
+/* Drawing surfaces must not change brightness as translucent parents stack. */
+@utility bg-glyph-grid {
+  background-color: rgb(from var(--color-background-surface) r g b / 1);
+}
+
 @utility pixelated {
   image-rendering: pixelated;
 }
