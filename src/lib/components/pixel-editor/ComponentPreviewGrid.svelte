@@ -211,7 +211,7 @@
       size="fill"
       isScrollable
       onscroll={handleScroll}
-      class="overflow-x-hidden border border-border bg-surface"
+      class="overflow-x-hidden border border-border bg-glyph-grid"
       {...observeSize((element) => {
         containerWidth = element.clientWidth
         containerHeight = element.clientHeight
@@ -223,7 +223,7 @@
           bind:this={canvas}
           width={canvasWidth}
           height={canvasHeight}
-          class="block h-full w-full border-border bg-surface text-primary pixelated"
+          class="block h-full w-full border-border text-primary pixelated"
           aria-label="조합 글자 미리보기"
         ></canvas>
         <svg
