@@ -14,8 +14,8 @@
 
 @layer product {
   [data-astryx-theme='liquid-glass'] .astryx-dialog {
-    color-scheme: light;
-    background-color: var(--color-on-dark);
+    /* Follow the active theme while keeping the modal surface opaque. */
+    background-color: rgb(from var(--color-background-surface) r g b / 1);
   }
 }
 
