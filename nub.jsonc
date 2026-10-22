@@ -1,0 +1,5 @@
+{
+  "$schema": "https://nubjs.com/schema/latest.json",
+  // SvelteKit generates $app/tsconfig during sync; Nub must be able to start before it exists.
+  "tsconfig": "./tsconfig.runtime.json",
+}

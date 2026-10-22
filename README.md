@@ -31,12 +31,12 @@ nub run dev -- --open
 ```
 
 The `prepare` script generates SvelteKit 3's `$app/tsconfig` and installs
-Lefthook's Git hooks. It runs SvelteKit sync with Nub's `--node` option so it
-can generate the TypeScript configuration before Nub tries to read it.
-If the generated configuration is missing, restore it with:
+Lefthook's Git hooks. `nub.jsonc` points Nub at `tsconfig.runtime.json`, which
+has no generated dependencies. This allows Nub to start even before SvelteKit
+has generated its configuration. To regenerate it and reinstall hooks, run:
 
 ```sh
-nub --node run prepare
+nub run prepare
 ```
 
 When updating an existing Husky checkout, remove its hooks path once before
@@ -48,9 +48,28 @@ nub --node run prepare
 ```
 
 The pre-commit hook runs Oxlint and Oxfmt on staged files, then stages formatting
-fixes. Lefthook is pinned to 2.0.11 because newer releases failed Nub's publisher
-trust check. TypeScript stays on 6.x for compatibility with SvelteKit and
-`svelte-check`.
+fixes.
+
+## TypeScript
+
+`nub run check` and `nub run check:watch` use svelte-check's `--tsgo` backend
+with TypeScript **7.1.0-beta**, pinned as `@typescript/native`. TypeScript 6.0
+remains installed for SvelteKit and svelte-check's JavaScript compiler API;
+replacing it outright is not supported by this toolchain. The experimental
+7.1 API backend is not enabled because it is incompatible with svelte-check
+4.7.7. See the [svelte-check setup guide](https://github.com/sveltejs/language-tools/tree/master/packages/svelte-check).
+
+The application's `tsconfig.json` still extends SvelteKit's generated config.
+Its explicit `#lib/*` mapping mirrors `package.json` imports so the TS 7
+checker can resolve generated Svelte component declarations. Nub's separate
+runtime config is only for running tools, not for application type checking.
+
+```sh
+nub run check
+nub run check:watch
+nub run test
+nub run lint
+```
 
 ## Building
 
