@@ -99,6 +99,7 @@ function plist(value: unknown): string {
   if (value instanceof SerializedPlist) return value.text
   if (typeof value === 'number') return String(value)
   if (typeof value === 'string') {
+    // Match Glyphs' native bare-token output, especially its version header.
     if (/^[A-Za-z_$+./:][A-Za-z0-9_$+./:-]*$/.test(value)) return value
     return JSON.stringify(value).replace(/\\u([0-9a-f]{4})/gi, '\\U$1')
   }
