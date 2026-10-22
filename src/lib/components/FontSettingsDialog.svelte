@@ -195,7 +195,7 @@
               isWheelEnabled={false}
             />
           </Grid>
-          <Text type="supporting">1~64px. 기존 그림의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.</Text>
+          <Text type="supporting">1~64px. 기존 글리프의 왼쪽 위를 유지하고, 늘어난 영역은 빈 픽셀로 채웁니다.</Text>
           {#if croppedPixels > 0}
             <CheckboxInput
               label="픽셀 삭제를 확인했고 이 크기를 적용합니다."
