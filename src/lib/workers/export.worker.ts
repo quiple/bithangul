@@ -8,7 +8,7 @@ self.onmessage = (e: MessageEvent<{type: FontExportType; buffer: ArrayBuffer; se
   try {
     const exporters = {bdf: exportBDF, hex: exportHEX, glyphs: exportGlyphs}
     const result = exporters[type](buffer, settings)
-    ;(self as unknown as Worker).postMessage({type, result})
+    ;(self as unknown as Worker).postMessage({type, blob: new Blob([result], {type: 'text/plain;charset=utf-8'})})
   } catch (error) {
     ;(self as unknown as Worker).postMessage({type, error: error instanceof Error ? error.message : String(error)})
   }

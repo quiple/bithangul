@@ -27,7 +27,7 @@
   import GroupManager from '#lib/components/pixel-editor/GroupManager.svelte'
   import SplitComponentDialog from '#lib/components/pixel-editor/SplitComponentDialog.svelte'
   import Preview from '#lib/components/Preview.svelte'
-  import {downloadText} from '#lib/export.js'
+  import {downloadBlob, downloadText} from '#lib/export.js'
   import {getHEXDimensions, type FontExportType} from '#lib/font-export.js'
   import {applyFontSettings, getFontSettings, type FontSettings} from '#lib/font-settings.js'
   import {COMPONENT_TYPE_LABELS} from '#lib/hangul.js'
@@ -44,7 +44,7 @@
   }))
 
   let generatorWorker: Worker
-  let exportWorker: Worker
+  let exportWorker: Worker | undefined
   let generatorBusy = false
   let generationPending = false
   let generationFrame = 0
@@ -210,27 +210,10 @@
       isGenerating = false
     }
 
-    exportWorker = new ExportWorker()
-    exportWorker.onmessage = (e) => {
-      const {type, result, error} = e.data
-      isExportingBDF = false
-      isExportingHEX = false
-      isExportingGlyphs = false
-      if (error) {
-        exportError = error
-        return
-      }
-      downloadText(result, `${exportFilename}.${type}`, 'text/plain')
-    }
-    exportWorker.onerror = () => {
-      isExportingBDF = isExportingHEX = isExportingGlyphs = false
-      exportError = '내보내기에 실패했습니다. 다시 시도해 주세요.'
-    }
-
     return () => {
       if (generationFrame) cancelAnimationFrame(generationFrame)
       generatorWorker.terminate()
-      exportWorker.terminate()
+      exportWorker?.terminate()
     }
   })
 
@@ -287,6 +270,27 @@
     if (type === 'bdf') isExportingBDF = true
     else if (type === 'hex') isExportingHEX = true
     else isExportingGlyphs = true
+    exportWorker = new ExportWorker()
+    exportWorker.onmessage = (e) => {
+      const {type, blob, error} = e.data
+      isExportingBDF = false
+      isExportingHEX = false
+      isExportingGlyphs = false
+      exportWorker?.terminate()
+      exportWorker = undefined
+      if (error) {
+        exportError = error
+        return
+      }
+      downloadBlob(blob, `${exportFilename}.${type}`)
+    }
+    exportWorker.onerror = () => {
+      isExportingBDF = isExportingHEX = isExportingGlyphs = false
+      exportWorker?.terminate()
+      exportWorker = undefined
+      exportError = '내보내기에 실패했습니다. 다시 시도해 주세요.'
+    }
+
     const bufferCopy = generatedData.slice(0)
     exportWorker.postMessage({type, buffer: bufferCopy, settings: $state.snapshot(settings)}, [bufferCopy])
   }

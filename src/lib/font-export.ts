@@ -5,7 +5,12 @@ import {HANGUL_START_CODE_POINT, HANGUL_SYLLABLE_COUNT} from './hangul'
 
 export type FontExportType = 'bdf' | 'hex' | 'glyphs'
 const hex = (value: number, digits = 4) => value.toString(16).toUpperCase().padStart(digits, '0')
-const bytesHex = (bytes: Uint8Array) => Array.from(bytes, (byte) => hex(byte, 2)).join('')
+const HEX_BYTES = Array.from({length: 256}, (_, byte) => hex(byte, 2))
+const bytesHex = (bytes: Uint8Array) => {
+  let result = ''
+  for (const byte of bytes) result += HEX_BYTES[byte]
+  return result
+}
 const bdfString = (text: string) => `"${text.replace(/[\r\n\0]/g, ' ').replaceAll('"', '""')}"`
 
 function validateBuffer(buffer: ArrayBuffer, settings: FontSettings) {
@@ -82,8 +87,16 @@ export function exportHEX(buffer: ArrayBuffer, settings: FontSettings) {
   ).join('\n')
 }
 
+class SerializedPlist {
+  readonly text: string
+  constructor(text: string) {
+    this.text = text
+  }
+}
+
 // Glyphs 3 uses OpenStep property lists; Unicode strings remain UTF-8.
 function plist(value: unknown): string {
+  if (value instanceof SerializedPlist) return value.text
   if (typeof value === 'number') return String(value)
   if (typeof value === 'string') return JSON.stringify(value).replace(/\\u([0-9a-f]{4})/gi, '\\U$1')
   if (Array.isArray(value)) return `(\n${value.map(plist).join(',\n')}\n)`
@@ -112,28 +125,40 @@ export function exportGlyphs(buffer: ArrayBuffer, settings: FontSettings) {
       [pixelSize, 0, 'l'],
     ],
   }
-  const glyphs: unknown[] = [
+  const glyphs = [
     {glyphname: '.notdef', layers: [layer([])]},
     {glyphname: 'space', unicode: 32, layers: [layer([])]},
     {glyphname: 'pixel', export: 0, layers: [layer([pixelShape], pixelSize)]},
-  ]
+  ].map(plist)
+  // Reuse the same serialized pixel references across all 11,172 glyphs.
+  const pixelReferences = Array.from({length: height}, (_, row) =>
+    Array.from(
+      {length: width},
+      (_, col) =>
+        new SerializedPlist(
+          plist({ref: 'pixel', alignment: -1, pos: [col * pixelSize, (baseline - row - 1) * pixelSize]}),
+        ),
+    ),
+  )
   for (let i = 0; i < HANGUL_SYLLABLE_COUNT; i++) {
     const code = HANGUL_START_CODE_POINT + i
     const shapes = []
     for (let row = 0; row < height; row++) {
       for (let col = 0; col < width; col++) {
         if (packedPixel(data, width, row, col, i * stride)) {
-          shapes.push({ref: 'pixel', alignment: -1, pos: [col * pixelSize, (baseline - row - 1) * pixelSize]})
+          shapes.push(pixelReferences[row][col])
         }
       }
     }
-    glyphs.push({
-      glyphname: `uni${hex(code)}`,
-      unicode: code,
-      script: 'hangul',
-      category: 'Letter',
-      layers: [layer(shapes)],
-    })
+    glyphs.push(
+      plist({
+        glyphname: `uni${hex(code)}`,
+        unicode: code,
+        script: 'hangul',
+        category: 'Letter',
+        layers: [layer(shapes)],
+      }),
+    )
   }
   const properties: unknown[] = []
   const localized = {
@@ -172,7 +197,7 @@ export function exportGlyphs(buffer: ArrayBuffer, settings: FontSettings) {
       },
     ],
     metrics: [{type: 'ascender'}, {type: 'cap height'}, {type: 'x-height'}, {type: 'descender'}],
-    glyphs,
+    glyphs: new SerializedPlist(`(\n${glyphs.join(',\n')}\n)`),
     properties,
     instances: [{name: styleName, axesValues: [100], exports: 1}],
     settings: {gridLength: pixelSize, gridSubDivision: 1, disablesAutomaticAlignment: 1, disablesNiceNames: 1},

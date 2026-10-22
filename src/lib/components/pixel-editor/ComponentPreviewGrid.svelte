@@ -26,6 +26,17 @@
   let canvas: HTMLCanvasElement = $state(undefined!)
   let containerWidth = $state(0)
   let containerHeight = $state(0)
+  let scrollTop = $state(0)
+  let scrollFrame = 0
+
+  function handleScroll(event: Event) {
+    const element = event.currentTarget as HTMLElement
+    if (scrollFrame) cancelAnimationFrame(scrollFrame)
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0
+      scrollTop = element.scrollTop
+    })
+  }
 
   interface MatchedGlyph {
     index: number
@@ -110,35 +121,42 @@
 
   let affectedIndices = $derived(matchedGlyphs.map((glyph) => glyph.index))
 
-  // Recompose affected characters
-  let previewData = $derived.by(() => {
-    if (affectedIndices.length === 0) return null
-
-    const buffer = new ArrayBuffer(matchedGlyphs.length * stride)
-    const view = new Uint8Array(buffer)
-    const result = new Uint8Array(stride)
-
+  // Only rebuild the unchanged components when the project or matching rules change.
+  const baseData = $derived.by(() => {
+    const view = new Uint8Array(matchedGlyphs.length * stride)
     for (let i = 0; i < matchedGlyphs.length; i++) {
-      result.fill(0)
       for (const matched of matchedGlyphs[i].components) {
+        if (matched.id === component.id) continue
         const bitmap = getFlattenedBitmap(matched)
-        for (let row = 0; row < stride; row++) result[row] |= bitmap[row]
+        for (let byte = 0; byte < stride; byte++) view[i * stride + byte] |= bitmap[byte]
       }
-
-      view.set(result, i * stride)
     }
+    return view
+  })
 
-    return buffer
+  let previewData = $derived.by(() => {
+    if (matchedGlyphs.length === 0) return null
+    const view = baseData.slice()
+    const edited = flattenBitmap(component.bitmap, width, height)
+    for (let offset = 0; offset < view.length; offset += stride) {
+      for (let byte = 0; byte < stride; byte++) view[offset + byte] |= edited[byte]
+    }
+    return view.buffer
   })
 
   // Calculate layout based on container width
   let cols = $derived(Math.max(1, Math.floor(containerWidth / displayCellWidth)))
   let rows = $derived(Math.ceil(affectedIndices.length / cols))
 
+  const startRow = $derived(Math.max(0, Math.min(rows - 1, Math.floor(scrollTop / displayCellHeight) - 2)))
+  const endRow = $derived(Math.min(rows, startRow + Math.ceil(containerHeight / displayCellHeight) + 4))
+  const visibleRowCount = $derived(endRow - startRow)
+  const totalDisplayHeight = $derived(rows * displayCellHeight)
+
   let canvasWidth = $derived(cols * internalCellWidth)
-  let canvasHeight = $derived(Math.max(height, rows * internalCellHeight))
+  let canvasHeight = $derived(Math.max(height, visibleRowCount * internalCellHeight))
   let canvasDisplayWidth = $derived(cols * displayCellWidth)
-  let canvasDisplayHeight = $derived(Math.max(height * 2, rows * displayCellHeight))
+  let canvasDisplayHeight = $derived(Math.max(height * 2, visibleRowCount * displayCellHeight))
 
   function draw() {
     if (!canvas || !previewData) return
@@ -152,12 +170,12 @@
     const view = new Uint8Array(previewData)
     ctx.fillStyle = getComputedStyle(canvas).color
 
-    for (let i = 0; i < affectedIndices.length; i++) {
+    for (let i = startRow * cols; i < Math.min(affectedIndices.length, endRow * cols); i++) {
       const offset = i * stride
       if (offset + stride > previewData.byteLength) continue
 
       const col = i % cols
-      const row = Math.floor(i / cols)
+      const row = Math.floor(i / cols) - startRow
 
       const cellX = col * internalCellWidth
       const cellY = row * internalCellHeight
@@ -174,14 +192,20 @@
 
   import {onDestroy} from 'svelte'
 
+  let drawFrame = 0
+
   $effect(() => {
     // Redraw whenever relevant dependencies change
     if (canvas && previewData && affectedIndices && cols && rows && canvasWidth && canvasHeight) {
-      requestAnimationFrame(draw)
+      void startRow
+      void endRow
+      drawFrame = requestAnimationFrame(draw)
+      return () => cancelAnimationFrame(drawFrame)
     }
   })
 
   onDestroy(() => {
+    if (scrollFrame) cancelAnimationFrame(scrollFrame)
     if (canvas) {
       canvas.width = 0
       canvas.height = 0
@@ -195,12 +219,14 @@
     <StackItem
       size="fill"
       isScrollable
+      onscroll={handleScroll}
       class="overflow-x-hidden border border-border bg-surface"
       {...observeSize((element) => {
         containerWidth = element.clientWidth
         containerHeight = element.clientHeight
       })}
     >
+      <VStack height={startRow * displayCellHeight} aria-hidden="true" />
       <VStack width={canvasDisplayWidth} height={canvasDisplayHeight} class="relative">
         <canvas
           bind:this={canvas}
@@ -218,12 +244,16 @@
           <path
             d={[
               ...Array.from({length: cols - 1}, (_, i) => `M${(i + 1) * internalCellWidth} 0 V${canvasHeight}`),
-              ...Array.from({length: rows - 1}, (_, i) => `M0 ${(i + 1) * internalCellHeight} H${canvasWidth}`),
+              ...Array.from(
+                {length: visibleRowCount - 1},
+                (_, i) => `M0 ${(i + 1) * internalCellHeight} H${canvasWidth}`,
+              ),
+              ...(endRow < rows ? [`M0 ${canvasHeight - 0.25} H${canvasWidth}`] : []),
               // Inset by half a screen pixel so the 1px stroke stays inside the SVG viewport.
               ...(canvasDisplayWidth < containerWidth
                 ? [`M${canvasWidth - canvasWidth / canvasDisplayWidth / 2} 0 V${canvasHeight}`]
                 : []),
-              ...(canvasDisplayHeight < containerHeight
+              ...(endRow === rows && totalDisplayHeight < containerHeight
                 ? [`M0 ${canvasHeight - canvasHeight / canvasDisplayHeight / 2} H${canvasWidth}`]
                 : []),
             ].join(' ')}
@@ -234,6 +264,7 @@
           />
         </svg>
       </VStack>
+      <VStack height={(rows - endRow) * displayCellHeight} aria-hidden="true" />
     </StackItem>
   {:else}<Text type="supporting">조건에 맞는 자모가 없습니다.</Text>{/if}
 </VStack>

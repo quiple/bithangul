@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
 import {readFileSync} from 'node:fs'
 import {test} from 'node:test'
 
@@ -160,4 +161,15 @@ test('HEX pads height upward and byte-aligns width without cropping or changing 
     assert.equal(first.length, (dimensions.width / 8) * outputHeight * 2)
     assert.deepEqual(serializeProject(project), before)
   }
+})
+
+test('optimized Glyphs export preserves every byte of the example font', () => {
+  const project = deserializeProject(
+    JSON.parse(readFileSync(new URL('../src/lib/assets/Dunggeunmo.json', import.meta.url), 'utf8')),
+  )
+  const output = exportGlyphs(generateFont(project).buffer, getFontSettings(project))
+  assert.equal(
+    createHash('sha256').update(output).digest('hex'),
+    '621ceb97ae61d2fcd68e7e9ddec5055078dc636a4b8353139f05270510d80ded',
+  )
 })
