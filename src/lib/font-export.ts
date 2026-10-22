@@ -98,8 +98,17 @@ class SerializedPlist {
 function plist(value: unknown): string {
   if (value instanceof SerializedPlist) return value.text
   if (typeof value === 'number') return String(value)
-  if (typeof value === 'string') return JSON.stringify(value).replace(/\\u([0-9a-f]{4})/gi, '\\U$1')
-  if (Array.isArray(value)) return `(\n${value.map(plist).join(',\n')}\n)`
+  if (typeof value === 'string') {
+    if (/^[A-Za-z_$+./:][A-Za-z0-9_$+./:-]*$/.test(value)) return value
+    return JSON.stringify(value).replace(/\\u([0-9a-f]{4})/gi, '\\U$1')
+  }
+  if (Array.isArray(value)) {
+    const entries = value.map(plist)
+    if (value.length && value.every((entry) => typeof entry === 'number' || typeof entry === 'string')) {
+      return `(${entries.join(',')})`
+    }
+    return `(\n${entries.join(',\n')}\n)`
+  }
   if (value && typeof value === 'object') {
     return `{\n${Object.entries(value)
       .sort(([a], [b]) => a.localeCompare(b))
