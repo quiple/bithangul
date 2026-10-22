@@ -3,9 +3,9 @@
 
   import type {PixelComponent, ComponentType} from '#lib/types.js'
 
-  import {flattenBitmap, bytesPerRow, packedPixel} from '#lib/bitmap.js'
+  import {flattenBitmap, bytesPerRow} from '#lib/bitmap.js'
   import {checkConditionMatch, createVariationGroupLookup, getConditionSpecificity} from '#lib/conditions.js'
-  import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT, SYLLABLES_PER_CHOSUNG} from '#lib/hangul.js'
+  import {CHOSUNG_COUNT, JUNGSUNG_COUNT, JONGSUNG_COUNT} from '#lib/hangul.js'
   import {observeSize} from '#lib/observe-size.js'
   import {projectState} from '#lib/state.svelte.js'
 
@@ -17,7 +17,8 @@
 
   const width = $derived(component.bitmap[0]?.length ?? 16)
   const height = $derived(component.bitmap.length)
-  const stride = $derived(bytesPerRow(width) * height)
+  const rowBytes = $derived(bytesPerRow(width))
+  const stride = $derived(rowBytes * height)
   const internalCellWidth = $derived(width)
   const internalCellHeight = $derived(height)
   const displayCellWidth = $derived(width * 2)
@@ -39,11 +40,8 @@
   }
 
   interface MatchedGlyph {
-    index: number
     components: PixelComponent[]
   }
-
-  const bitmapCache = new Map<string, {bitmap: number[][]; flattened: Uint8Array}>()
 
   let groupLookup = $derived(createVariationGroupLookup(projectState.project.groups))
 
@@ -84,15 +82,6 @@
     return best
   }
 
-  function getFlattenedBitmap(candidate: PixelComponent) {
-    const bitmap = candidate.id === component.id ? component.bitmap : candidate.bitmap
-    const cached = bitmapCache.get(candidate.id)
-    if (cached?.bitmap === bitmap) return cached.flattened
-    const flattened = flattenBitmap(bitmap)
-    bitmapCache.set(candidate.id, {bitmap, flattened})
-    return flattened
-  }
-
   // 조건 판정은 편집 중인 비트맵과 무관하므로 음절별 승자를 한 번만 계산합니다.
   let matchedGlyphs = $derived.by(() => {
     const glyphs: MatchedGlyph[] = []
@@ -110,7 +99,6 @@
           ]
           if (jong > 0) components.push(getBestMatch('jongsung', jong, cho, jung, jong))
           glyphs.push({
-            index: cho * SYLLABLES_PER_CHOSUNG + jung * JONGSUNG_COUNT + jong,
             components: components.filter((candidate): candidate is PixelComponent => Boolean(candidate)),
           })
         }
@@ -119,34 +107,33 @@
     return glyphs
   })
 
-  let affectedIndices = $derived(matchedGlyphs.map((glyph) => glyph.index))
+  const glyphCount = $derived(matchedGlyphs.length)
 
   // Only rebuild the unchanged components when the project or matching rules change.
   const baseData = $derived.by(() => {
-    const view = new Uint8Array(matchedGlyphs.length * stride)
+    const view = new Uint8Array(glyphCount * stride)
+    const bitmaps = new Map<string, Uint8Array>()
     for (let i = 0; i < matchedGlyphs.length; i++) {
       for (const matched of matchedGlyphs[i].components) {
         if (matched.id === component.id) continue
-        const bitmap = getFlattenedBitmap(matched)
+        let bitmap = bitmaps.get(matched.id)
+        if (!bitmap) {
+          bitmap = flattenBitmap(matched.bitmap, width, height)
+          bitmaps.set(matched.id, bitmap)
+        }
         for (let byte = 0; byte < stride; byte++) view[i * stride + byte] |= bitmap[byte]
       }
     }
     return view
   })
 
-  let previewData = $derived.by(() => {
-    if (matchedGlyphs.length === 0) return null
-    const view = baseData.slice()
-    const edited = flattenBitmap(component.bitmap, width, height)
-    for (let offset = 0; offset < view.length; offset += stride) {
-      for (let byte = 0; byte < stride; byte++) view[offset + byte] |= edited[byte]
-    }
-    return view.buffer
-  })
+  // Keep only the edited component packed; combine it with the cached base
+  // at draw time, without copying every affected glyph after each stroke.
+  const editedBitmap = $derived(flattenBitmap(component.bitmap, width, height))
 
   // Calculate layout based on container width
   let cols = $derived(Math.max(1, Math.floor(containerWidth / displayCellWidth)))
-  let rows = $derived(Math.ceil(affectedIndices.length / cols))
+  let rows = $derived(Math.ceil(glyphCount / cols))
 
   const startRow = $derived(Math.max(0, Math.min(rows - 1, Math.floor(scrollTop / displayCellHeight) - 2)))
   const endRow = $derived(Math.min(rows, startRow + Math.ceil(containerHeight / displayCellHeight) + 4))
@@ -159,7 +146,7 @@
   let canvasDisplayHeight = $derived(Math.max(height * 2, visibleRowCount * displayCellHeight))
 
   function draw() {
-    if (!canvas || !previewData) return
+    if (!canvas || !glyphCount) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
@@ -167,12 +154,10 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     // Draw glyphs
-    const view = new Uint8Array(previewData)
     ctx.fillStyle = getComputedStyle(canvas).color
 
-    for (let i = startRow * cols; i < Math.min(affectedIndices.length, endRow * cols); i++) {
+    for (let i = startRow * cols; i < Math.min(glyphCount, endRow * cols); i++) {
       const offset = i * stride
-      if (offset + stride > previewData.byteLength) continue
 
       const col = i % cols
       const row = Math.floor(i / cols) - startRow
@@ -181,9 +166,13 @@
       const cellY = row * internalCellHeight
 
       for (let r = 0; r < height; r++) {
-        for (let c = 0; c < width; c++) {
-          if (packedPixel(view, width, r, c, offset)) {
-            ctx.fillRect(cellX + c, cellY + r, 1, 1)
+        for (let byte = 0; byte < rowBytes; byte++) {
+          const index = r * rowBytes + byte
+          const pixels = baseData[offset + index] | editedBitmap[index]
+          if (!pixels) continue
+          const start = byte * 8
+          for (let bit = 0; bit < Math.min(8, width - start); bit++) {
+            if (pixels & (0x80 >> bit)) ctx.fillRect(cellX + start + bit, cellY + r, 1, 1)
           }
         }
       }
@@ -196,7 +185,9 @@
 
   $effect(() => {
     // Redraw whenever relevant dependencies change
-    if (canvas && previewData && affectedIndices && cols && rows && canvasWidth && canvasHeight) {
+    if (canvas && glyphCount && cols && rows && canvasWidth && canvasHeight) {
+      void baseData
+      void editedBitmap
       void startRow
       void endRow
       drawFrame = requestAnimationFrame(draw)
@@ -214,8 +205,8 @@
 </script>
 
 <VStack minHeight={128} gap={2} class="min-w-0 flex-1">
-  <Heading level={4} accessibilityLevel={3}>미리보기 ({affectedIndices.length}자)</Heading>
-  {#if previewData}
+  <Heading level={4} accessibilityLevel={3}>미리보기 ({glyphCount}자)</Heading>
+  {#if glyphCount > 0}
     <StackItem
       size="fill"
       isScrollable
