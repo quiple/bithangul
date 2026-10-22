@@ -55,7 +55,15 @@ test('legacy example opens at 16×16 with baseline 14 and unchanged bitmap bytes
   const source = JSON.parse(readFileSync(new URL('../src/lib/assets/Dunggeunmo.json', import.meta.url), 'utf8'))
   const original = new Map(source.components.map((c) => [c.id, c.bitmap]))
   const loaded = deserializeProject(source)
-  assert.equal(getFontSettings(loaded).baseline, 14)
+  const settings = getFontSettings(loaded)
+  assert.equal(settings.name, '둥근모꼴')
+  assert.equal(settings.designer, '김중태')
+  assert.equal(settings.designerURL, 'https://ith.kr')
+  assert.equal(settings.manufacturer, 'quiple')
+  assert.equal(settings.manufacturerURL, 'https://quiple.dev')
+  assert.equal(settings.license, '퍼블릭 도메인')
+  assert.deepEqual(getFontSettings(deserializeProject(serializeProject(loaded))), settings)
+  assert.equal(settings.baseline, 14)
   assert.equal(getFontSettings(loaded).width, 16)
   for (const c of loaded.components) assert.equal(bitmapToHex(c.bitmap), original.get(c.id))
 })
@@ -167,7 +175,9 @@ test('example export matches the file verified in Glyphs 3.5.1', () => {
   const project = deserializeProject(
     JSON.parse(readFileSync(new URL('../src/lib/assets/Dunggeunmo.json', import.meta.url), 'utf8')),
   )
-  const output = exportGlyphs(generateFont(project).buffer, getFontSettings(project))
+  // Keep the metadata of the file verified in Glyphs fixed while example credits evolve.
+  const settings = getFontSettings({...project, name: 'Dunggeunmo', fontInfo: undefined})
+  const output = exportGlyphs(generateFont(project).buffer, settings)
   assert.ok(output.startsWith('{\n.appVersion = "3335";\n.formatVersion = 3;\naxes = ('))
   assert.match(output, /nodes = \(\n\(0,0,l\),/)
   assert.doesNotMatch(output, /"\.formatVersion"/)
