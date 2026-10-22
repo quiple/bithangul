@@ -61,7 +61,7 @@ test('legacy example opens at 16×16 with baseline 14 and unchanged bitmap bytes
   assert.equal(settings.designerURL, 'https://ith.kr')
   assert.equal(settings.manufacturer, 'quiple')
   assert.equal(settings.manufacturerURL, 'https://quiple.dev')
-  assert.equal(settings.license, '퍼블릭 도메인')
+  assert.equal(settings.license, 'Public domain')
   assert.deepEqual(getFontSettings(deserializeProject(serializeProject(loaded))), settings)
   assert.equal(settings.baseline, 14)
   assert.equal(getFontSettings(loaded).width, 16)
