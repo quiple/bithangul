@@ -168,9 +168,9 @@ test('example export matches the file verified in Glyphs 3.5.1', () => {
     JSON.parse(readFileSync(new URL('../src/lib/assets/Dunggeunmo.json', import.meta.url), 'utf8')),
   )
   const output = exportGlyphs(generateFont(project).buffer, getFontSettings(project))
-  assert.ok(output.startsWith('{\n.appVersion = \"3335\";\n.formatVersion = 3;\naxes = ('))
+  assert.ok(output.startsWith('{\n.appVersion = "3335";\n.formatVersion = 3;\naxes = ('))
   assert.match(output, /nodes = \(\n\(0,0,l\),/)
-  assert.doesNotMatch(output, /\"\.formatVersion\"/)
+  assert.doesNotMatch(output, /"\.formatVersion"/)
   assert.equal(
     createHash('sha256').update(output).digest('hex'),
     'a36853e936950d791f0663ab964f1ccf79255285b503af03781b05cd771b99e1',
